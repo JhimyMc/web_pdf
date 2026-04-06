@@ -1,3 +1,102 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Estilos base para que se vea modo oscuro */
+body {
+    background-color: #000000;
+    color: #ffffff;
+    margin: 0;
+    font-family: sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Contenedor de las 3 columnas (como el notebooklm) */
+.layout-principal {
+    display: grid;
+    grid-template-columns: 260px 1fr 280px;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Estilos de los paneles laterales */
+.columna-lateral {
+    background-color: #0a0a0a;
+    border-right: 1px solid #222222;
+    padding: 20px;
+}
+
+.columna-derecha {
+    border-right: none;
+    border-left: 1px solid #222222;
+}
+
+/* Botones laterales simples */
+.boton-opcion {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: none;
+    border: 1px solid #333333;
+    color: #cccccc;
+    text-align: left;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.boton-opcion:hover {
+    border-color: #ff0000;
+    color: white;
+}
+
+/* Cuadro de subida central */
+.seccion-central {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.caja-subida {
+    width: 90%;
+    max-width: 500px;
+    height: 250px;
+    border: 2px dashed #444444;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #050505;
+}
+
+.caja-subida:hover {
+    border-color: #ff0000;
+}
+
+.boton-rojo {
+    background-color: #ff0000;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+/* Input de chat abajo */
+.barra-busqueda {
+    width: 90%;
+    max-width: 600px;
+    margin-top: 30px;
+    padding: 15px;
+    background-color: #111111;
+    border: 1px solid #333333;
+    border-radius: 10px;
+    color: white;
+}
