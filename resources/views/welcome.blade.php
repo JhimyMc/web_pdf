@@ -9,7 +9,14 @@
 <body>
 
     <header class="header-principal">
-        <div class="logo-marca">PlayDF</div>
+        <div class="contenedor-logo-gamificacion">
+            <div class="logo-marca">PlayDF</div>
+            
+            <div class="seccion-gamificacion">
+                <div class="indicador-racha">Racha: 5 Dias</div>
+                <div class="indicador-nivel">Nivel: 12</div>
+            </div>
+        </div>
         
         <div class="nav-auth">
             @if (Route::has('login'))
@@ -30,27 +37,39 @@
         <aside class="columna-lateral">
             <h3 class="titulo-seccion">Fuentes</h3>
             <button class="boton-opcion">+ Cargar Documento</button>
-            <div style="margin-top: 2rem;">
-                <p style="color: #4b5563; font-size: 0.875rem; font-style: italic;">No hay archivos cargados recientemente.</p>
+            <button class="boton-opcion boton-conexion">Conexion de Conceptos</button>
+            
+            <div class="contenedor-recientes" style="margin-top: 2rem;">
+                <h4 class="titulo-seccion subtitulo-recientes">Archivos Recientes</h4>
+                <div class="texto-vacio">
+                    No hay archivos cargados recientemente.
+                </div>
             </div>
         </aside>
 
         <section class="seccion-central">
             <div class="caja-subida">
-                <div class="icono-pdf">📄</div>
-                <p class="texto-subida-principal">Arrastra tu PDF aquí</p>
-                <p class="texto-subida-secundario">o selecciona un archivo de tu PC</p>
-                <button class="boton-rojo">Seleccionar PDF</button>
+                <div class="icono-reemplazo">PDF</div>
+                <p class="texto-subida-principal">Arrastra tus archivos aqui</p>
+                <p class="texto-subida-secundario">Puedes subir multiples PDFs para conectarlos</p>
+                <button class="boton-rojo">Seleccionar Archivos</button>
             </div>
 
             <div class="contenedor-busqueda">
-                <input type="text" class="barra-busqueda" placeholder="Haz una pregunta sobre el contenido del PDF...">
+                <input type="text" class="barra-busqueda" placeholder="Haz una pregunta sobre el contenido de tus PDFs...">
             </div>
         </section>
 
         <aside class="columna-lateral columna-derecha">
-            <h3 class="titulo-seccion">Herramientas</h3>
-            <button class="boton-opcion">Resumen Automático</button>
+            
+            <h3 class="titulo-seccion">Sostenibilidad y Repaso</h3>
+            <button class="boton-opcion">Repeticion Espaciada (SRS)</button>
+            <button class="boton-opcion">Modo Examen</button>
+
+            <div class="separador-herramientas"></div>
+
+            <h3 class="titulo-seccion">Herramientas IA</h3>
+            <button class="boton-opcion">Resumen Automatico</button>
             <button class="boton-opcion">Generar Mapa Mental</button>
             <button class="boton-opcion">Crear Cuestionario</button>
             <button class="boton-opcion">Tarjetas de Estudio</button>

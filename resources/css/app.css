@@ -27,11 +27,37 @@ body {
     background-color: #000000;
 }
 
+.contenedor-logo-gamificacion {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
 .logo-marca {
     color: #ef4444;
     font-weight: 700;
     font-size: 1.5rem;
     letter-spacing: -0.05em;
+}
+
+/* Indicadores de Gamificación */
+.seccion-gamificacion {
+    display: flex;
+    gap: 15px;
+    border-left: 1px solid #1f2937;
+    padding-left: 20px;
+}
+
+.indicador-racha {
+    color: #f97316;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.indicador-nivel {
+    color: #ffeb13;
+    font-size: 0.8rem;
+    font-weight: bold;
 }
 
 .nav-auth {
@@ -95,6 +121,16 @@ body {
     margin-bottom: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
+}
+
+.subtitulo-recientes {
+    font-size: 0.65rem;
+}
+
+.texto-vacio {
+    color: #4b5563;
+    font-size: 0.8rem;
+    font-style: italic;
 }
 
 /* ==========================================================
@@ -176,7 +212,9 @@ body {
     border-color: #ef4444;
 }
 
-/* Botones laterales */
+/* ==========================================================
+   BOTONES Y ELEMENTOS DE ACCIÓN
+   ========================================================== */
 .boton-opcion {
     display: block;
     width: 100%;
@@ -196,14 +234,24 @@ body {
     color: white;
 }
 
+.boton-conexion {
+    border-style: dashed !important;
+    font-size: 0.7rem;
+}
+
+.separador-herramientas {
+    height: 1px;
+    background-color: #1f2937;
+    margin: 15px 0;
+}
+
 /* ==========================================================
-   ESTILOS DEL FOOTER COMPACTO (PLAYDF AI)
+   ESTILOS DEL FOOTER
    ========================================================== */
 .footer-principal {
     border-top: 1px solid #1f2937;
     background-color: #000000;
     padding: 1.5rem 0;
-    /* Reducido para que no sea tan alto */
     margin-top: auto;
 }
 
@@ -256,7 +304,6 @@ body {
     margin-bottom: 0.3rem;
 }
 
-
 .footer-enlace,
 .footer-lista li {
     text-decoration: none;
@@ -265,12 +312,10 @@ body {
     cursor: pointer;
 }
 
-
 .footer-enlace:hover,
 .footer-lista li:hover {
     color: #ef4444 !important;
     padding-left: 3px;
-
 }
 
 .footer-copyright {
