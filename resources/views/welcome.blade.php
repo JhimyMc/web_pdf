@@ -54,7 +54,7 @@
             <button class="boton-opcion">Generar Mapa Mental</button>
             <button class="boton-opcion">Crear Cuestionario</button>
             <button class="boton-opcion">Tarjetas de Estudio</button>
-            <button class="boton-opcion">Análisis de Video</button>
+            
         </aside>
     
     </main>
