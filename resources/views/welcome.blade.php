@@ -6,19 +6,19 @@
     <title>PlayDF - Inteligencia Artificial en PDF</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="flex flex-col min-h-screen bg-black">
+<body>
 
-    <header class="flex justify-between items-center p-4 border-b border-gray-800 bg-black">
-        <div class="text-red-600 font-bold text-2xl tracking-tighter">PlayDF</div>
+    <header class="header-principal">
+        <div class="logo-marca">PlayDF</div>
         
-        <div class="flex gap-4 items-center">
+        <div class="nav-auth">
             @if (Route::has('login'))
                 @auth
-                    <a href="{{ url('/dashboard') }}" class="text-gray-400 text-sm hover:text-white">Dashboard</a>
+                    <a href="{{ url('/dashboard') }}" class="link-auth">Dashboard</a>
                 @else
-                    <a href="{{ route('login') }}" class="text-gray-400 text-sm hover:text-white">Entrar</a>
+                    <a href="{{ route('login') }}" class="link-auth">Entrar</a>
                     @if (Route::has('register'))
-                        <a href="{{ route('register') }}" class="text-red-600 border border-red-600 px-4 py-1 rounded-full text-sm hover:bg-red-600 hover:text-white transition">Registrarse</a>
+                        <a href="{{ route('register') }}" class="boton-registro">Registrarse</a>
                     @endif
                 @endauth
             @endif
@@ -28,36 +28,33 @@
     <main class="layout-principal">
         
         <aside class="columna-lateral">
-            <h3 class="text-gray-500 text-xs font-bold mb-4 uppercase tracking-widest">Fuentes</h3>
+            <h3 class="titulo-seccion">Fuentes</h3>
             <button class="boton-opcion">+ Cargar Documento</button>
-            <div class="mt-8">
-                <p class="text-gray-600 text-sm italic">No hay archivos cargados recientemente.</p>
+            <div style="margin-top: 2rem;">
+                <p style="color: #4b5563; font-size: 0.875rem; font-style: italic;">No hay archivos cargados recientemente.</p>
             </div>
         </aside>
 
         <section class="seccion-central">
             <div class="caja-subida">
-                <div class="text-4xl mb-2 text-gray-700">📄</div>
-                <p class="text-xl font-semibold">Arrastra tu PDF aquí</p>
-                <p class="text-gray-500 text-sm mb-4">o selecciona un archivo de tu PC</p>
-                <button class="boton-rojo shadow-lg shadow-red-900/20">Seleccionar PDF</button>
+                <div class="icono-pdf">📄</div>
+                <p class="texto-subida-principal">Arrastra tu PDF aquí</p>
+                <p class="texto-subida-secundario">o selecciona un archivo de tu PC</p>
+                <button class="boton-rojo">Seleccionar PDF</button>
             </div>
 
-            <div class="w-full max-w-2xl px-4">
-                <input type="text" class="barra-busqueda w-full focus:ring-1 focus:ring-red-600 outline-none" 
-                       placeholder="Haz una pregunta sobre el contenido del PDF...">
+            <div class="contenedor-busqueda">
+                <input type="text" class="barra-busqueda" placeholder="Haz una pregunta sobre el contenido del PDF...">
             </div>
         </section>
 
         <aside class="columna-lateral columna-derecha">
-            <h3 class="text-gray-500 text-xs font-bold mb-4 uppercase tracking-widest">Herramientas</h3>
-            <div class="space-y-2">
-                <button class="boton-opcion">Resumen Automático</button>
-                <button class="boton-opcion">Generar Mapa Mental</button>
-                <button class="boton-opcion">Crear Cuestionario</button>
-                <button class="boton-opcion">Tarjetas de Estudio</button>
-                <button class="boton-opcion">Análisis de Video</button>
-            </div>
+            <h3 class="titulo-seccion">Herramientas</h3>
+            <button class="boton-opcion">Resumen Automático</button>
+            <button class="boton-opcion">Generar Mapa Mental</button>
+            <button class="boton-opcion">Crear Cuestionario</button>
+            <button class="boton-opcion">Tarjetas de Estudio</button>
+            <button class="boton-opcion">Análisis de Video</button>
         </aside>
     
     </main>
