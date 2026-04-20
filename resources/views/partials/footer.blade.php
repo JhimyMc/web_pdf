@@ -1,5 +1,5 @@
 <footer class="footer-principal">
-    <div class="footer-contenedor">
+    <div class="footer-contenedor text-center md:text-left">
         
         <div>
             <h4 class="footer-titulo-rojo">PlayDF AI</h4>

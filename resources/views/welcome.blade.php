@@ -8,8 +8,8 @@
 </head>
 <body>
 
-    <header class="header-principal">
-        <div class="contenedor-logo-gamificacion">
+    <header class="header-principal flex-wrap gap-4">
+        <div class="contenedor-logo-gamificacion flex-wrap">
             <div class="logo-marca">PlayDF</div>
             
             <div class="seccion-gamificacion">
@@ -48,20 +48,19 @@
         </aside>
 
         <section class="seccion-central">
-            <div class="caja-subida">
+            <div class="caja-subida w-full">
                 <div class="icono-reemplazo">PDF</div>
-                <p class="texto-subida-principal">Arrastra tus archivos aqui</p>
-                <p class="texto-subida-secundario">Puedes subir multiples PDFs para conectarlos</p>
-                <button class="boton-rojo">Seleccionar Archivos</button>
+                <p class="texto-subida-principal text-center">Arrastra tus archivos aqui</p>
+                <p class="texto-subida-secundario text-center">Puedes subir multiples PDFs para conectarlos</p>
+                <button class="boton-rojo mt-2">Seleccionar Archivos</button>
             </div>
 
-            <div class="contenedor-busqueda">
+            <div class="contenedor-busqueda w-full">
                 <input type="text" class="barra-busqueda" placeholder="Haz una pregunta sobre el contenido de tus PDFs...">
             </div>
         </section>
 
         <aside class="columna-lateral columna-derecha">
-            
             <h3 class="titulo-seccion">Sostenibilidad y Repaso</h3>
             <button class="boton-opcion">Repeticion Espaciada (SRS)</button>
             <button class="boton-opcion">Modo Examen</button>
@@ -73,12 +72,13 @@
             <button class="boton-opcion">Generar Mapa Mental</button>
             <button class="boton-opcion">Crear Cuestionario</button>
             <button class="boton-opcion">Tarjetas de Estudio</button>
-            
         </aside>
     
     </main>
 
     @include('partials.footer')
+
+    <button class="boton-ayuda-fijo" aria-label="Ayuda">?</button>
 
 </body>
 </html>

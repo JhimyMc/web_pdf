@@ -3,11 +3,39 @@
 @tailwind utilities;
 
 /* ==========================================================
+   GUÍA 6: VARIABLES CSS
+   ========================================================== */
+:root {
+    --color-fondo: #000000;
+    --color-texto: #ffffff;
+    --color-primario: #ef4444;
+    --color-panel: #0a0a0a;
+    --color-borde: #1f2937;
+    --color-borde-oscuro: #222222;
+    --color-borde-input: #333333;
+    --color-fondo-input: #111111;
+    --color-gris-claro: #9ca3af;
+    --color-gris-medio: #6b7280;
+    --color-gris-oscuro: #4b5563;
+    --color-racha: #f97316;
+    --color-nivel: #ffeb13;
+}
+
+/* ==========================================================
+   GUÍA 5: BOX-SIZING
+   ========================================================== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* ==========================================================
    ESTILOS GENERALES Y BASE
    ========================================================== */
 body {
-    background-color: #000000;
-    color: #ffffff;
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
     margin: 0;
     font-family: sans-serif;
     min-height: 100vh;
@@ -16,46 +44,52 @@ body {
 }
 
 /* ==========================================================
-   HEADER (BARRA SUPERIOR)
+   HEADER (BARRA SUPERIOR) 
    ========================================================== */
 .header-principal {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
     padding: 1rem;
-    border-bottom: 1px solid #1f2937;
-    background-color: #000000;
+    border-bottom: 1px solid var(--color-borde);
+    background-color: var(--color-fondo);
+    position: sticky;
+    top: 0;
+    z-index: 50;
 }
 
 .contenedor-logo-gamificacion {
     display: flex;
     align-items: center;
-    gap: 24px;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .logo-marca {
-    color: #ef4444;
+    color: var(--color-primario);
     font-weight: 700;
     font-size: 1.5rem;
     letter-spacing: -0.05em;
 }
 
-/* Indicadores de Gamificación */
+/* Indicadores de puntaje */
 .seccion-gamificacion {
     display: flex;
-    gap: 15px;
-    border-left: 1px solid #1f2937;
-    padding-left: 20px;
+    gap: 0.9375rem;
+    border-left: 1px solid var(--color-borde);
+    padding-left: 1rem;
 }
 
 .indicador-racha {
-    color: #f97316;
+    color: var(--color-racha);
     font-size: 0.8rem;
     font-weight: bold;
 }
 
 .indicador-nivel {
-    color: #ffeb13;
+    color: var(--color-nivel);
     font-size: 0.8rem;
     font-weight: bold;
 }
@@ -67,55 +101,82 @@ body {
 }
 
 .link-auth {
-    color: #9ca3af;
+    color: var(--color-gris-claro);
     font-size: 0.875rem;
     text-decoration: none;
     transition: color 0.3s;
 }
 
 .link-auth:hover {
-    color: #ffffff;
+    color: var(--color-texto);
 }
 
 .boton-registro {
-    color: #ef4444;
-    border: 1px solid #ef4444;
+    color: var(--color-primario);
+    border: 1px solid var(--color-primario);
     padding: 0.25rem 1rem;
     border-radius: 9999px;
     font-size: 0.875rem;
     text-decoration: none;
     transition: all 0.3s;
+    white-space: nowrap;
 }
 
 .boton-registro:hover {
-    background-color: #ef4444;
-    color: #ffffff;
+    background-color: var(--color-primario);
+    color: var(--color-texto);
 }
 
 /* ==========================================================
-   LAYOUT Y COLUMNAS
+   LAYOUT Y COLUMNAS 
    ========================================================== */
 .layout-principal {
-    display: grid;
-    grid-template-columns: 260px 1fr 280px;
-    flex: 1;
-    overflow-y: auto;
-    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    /* MOBILE FIRST: En celulares todo es una sola columna */
+    flex-grow: 1;
+    overflow-x: hidden;
+    /* Evita scroll horizontal no deseado */
+
 }
 
 .columna-lateral {
-    background-color: #0a0a0a;
-    border-right: 1px solid #222222;
-    padding: 20px;
+    background-color: var(--color-panel);
+    padding: 1.25rem;
+    width: 100%;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--color-borde-oscuro);
 }
 
 .columna-derecha {
-    border-right: none;
-    border-left: 1px solid #222222;
+    border-bottom: none;
+    border-top: 1px solid var(--color-borde-oscuro);
+}
+
+/* MEDIA QUERY: (mínimo 768px) */
+@media (min-width: 768px) {
+    .layout-principal {
+        flex-direction: row;
+        overflow-y: auto;
+    }
+
+    .columna-lateral {
+        width: auto;
+        flex-basis: 16.25rem;
+        border-bottom: none;
+        border-right: 1px solid var(--color-borde-oscuro);
+    }
+
+    .columna-derecha {
+        flex-basis: 17.5rem;
+        border-top: none;
+        border-left: 1px solid var(--color-borde-oscuro);
+        border-right: none;
+    }
 }
 
 .titulo-seccion {
-    color: #6b7280;
+    color: var(--color-gris-medio);
     font-size: 0.75rem;
     font-weight: 700;
     margin-bottom: 1rem;
@@ -128,7 +189,7 @@ body {
 }
 
 .texto-vacio {
-    color: #4b5563;
+    color: var(--color-gris-oscuro);
     font-size: 0.8rem;
     font-style: italic;
 }
@@ -141,31 +202,36 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 2rem 1.25rem;
+    flex-grow: 1;
+    width: 100%;
 }
 
 .caja-subida {
-    width: 90%;
-    max-width: 500px;
-    height: 250px;
+    width: 100%;
+    max-width: 31.25rem;
+    height: 15.625rem;
     border: 2px dashed #444444;
-    border-radius: 15px;
+    border-radius: 0.9375rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     background-color: #050505;
     transition: 0.3s;
+    text-align: center;
+    padding: 1rem;
 }
 
 .caja-subida:hover {
-    border-color: #ef4444;
+    border-color: var(--color-primario);
 }
 
-.icono-pdf {
+.icono-reemplazo {
     font-size: 2.25rem;
     margin-bottom: 0.5rem;
     color: #374151;
+    font-weight: 700;
 }
 
 .texto-subida-principal {
@@ -174,16 +240,16 @@ body {
 }
 
 .texto-subida-secundario {
-    color: #6b7280;
+    color: var(--color-gris-medio);
     font-size: 0.875rem;
     margin-bottom: 1rem;
 }
 
 .boton-rojo {
-    background-color: #ef4444;
+    background-color: var(--color-primario);
     color: white;
-    padding: 10px 20px;
-    border-radius: 20px;
+    padding: 0.625rem 1.25rem;
+    border-radius: 1.25rem;
     border: none;
     font-weight: bold;
     cursor: pointer;
@@ -193,23 +259,22 @@ body {
 .contenedor-busqueda {
     width: 100%;
     max-width: 42rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding: 0;
 }
 
 .barra-busqueda {
     width: 100%;
-    margin-top: 30px;
-    padding: 15px;
-    background-color: #111111;
-    border: 1px solid #333333;
-    border-radius: 10px;
+    margin-top: 1.875rem;
+    padding: 0.9375rem;
+    background-color: var(--color-fondo-input);
+    border: 1px solid var(--color-borde-input);
+    border-radius: 0.625rem;
     color: white;
     outline: none;
 }
 
 .barra-busqueda:focus {
-    border-color: #ef4444;
+    border-color: var(--color-primario);
 }
 
 /* ==========================================================
@@ -218,19 +283,19 @@ body {
 .boton-opcion {
     display: block;
     width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
+    padding: 0.625rem;
+    margin-bottom: 0.625rem;
     background: none;
-    border: 1px solid #333333;
+    border: 1px solid var(--color-borde-input);
     color: #cccccc;
     text-align: left;
-    border-radius: 5px;
+    border-radius: 0.3125rem;
     cursor: pointer;
     transition: 0.2s;
 }
 
 .boton-opcion:hover {
-    border-color: #ef4444;
+    border-color: var(--color-primario);
     color: white;
 }
 
@@ -241,16 +306,44 @@ body {
 
 .separador-herramientas {
     height: 1px;
-    background-color: #1f2937;
-    margin: 15px 0;
+    background-color: var(--color-borde);
+    margin: 0.9375rem 0;
+}
+
+/* ==========================================================
+   BOTÓN FIJO (AYUDA)
+   ========================================================== */
+.boton-ayuda-fijo {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background-color: var(--color-primario);
+    color: var(--color-texto);
+    border: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.boton-ayuda-fijo:hover {
+    transform: scale(1.1);
 }
 
 /* ==========================================================
    ESTILOS DEL FOOTER
    ========================================================== */
 .footer-principal {
-    border-top: 1px solid #1f2937;
-    background-color: #000000;
+    border-top: 1px solid var(--color-borde);
+    background-color: var(--color-fondo);
     padding: 1.5rem 0;
     margin-top: auto;
 }
@@ -271,7 +364,7 @@ body {
 }
 
 .footer-titulo-rojo {
-    color: #ef4444;
+    color: var(--color-primario);
     font-weight: 700;
     margin-bottom: 0.5rem;
     text-transform: uppercase;
@@ -280,20 +373,20 @@ body {
 }
 
 .footer-titulo-blanco {
-    color: #ffffff;
+    color: var(--color-texto);
     font-weight: 600;
     margin-bottom: 0.5rem;
     font-size: 0.75rem;
 }
 
 .footer-texto {
-    color: #9ca3af;
+    color: var(--color-gris-claro);
     font-size: 0.75rem;
     line-height: 1.5;
 }
 
 .footer-lista {
-    color: #6b7280;
+    color: var(--color-gris-medio);
     font-size: 0.75rem;
     list-style: none;
     padding: 0;
@@ -307,25 +400,25 @@ body {
 .footer-enlace,
 .footer-lista li {
     text-decoration: none;
-    color: #6b7280;
+    color: var(--color-gris-medio);
     transition: all 0.3s ease;
     cursor: pointer;
 }
 
 .footer-enlace:hover,
 .footer-lista li:hover {
-    color: #ef4444 !important;
+    color: var(--color-primario) !important;
     padding-left: 3px;
 }
 
 .footer-copyright {
-    border-top: 1px solid #111827;
+    border-top: 1px solid var(--color-fondo-input);
     margin-top: 1.5rem;
     padding-top: 1rem;
     text-align: center;
 }
 
 .footer-copyright-texto {
-    color: #4b5563;
+    color: var(--color-gris-oscuro);
     font-size: 0.7rem;
 }
