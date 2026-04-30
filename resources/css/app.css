@@ -67,11 +67,51 @@ body {
     gap: 1rem;
 }
 
-.logo-marca {
+/* ==========================================================
+   NUEVO DISEÑO DE LOGO
+   ========================================================== */
+.logo-contenedor {
+    display: flex;
+    align-items: center;
+    /* Centra verticalmente respecto a la P */
+    line-height: 1;
+    /* Evita espacios extra entre líneas */
+    user-select: none;
+}
+
+.logo-letra-p {
     color: var(--color-primario);
-    font-weight: 700;
+    /* Rojo del CSS */
+    font-size: 3.5rem;
+    /* Tamaño grande para la P */
+    font-weight: 900;
+    margin-right: 4px;
+    /* Espacio mínimo con el bloque derecho */
+    letter-spacing: -2px;
+}
+
+.logo-bloque-derecho {
+    display: flex;
+    flex-direction: column;
+    /* Apila 'lay' sobre 'DF' */
+    justify-content: center;
+}
+
+.logo-texto-lay {
+    color: var(--color-primario);
     font-size: 1.5rem;
-    letter-spacing: -0.05em;
+    /* Tamaño mediano */
+    font-weight: 700;
+    margin-bottom: 0.5px;
+    /* Ajusta el pegado vertical entre palabras */
+}
+
+.logo-texto-df {
+    color: var(--color-primario);
+    font-size: 1.2rem;
+    /* Un poco más pequeño que 'lay' */
+    font-weight: 800;
+    text-transform: uppercase;
 }
 
 /* Indicadores de puntaje */

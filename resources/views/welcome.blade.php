@@ -10,7 +10,14 @@
 
     <header class="header-principal flex-wrap gap-4">
         <div class="contenedor-logo-gamificacion flex-wrap">
-            <div class="logo-marca">PlayDF</div>
+            {{--Mejora del Logo--}}
+            <div class="logo-contenedor">
+                <span class="logo-letra-p">P</span>
+                <div class="logo-bloque-derecho">
+                    <span class="logo-texto-lay">lay</span>
+                    <span class="logo-texto-df">DF</span>
+                </div>
+            </div>
             
             <div class="seccion-gamificacion">
                 <div class="indicador-racha">Racha: 5 Dias</div>
