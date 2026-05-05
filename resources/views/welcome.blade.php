@@ -25,18 +25,27 @@
             </div>
         </div>
         
-        <div class="nav-auth">
-            @if (Route::has('login'))
-                @auth
-                    <a href="{{ url('/dashboard') }}" class="link-auth">Dashboard</a>
-                @else
-                    <a href="{{ route('login') }}" class="link-auth">Entrar</a>
-                    @if (Route::has('register'))
-                        <a href="{{ route('register') }}" class="boton-registro">Registrarse</a>
-                    @endif
-                @endauth
-            @endif
-        </div>
+            <div class="nav-auth">
+                @if (Route::has('login'))
+                    @auth
+                        <span class="link-auth" style="margin-right: 15px; color: var(--color-gris-claro);">
+                            {{ Auth::user()->name }}
+                        </span>
+                        <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                            @csrf
+                            <a href="{{ route('logout') }}" class="link-auth" 
+                            onclick="event.preventDefault(); this.closest('form').submit();">
+                                Salir
+                            </a>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}" class="link-auth">Entrar</a>
+                        @if (Route::has('register'))
+                            <a href="{{ route('register') }}" class="boton-registro">Registrarse</a>
+                        @endif
+                    @endauth
+                @endif
+            </div>
     </header>
 
     <main class="layout-principal">
@@ -77,7 +86,7 @@
             
             <button class="boton-opcion flex-items-center">
                 @include('partials.iconos', ['name' => 'file-description', 'size' => 18, 'class' => 'mr-2'])
-                <span>Modo Examen</span>
+                <a href="/modo-examen" class="boton-opcion">Modo Examen</a>
             </button>
 
             <div class="separador-herramientas"></div>
