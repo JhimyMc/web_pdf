@@ -69,16 +69,40 @@
 
         <aside class="columna-lateral columna-derecha">
             <h3 class="titulo-seccion">Sostenibilidad y Repaso</h3>
-            <button class="boton-opcion">Repeticion Espaciada (SRS)</button>
-            <button class="boton-opcion">Modo Examen</button>
+            
+            <button class="boton-opcion flex-items-center">
+                @include('partials.iconos', ['name' => 'book', 'size' => 18, 'class' => 'mr-2'])
+                <span>Repeticion Espaciada (SRS)</span>
+            </button>
+            
+            <button class="boton-opcion flex-items-center">
+                @include('partials.iconos', ['name' => 'file-description', 'size' => 18, 'class' => 'mr-2'])
+                <span>Modo Examen</span>
+            </button>
 
             <div class="separador-herramientas"></div>
 
             <h3 class="titulo-seccion">Herramientas IA</h3>
-            <button class="boton-opcion">Resumen Automatico</button>
-            <button class="boton-opcion">Generar Mapa Mental</button>
-            <button class="boton-opcion">Crear Cuestionario</button>
-            <button class="boton-opcion">Tarjetas de Estudio</button>
+            
+            <button class="boton-opcion flex-items-center">
+                @include('partials.iconos', ['name' => 'file-filled', 'size' => 18, 'class' => 'mr-2'])
+                <span>Resumen Automatico</span>
+            </button>
+            
+            <button class="boton-opcion flex-items-center">
+                @include('partials.iconos', ['name' => 'sitemap', 'size' => 18, 'class' => 'mr-2'])
+                <span>Generar Mapa Mental</span>
+            </button>
+            
+            <button class="boton-opcion flex-items-center">
+                @include('partials.iconos', ['name' => 'list-details', 'size' => 18, 'class' => 'mr-2'])
+                <span>Crear Cuestionario</span>
+            </button>
+            
+            <button class="boton-opcion flex-items-center">
+                @include('partials.iconos', ['name' => 'cards', 'size' => 18, 'class' => 'mr-2'])
+                <span>Tarjetas de Estudio</span>
+            </button>
         </aside>
     
     </main>

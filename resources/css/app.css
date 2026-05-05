@@ -462,3 +462,21 @@ body {
     color: var(--color-gris-oscuro);
     font-size: 0.7rem;
 }
+
+/* Alineación para botones con iconos */
+.flex-items-center {
+    display: flex;
+    align-items: center;
+}
+
+.mr-2 {
+    margin-right: 0.5rem;
+    /* Espacio entre el icono y el texto */
+}
+
+.boton-opcion svg {
+    flex-shrink: 0;
+    /* Evita que el icono se aplaste si el texto es largo */
+    color: var(--color-primario);
+    /* Opcional: hace que los iconos sean rojos como tu marca */
+}
