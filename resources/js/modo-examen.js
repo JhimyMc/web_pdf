@@ -25,8 +25,7 @@ window.irA = function (idPantalla) {
 
 // --- DOCENTE ---
 window.verificarAccesoDocente = function () {
-    if (document.body.dataset.auth === 'true') window.irA('pantalla-C');
-    else { alert("Inicia sesión primero."); window.location.href = "/login"; }
+    window.irA('pantalla-C');
 };
 
 window.validarConfiguracionDocente = function () {

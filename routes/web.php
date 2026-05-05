@@ -16,6 +16,4 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-Route::get('/modo-examen', function () {
-    return view('modo-examen');
-});
+Route::view('/modo-examen', 'modo-examen');

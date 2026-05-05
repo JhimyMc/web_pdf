@@ -54,10 +54,11 @@
             <div id="pantalla-B" class="pantalla-examen activa">
                 <h2 class="titulo-pantalla">¿Cómo deseas ingresar?</h2>
                 <div class="botones-rol-grid">
-                    <button class="boton-rol-card" onclick="verificarAccesoDocente()">
+                    <button class="boton-rol-card" onclick="irA('pantalla-C')">
                         <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 18a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><circle cx="12" cy="10" r="2"></circle><line x1="7" x2="7" y1="2" y2="4"></line><line x1="17" x2="17" y1="2" y2="4"></line></svg>
                         <span class="texto-rol">Soy Docente</span>
                     </button>
+                    
                     <button class="boton-rol-card" onclick="irA('pantalla-E')">
                         <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
                         <span class="texto-rol">Soy Estudiante</span>
