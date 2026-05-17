@@ -1,0 +1,20 @@
+/* Animación suave para la aparición del código de sala */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Efecto de pulso premium en el indicador de estado */
+.pulse-emerald {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    animation: pulseStatus 2s infinite;
+}
+
+@keyframes pulseStatus {
+    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}

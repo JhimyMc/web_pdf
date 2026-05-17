@@ -1,0 +1,278 @@
+/* ==========================================================\
+   ESTILOS ESTRUCTURALES DEL BIENVENIDA (WELCOME)
+   ========================================================== */
+.cuerpo-aplicacion {
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+}
+
+.cabecera-principal {
+    background-color: var(--color-panel);
+    border-bottom: 1px solid var(--color-borde-oscuro);
+}
+
+.boton-menu-movil {
+    color: #ffffff;
+    background: transparent;
+    border: none;
+}
+.boton-menu-movil:hover {
+    color: var(--color-primario);
+}
+
+.logo-recuadro {
+    background-color: var(--color-primario);
+    color: #ffffff;
+}
+
+.primario-resaltado {
+    color: var(--color-primario);
+}
+
+.racha-nivel-contenedor {
+    background-color: var(--color-fondo-input);
+}
+
+.usuario-identificado {
+    color: var(--color-gris-claro);
+}
+
+.boton-salir {
+    color: var(--color-primario);
+}
+
+.enlace-autenticacion {
+    color: var(--color-gris-claro);
+    transition: color 0.2s;
+}
+.enlace-autenticacion:hover {
+    color: #ffffff;
+}
+
+.boton-registrarse {
+    background-color: var(--color-primario);
+}
+.boton-registrarse:hover {
+    background-color: #dc2626;
+}
+
+/* Paneles Laterales y Componentes Internos */
+.panel-lateral {
+    background-color: var(--color-panel);
+    border: 1px solid var(--color-borde-oscuro);
+}
+
+.seccion-subtitulo {
+    color: var(--color-gris-oscuro);
+}
+
+.seccion-subtitulo-atenuado {
+    color: var(--color-gris-medio);
+}
+
+.divisor-linea {
+    border-top: 1px solid var(--color-borde-oscuro);
+}
+
+/* Botones y Acciones */
+.boton-accion-principal {
+    background-color: var(--color-fondo-input);
+    border: 1px solid var(--color-borde-input);
+    color: #ffffff;
+}
+.boton-accion-principal:hover {
+    background-color: #1a1a1a;
+}
+
+.boton-deshabilitado {
+    background-color: rgba(17, 17, 17, 0.4);
+    color: var(--color-gris-oscuro);
+    border: 1px solid rgba(51, 51, 51, 0.5);
+}
+
+.boton-herramienta-ia {
+    background-color: var(--color-fondo);
+    border: 1px solid var(--color-borde-input);
+    width: 100%;
+    color: var(--color-gris-claro);
+    text-decoration: none;
+}
+.boton-herramienta-ia:hover {
+    background-color: var(--color-panel);
+    color: #ffffff;
+}
+.boton-herramienta-ia i.fa-graduation-cap {
+    color: var(--color-primario);
+}
+
+/* Estilo Destacado para Cargar Documento desde Móvil */
+.boton-cargar-movil-rojo {
+    background-color: var(--color-primario);
+    color: #ffffff;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    transition: background-color 0.2s, transform 0.1s;
+}
+.boton-cargar-movil-rojo:active {
+    transform: scale(0.98);
+    background-color: #dc2626;
+}
+
+/* Lista de Documentos */
+.item-documento {
+    background-color: var(--color-panel);
+    border: 1px solid var(--color-borde-oscuro);
+}
+.item-documento:hover {
+    background-color: var(--color-fondo-input);
+}
+
+.enlace-documento {
+    color: var(--color-gris-claro);
+}
+.enlace-documento i {
+    color: var(--color-primario);
+}
+
+.boton-eliminar {
+    color: var(--color-gris-oscuro);
+}
+.boton-eliminar:hover {
+    color: var(--color-primario);
+    background-color: var(--color-fondo);
+}
+
+/* Área Central de Arrastre de PDF y Carga */
+.zona-arrastre {
+    border-color: var(--color-borde-input);
+    background-color: rgba(10, 10, 10, 0.3);
+}
+.zona-arrastre:hover {
+    background-color: rgba(17, 17, 17, 0.5);
+    border-color: var(--color-gris-oscuro);
+}
+
+.insignia-pdf {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--color-primario);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.boton-subir-archivos {
+    background-color: var(--color-primario);
+}
+.boton-subir-archivos:hover {
+    background-color: #dc2626;
+}
+
+.pantalla-carga-ia {
+    background-color: rgba(0, 0, 0, 0.85);
+}
+
+.anillo-espera-base {
+    border-color: var(--color-borde-input);
+}
+
+.anillo-espera-activo {
+    border-top-color: var(--color-primario);
+}
+
+.pantalla-carga-ia i {
+    color: var(--color-primario);
+}
+
+.chat-contenedor-ia {
+    background-color: var(--color-panel);
+    border: 1px solid var(--color-borde-oscuro);
+}
+
+/* Barra de Busqueda Inferior */
+.barra-busqueda {
+    background-color: var(--color-fondo);
+    border: 1px solid var(--color-borde-input);
+}
+
+.icono-magia {
+    color: var(--color-gris-oscuro);
+}
+
+.barra-busqueda input {
+    color: var(--color-gris-claro);
+}
+
+.boton-enviar-deshabilitado {
+    color: var(--color-gris-oscuro);
+}
+
+.texto-blanco { color: var(--color-texto); }
+.texto-atenuado { color: var(--color-gris-medio); }
+
+/* ==========================================================\
+   🚨 SISTEMA RESPONSIVE DEL MENÚ LATERAL MÓVIL (DRAWER)
+   ========================================================== */
+.overlay-menu-movil {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 45;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.overlay-menu-movil.activo {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.menu-movil-contenedor {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100vh;
+    background-color: var(--color-panel);
+    border-right: 1px solid var(--color-borde-oscuro);
+    z-index: 50;
+    box-shadow: 5px 0 25px rgba(0, 0, 0, 0.5);
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+}
+
+.menu-movil-contenedor.activo {
+    left: 0;
+}
+
+.rotate-180 {
+    transform: rotate(180deg);
+}
+
+/* ==========================================================\
+   PARSER MARKDOWN INTERNO DE LAS RESPUESTAS DE LA IA
+   ========================================================== */
+.markdown-body p {
+    margin-bottom: 0.5rem;
+}
+.markdown-body ul {
+    list-style-type: disc;
+    margin-left: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+.markdown-body ol {
+    list-style-type: decimal;
+    margin-left: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+.markdown-body strong {
+    color: var(--color-primario);
+}
+.markdown-body h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}

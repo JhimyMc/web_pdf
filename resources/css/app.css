@@ -2,8 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ==========================================================
-   GUÍA 6: VARIABLES CSS
+/* ==========================================================\
+   VARIABLES CSS CENTRALIZADAS (ROJO Y NEGRO)
    ========================================================== */
 :root {
     --color-fondo: #000000;
@@ -21,385 +21,38 @@
     --color-nivel: #ffeb13;
 }
 
-/* ==========================================================
-   GUÍA 5: BOX-SIZING
-   ========================================================== */
-*,
-*::before,
-*::after {
+/* Base resets */
+*, *::before, *::after {
     box-sizing: border-box;
 }
 
-/* ==========================================================
-   ESTILOS GENERALES Y BASE
-   ========================================================== */
 body {
     background-color: var(--color-fondo);
     color: var(--color-texto);
     margin: 0;
-    font-family: sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
 }
 
-/* ==========================================================
-   HEADER (BARRA SUPERIOR) 
-   ========================================================== */
-.header-principal {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    padding: 1rem;
-    border-bottom: 1px solid var(--color-borde);
-    background-color: var(--color-fondo);
-    position: sticky;
-    top: 0;
-    z-index: 50;
-}
-
-.contenedor-logo-gamificacion {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-/* ==========================================================
-   NUEVO DISEÑO DE LOGO
-   ========================================================== */
-.logo-contenedor {
-    display: flex;
-    align-items: center;
-    /* Centra verticalmente respecto a la P */
-    line-height: 1;
-    /* Evita espacios extra entre líneas */
-    user-select: none;
-}
-
-.logo-letra-p {
-    color: var(--color-primario);
-    /* Rojo del CSS */
-    font-size: 3.5rem;
-    /* Tamaño grande para la P */
-    font-weight: 900;
-    margin-right: 4px;
-    /* Espacio mínimo con el bloque derecho */
-    letter-spacing: -2px;
-}
-
-.logo-bloque-derecho {
-    display: flex;
-    flex-direction: column;
-    /* Apila 'lay' sobre 'DF' */
-    justify-content: center;
-}
-
-.logo-texto-lay {
-    color: var(--color-primario);
-    font-size: 1.5rem;
-    /* Tamaño mediano */
-    font-weight: 700;
-    margin-bottom: 0.5px;
-    /* Ajusta el pegado vertical entre palabras */
-}
-
-.logo-texto-df {
-    color: var(--color-primario);
-    font-size: 1.2rem;
-    /* Un poco más pequeño que 'lay' */
-    font-weight: 800;
-    text-transform: uppercase;
-}
-
-/* Indicadores de puntaje */
-.seccion-gamificacion {
-    display: flex;
-    gap: 0.9375rem;
-    border-left: 1px solid var(--color-borde);
-    padding-left: 1rem;
-}
-
-.indicador-racha {
-    color: var(--color-racha);
-    font-size: 0.8rem;
-    font-weight: bold;
-}
-
-.indicador-nivel {
-    color: var(--color-nivel);
-    font-size: 0.8rem;
-    font-weight: bold;
-}
-
-.nav-auth {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-}
-
-.link-auth {
-    color: var(--color-gris-claro);
-    font-size: 0.875rem;
-    text-decoration: none;
-    transition: color 0.3s;
-}
-
-.link-auth:hover {
-    color: var(--color-texto);
-}
-
-.boton-registro {
-    color: var(--color-primario);
-    border: 1px solid var(--color-primario);
-    padding: 0.25rem 1rem;
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    text-decoration: none;
-    transition: all 0.3s;
-    white-space: nowrap;
-}
-
-.boton-registro:hover {
-    background-color: var(--color-primario);
-    color: var(--color-texto);
-}
-
-/* ==========================================================
-   LAYOUT Y COLUMNAS 
-   ========================================================== */
-.layout-principal {
-    display: flex;
-    flex-direction: column;
-    /* MOBILE FIRST: En celulares todo es una sola columna */
-    flex-grow: 1;
-    overflow-x: hidden;
-    /* Evita scroll horizontal no deseado */
-
-}
-
-.columna-lateral {
-    background-color: var(--color-panel);
-    padding: 1.25rem;
-    width: 100%;
-    flex-shrink: 0;
-    border-bottom: 1px solid var(--color-borde-oscuro);
-}
-
-.columna-derecha {
-    border-bottom: none;
-    border-top: 1px solid var(--color-borde-oscuro);
-}
-
-/* MEDIA QUERY: (mínimo 768px) */
-@media (min-width: 768px) {
-    .layout-principal {
-        flex-direction: row;
-        overflow-y: auto;
-    }
-
-    .columna-lateral {
-        width: auto;
-        flex-basis: 16.25rem;
-        border-bottom: none;
-        border-right: 1px solid var(--color-borde-oscuro);
-    }
-
-    .columna-derecha {
-        flex-basis: 17.5rem;
-        border-top: none;
-        border-left: 1px solid var(--color-borde-oscuro);
-        border-right: none;
-    }
-}
-
-.titulo-seccion {
-    color: var(--color-gris-medio);
-    font-size: 0.75rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-}
-
-.subtitulo-recientes {
-    font-size: 0.65rem;
-}
-
-.texto-vacio {
-    color: var(--color-gris-oscuro);
-    font-size: 0.8rem;
-    font-style: italic;
-}
-
-/* ==========================================================
-   COMPONENTES CENTRALES
-   ========================================================== */
-.seccion-central {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1.25rem;
-    flex-grow: 1;
-    width: 100%;
-}
-
-.caja-subida {
-    width: 100%;
-    max-width: 31.25rem;
-    height: 15.625rem;
-    border: 2px dashed #444444;
-    border-radius: 0.9375rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: #050505;
-    transition: 0.3s;
-    text-align: center;
-    padding: 1rem;
-}
-
-.caja-subida:hover {
-    border-color: var(--color-primario);
-}
-
-.icono-reemplazo {
-    font-size: 2.25rem;
-    margin-bottom: 0.5rem;
-    color: #374151;
-    font-weight: 700;
-}
-
-.texto-subida-principal {
-    font-size: 1.25rem;
-    font-weight: 600;
-}
-
-.texto-subida-secundario {
-    color: var(--color-gris-medio);
-    font-size: 0.875rem;
-    margin-bottom: 1rem;
-}
-
-.boton-rojo {
-    background-color: var(--color-primario);
-    color: white;
-    padding: 0.625rem 1.25rem;
-    border-radius: 1.25rem;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 10px 15px -3px rgba(127, 29, 29, 0.2);
-}
-
-.contenedor-busqueda {
-    width: 100%;
-    max-width: 42rem;
-    padding: 0;
-}
-
-.barra-busqueda {
-    width: 100%;
-    margin-top: 1.875rem;
-    padding: 0.9375rem;
-    background-color: var(--color-fondo-input);
-    border: 1px solid var(--color-borde-input);
-    border-radius: 0.625rem;
-    color: white;
-    outline: none;
-}
-
-.barra-busqueda:focus {
-    border-color: var(--color-primario);
-}
-
-/* ==========================================================
-   BOTONES Y ELEMENTOS DE ACCIÓN
-   ========================================================== */
-.boton-opcion {
-    display: block;
-    width: 100%;
-    padding: 0.625rem;
-    margin-bottom: 0.625rem;
-    background: none;
-    border: 1px solid var(--color-borde-input);
-    color: #cccccc;
-    text-align: left;
-    border-radius: 0.3125rem;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.boton-opcion:hover {
-    border-color: var(--color-primario);
-    color: white;
-}
-
-.boton-conexion {
-    border-style: dashed !important;
-    font-size: 0.7rem;
-}
-
-.separador-herramientas {
-    height: 1px;
-    background-color: var(--color-borde);
-    margin: 0.9375rem 0;
-}
-
-/* ==========================================================
-   BOTÓN FIJO (AYUDA)
-   ========================================================== */
-.boton-ayuda-fijo {
-    position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    width: 3.5rem;
-    height: 3.5rem;
-    border-radius: 50%;
-    background-color: var(--color-primario);
-    color: var(--color-texto);
-    border: none;
-    font-size: 1.5rem;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-    z-index: 100;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: transform 0.2s;
-}
-
-.boton-ayuda-fijo:hover {
-    transform: scale(1.1);
-}
-
-/* ==========================================================
-   ESTILOS DEL FOOTER
+/* ==========================================================\
+   ESTILOS COMPARTIDOS DEL FOOTER PRINCIPAL
    ========================================================== */
 .footer-principal {
-    border-top: 1px solid var(--color-borde);
-    background-color: var(--color-fondo);
-    padding: 1.5rem 0;
-    margin-top: auto;
+    background-color: var(--color-panel);
+    border-top: 1px solid var(--color-borde-oscuro);
+    padding: 2rem 1.5rem 1rem 1.5rem;
+    width: 100%;
 }
 
 .footer-contenedor {
     max-width: 80rem;
     margin: 0 auto;
-    padding: 0 1rem;
     display: grid;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: 1fr;
+    gap: 2rem;
 }
 
 @media (min-width: 768px) {
     .footer-contenedor {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 
@@ -437,22 +90,19 @@ body {
     margin-bottom: 0.3rem;
 }
 
-.footer-enlace,
-.footer-lista li {
+.footer-enlace {
     text-decoration: none;
     color: var(--color-gris-medio);
     transition: all 0.3s ease;
     cursor: pointer;
 }
 
-.footer-enlace:hover,
-.footer-lista li:hover {
+.footer-enlace:hover {
     color: var(--color-primario) !important;
-    padding-left: 3px;
 }
 
 .footer-copyright {
-    border-top: 1px solid var(--color-fondo-input);
+    border-top: 1px solid var(--color-borde-input);
     margin-top: 1.5rem;
     padding-top: 1rem;
     text-align: center;
@@ -461,22 +111,5 @@ body {
 .footer-copyright-texto {
     color: var(--color-gris-oscuro);
     font-size: 0.7rem;
-}
-
-/* Alineación para botones con iconos */
-.flex-items-center {
-    display: flex;
-    align-items: center;
-}
-
-.mr-2 {
-    margin-right: 0.5rem;
-    /* Espacio entre el icono y el texto */
-}
-
-.boton-opcion svg {
-    flex-shrink: 0;
-    /* Evita que el icono se aplaste si el texto es largo */
-    color: var(--color-primario);
-    /* Opcional: hace que los iconos sean rojos como tu marca */
+    margin: 0;
 }

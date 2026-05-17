@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PlayDF - Modo Examen</title>
-    {{-- Importación de estilos y JS --}}
+    {{-- Agregamos FontAwesome para el icono de la bandera --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     @vite(['resources/css/app.css', 'resources/css/modo-examen.css', 'resources/js/modo-examen.js'])
 </head>
+
 <body class="body-examen" data-auth="{{ Auth::check() ? 'true' : 'false' }}">
 
     <header class="header-principal flex-wrap gap-4">
@@ -18,169 +21,80 @@
                     <span class="logo-texto-df">DF</span>
                 </div>
             </div>
-            
-            <div class="seccion-gamificacion">
-                <div class="indicador-racha">Racha: 5 Dias</div>
-                <div class="indicador-nivel">Nivel: 12</div>
-            </div>
         </div>
-        
+
         <div class="nav-auth">
-            @if (Route::has('login'))
-                @auth
-                    <span class="link-auth" style="margin-right: 15px; color: var(--color-gris-claro);">
-                        {{ Auth::user()->name }}
-                    </span>
-                    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                        @csrf
-                        <a href="{{ route('logout') }}" class="link-auth" 
-                        onclick="event.preventDefault(); this.closest('form').submit();">
-                            Salir
-                        </a>
-                    </form>
-                @else
-                    <a href="{{ route('login') }}" class="link-auth">Entrar</a>
-                    @if (Route::has('register'))
-                        <a href="{{ route('register') }}" class="boton-registro">Registrarse</a>
-                    @endif
-                @endauth
-            @endif
+            @auth
+                <span class="link-auth">{{ Auth::user()->name }}</span>
+            @else
+                <a href="{{ route('login') }}" class="link-auth">Entrar</a>
+            @endauth
         </div>
     </header>
 
     <main class="layout-examen">
         <div class="contenedor-examen">
 
-            <div id="pantalla-B" class="pantalla-examen activa">
-                <h2 class="titulo-pantalla">¿Cómo deseas ingresar?</h2>
-                <div class="botones-rol-grid">
-                    <button class="boton-rol-card" onclick="irA('pantalla-C')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 18a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><circle cx="12" cy="10" r="2"></circle><line x1="7" x2="7" y1="2" y2="4"></line><line x1="17" x2="17" y1="2" y2="4"></line></svg>
-                        <span class="texto-rol">Soy Docente</span>
-                    </button>
-                    
-                    <button class="boton-rol-card" onclick="irA('pantalla-E')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
-                        <span class="texto-rol">Soy Estudiante</span>
-                    </button>
-                </div>
-            </div>
-
-            <div id="pantalla-C" class="pantalla-examen">
-                <button class="boton-volver" onclick="irA('pantalla-B')">← Volver</button>
-                <h2 class="titulo-pantalla">Configurar Evaluación</h2>
-                
-                <div class="form-examen">
-                    <label class="label-examen">1. Selecciona el material (PDF):</label>
-                    <select id="select-pdf" class="input-examen">
-                        <option value="">-- Seleccionar archivo --</option>
-                        <option value="Clase_01_Arquitectura.pdf">Clase_01_Arquitectura.pdf</option>
-                        <option value="Semana_05_Ingenieria_Web.pdf">Semana_05_Ingenieria_Web.pdf</option>
-                        <option value="subir">➕ Subir nuevo PDF...</option>
-                    </select>
-
-                    <label class="label-examen">2. Número de preguntas:</label>
-                    <input type="number" id="num-preguntas" class="input-examen" value="5" min="1" max="20">
-
-                    <button class="boton-accion-principal" onclick="validarConfiguracionDocente()">Crear Sala de Examen</button>
-                </div>
-            </div>
-
-            <div id="pantalla-D" class="pantalla-examen">
-                <button class="boton-volver" onclick="irA('pantalla-C')">← Configuración</button>
-                <h2 class="titulo-pantalla">Sala de Espera</h2>
-                <div class="codigo-sala-container">
-                    <span id="codigo-visual">-----</span>
-                </div>
-
-                <div class="status-box">
-                    <span class="punto-verde-parpadeante"></span>
-                    Conectando alumnos en tiempo real...
-                </div>
-
-                <div id="lista-alumnos-espera" class="lista-alumnos">
-                    <div class="alumno-item">Esperando participantes...</div>
-                </div>
-
-                <button class="boton-accion-exito" onclick="iniciarExamenParaTodos()">
-                    EMPEZAR AHORA
-                </button>
-            </div>
-
-            <div id="pantalla-E" class="pantalla-examen">
-                <button class="boton-volver" onclick="irA('pantalla-B')">← Volver</button>
+            {{-- PANTALLA 1: INGRESO DE CÓDIGO (ESTUDIANTE) --}}
+            <div id="pantalla-ingreso" class="pantalla-examen activa">
                 <h2 class="titulo-pantalla">Unirse al Examen</h2>
                 <div class="form-examen">
-                    <label class="label-examen">Código de Sala:</label>
-                    <input type="text" id="input-codigo-estudiante" class="input-examen" maxlength="5" placeholder="Ej: XJ82P" style="text-transform: uppercase;">
-                    
-                    <label class="label-examen">Tu Nombre:</label>
-                    <input type="text" id="input-nombre-estudiante" class="input-examen" placeholder="Nombre Apellido">
-                    
-                    <button class="boton-accion-principal" onclick="unirseASala()">Validar y Entrar</button>
+                    <label class="label-examen">Código de Sala (5 dígitos):</label>
+                    <input type="text" id="input-codigo" class="input-examen" maxlength="5" placeholder="EJ: FNAF5"
+                        style="text-transform: uppercase;">
+
+                    <label class="label-examen">Tu Nombre o Apodo:</label>
+                    <input type="text" id="input-nombre" class="input-examen" placeholder="Escribe tu nombre aquí">
+
+                    <button class="boton-accion-principal" onclick="validarYUnirse()">INGRESAR A LA SALA</button>
                 </div>
             </div>
 
-            <div id="pantalla-E2" class="pantalla-examen">
-                <h2 class="titulo-pantalla">¡Te has unido!</h2>
+            {{-- PANTALLA 2: ESPERA (LOBBY) --}}
+            <div id="pantalla-espera" class="pantalla-examen">
+                <h2 class="titulo-pantalla">¡Listo, <span id="nombre-espera"></span>!</h2>
                 <div class="status-box">
                     <span class="punto-verde-parpadeante"></span>
-                    Esperando que el profesor inicie...
+                    Esperando que el profesor inicie el examen...
                 </div>
-                
-                <div class="codigo-sala-container" style="padding: 10px;">
-                    <small>SALA:</small> <b id="codigo-estudiante-ver">-----</b>
+                <div class="codigo-sala-container">
+                    <small>CÓDIGO:</small> <b id="codigo-ver">-----</b>
                 </div>
-
-                <div id="lista-alumnos-estudiante" class="lista-alumnos"></div>
+                <p style="text-align: center; color: #888;">El examen comenzará automáticamente en tu pantalla.</p>
             </div>
 
-                <div id="pantalla-F-Docente" class="pantalla-examen">
-                    <h2 class="titulo-pantalla">Monitoreo en Vivo</h2>
-                    <p style="color: var(--color-gris-claro);">PDF Analizado: <span id="pdf-monitoreo" style="color: var(--color-primario); font-weight: bold;"></span></p>
-                    
-                    <div id="ranking-docente-viva" class="ranking-container-docente"></div>
-
-                    <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button class="boton-accion-exito" style="flex: 1; margin-top:0;" onclick="alert('Resultados guardados en la base de datos.')">
-                            Descargar Reporte
-                        </button>
-                        <button class="boton-accion-principal" style="flex: 1; margin-top:0;" onclick="window.location.href='/'">
-                            Salir al Inicio
-                        </button>
-                    </div>
+            {{-- PANTALLA 3: EL EXAMEN (DINÁMICO) --}}
+            <div id="pantalla-quiz" class="pantalla-examen">
+                <div class="header-quiz">
+                    <span>Pregunta <b id="pregunta-actual-num">1</b></span>
+                    {{-- BOTÓN DE BANDERA --}}
+                    <button id="btn-bandera" class="btn-flag" onclick="toggleFlag()"
+                        title="Reportar error en esta pregunta">
+                        <i class="fa-solid fa-flag"></i> <span id="txt-bandera">Reportar</span>
+                    </button>
                 </div>
 
-            <div id="pantalla-F-Estudiante" class="pantalla-examen">
-                <div class="header-quiz" style="width: 100%; display: flex; justify-content: space-between; margin-bottom: 20px;">
-                    <span>Pregunta <b id="pregunta-actual-num">1</b> de <b>5</b></span>
-                </div>
-                <h2 id="pregunta-texto" class="titulo-pantalla" style="font-size: 1.4rem; min-height: 80px;">¿Cargando pregunta desde el PDF...?</h2>
-                
-                <div class="opciones-quiz">
-                    <button class="opcion-btn" onclick="seleccionarOpcion(this, 'A')">Opción A</button>
-                    <button class="opcion-btn" onclick="seleccionarOpcion(this, 'B')">Opción B</button>
-                    <button class="opcion-btn" onclick="seleccionarOpcion(this, 'C')">Opción C</button>
+                <h2 id="pregunta-texto" class="titulo-pantalla">Cargando pregunta...</h2>
+
+                <div id="contenedor-opciones" class="opciones-quiz">
                 </div>
 
-                <div class="navegacion-quiz" style="display: flex; gap: 10px; margin-top: 30px; width: 100%;">
-                    <button class="boton-volver" style="margin:0; flex: 1;" onclick="cambiarPregunta(-1)">Anterior</button>
-                    <button class="boton-volver" style="margin:0; flex: 1;" onclick="cambiarPregunta(1)">Siguiente</button>
+                <div class="navegacion-quiz">
+                    <button class="boton-accion-exito" id="btn-siguiente" onclick="enviarRespuesta()">
+                        CONFIRMAR Y SIGUIENTE
+                    </button>
                 </div>
-
-                <button class="boton-accion-exito" style="margin-top: 20px; width: 100%;" onclick="finalizarExamenEstudiante()">
-                    ENTREGAR EXAMEN
-                </button>
             </div>
 
-            <div id="pantalla-G" class="pantalla-examen">
-                <div class="card-resultado" style="text-align: center; background: #1a1a1a; padding: 40px; border-radius: 20px; border: 2px solid var(--color-primario);">
-                    <h2 style="font-size: 2rem;">🏆 Examen Finalizado</h2>
-                    <p style="margin: 20px 0; color: var(--color-gris-claro);">Tu nota final es:</p>
-                    <div style="font-size: 4rem; font-weight: 900; color: var(--color-primario);">
-                        <span id="nota-estudiante-valor">0.0</span><small style="font-size: 1.5rem;">/20</small>
+            {{-- PANTALLA 4: RESULTADOS --}}
+            <div id="pantalla-resultado" class="pantalla-examen">
+                <div class="card-resultado">
+                    <h2>🏆 ¡Examen Terminado!</h2>
+                    <p>Tu puntuación es:</p>
+                    <div class="score-final">
+                        <span id="nota-valor">0</span><small>/20</small>
                     </div>
-                    <button class="boton-accion-principal" style="margin-top: 30px;" onclick="window.location.href='/'">Volver al Inicio</button>
+                    <button class="boton-accion-principal" onclick="window.location.href='/'">Volver al Inicio</button>
                 </div>
             </div>
 
@@ -188,5 +102,141 @@
     </main>
 
     @include('partials.footer')
+
+    {{-- Script de lógica en tiempo real --}}
+    <script>
+        let roomCode = '';
+        let studentName = '';
+        let currentQuestionIndex = 0;
+        let isFlagged = false;
+        let questions = [];
+
+        function irA(id) {
+            document.querySelectorAll('.pantalla-examen').forEach(p => p.classList.remove('activa'));
+            document.getElementById(id).classList.add('activa');
+        }
+
+        async function validarYUnirse() {
+            roomCode = document.getElementById('input-codigo').value.toUpperCase();
+            studentName = document.getElementById('input-nombre').value;
+
+            if (roomCode.length < 5 || studentName === "") {
+                alert("Completa los datos");
+                return;
+            }
+
+            // Llamada a Laravel para verificar si la sala existe
+            const response = await fetch(`/api/rooms/${roomCode}/status`);
+            if (response.ok) {
+                document.getElementById('nombre-espera').innerText = studentName;
+                document.getElementById('codigo-ver').innerText = roomCode;
+                irA('pantalla-espera');
+                empezarPolling();
+            } else {
+                alert("La sala no existe o ya terminó.");
+            }
+        }
+
+        function empezarPolling() {
+            const interval = setInterval(async () => {
+                const response = await fetch(`/api/rooms/${roomCode}/status`);
+                const data = await response.json();
+
+                // Si el docente cambió el estado a "iniciado" (ej: current_question >= 0)
+                if (data.current_question >= 0) {
+                    clearInterval(interval);
+                    questions = JSON.parse(data.questions);
+                    iniciarQuiz();
+                }
+            }, 3000);
+        }
+
+        function iniciarQuiz() {
+            irA('pantalla-quiz');
+            mostrarPregunta();
+        }
+
+        function mostrarPregunta() {
+            const q = questions[currentQuestionIndex];
+            document.getElementById('pregunta-texto').innerText = q.titulo;
+            document.getElementById('pregunta-actual-num').innerText = currentQuestionIndex + 1;
+
+            const contenedor = document.getElementById('contenedor-opciones');
+            contenedor.innerHTML = '';
+            isFlagged = false; // Reset bandera
+            actualizarEstiloBandera();
+
+            q.opciones.forEach((op, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'opcion-btn';
+                btn.innerText = op;
+                btn.onclick = () => seleccionarOpcion(index);
+                contenedor.appendChild(btn);
+            });
+        }
+
+        function toggleFlag() {
+            isFlagged = !isFlagged;
+            actualizarEstiloBandera();
+        }
+
+        function actualizarEstiloBandera() {
+            const btn = document.getElementById('btn-bandera');
+            btn.style.color = isFlagged ? '#e50914' : '#888';
+            document.getElementById('txt-bandera').innerText = isFlagged ? 'Reportada' : 'Reportar';
+        }
+
+        async function enviarRespuesta() {
+            const q = questions[currentQuestionIndex];
+            const seleccion = document.querySelector(
+            '.opcion-btn.seleccionada'); // Asumiendo que añades esta clase al hacer clic
+
+            if (!seleccion) {
+                alert("Selecciona una opción antes de continuar");
+                return;
+            }
+
+            const indiceSeleccionado = Array.from(seleccion.parentNode.children).indexOf(seleccion);
+            const esCorrecta = (indiceSeleccionado === q.respuesta_correcta);
+
+            const payload = {
+                room_code: roomCode,
+                student_name: studentName,
+                question_index: currentQuestionIndex,
+                selected_option: indiceSeleccionado,
+                is_flagged: isFlagged,
+                is_correct: esCorrecta
+            };
+
+            try {
+                await fetch('/api/responses/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                // Pasar a la siguiente o terminar
+                if (currentQuestionIndex < questions.length - 1) {
+                    currentQuestionIndex++;
+                    mostrarPregunta();
+                } else {
+                    irA('pantalla-resultado');
+                    // Aquí podrías calcular la nota final basada en las respuestas correctas
+                }
+            } catch (error) {
+                console.error("Error al enviar respuesta:", error);
+            }
+        }
+
+        // Pequeño ajuste para que los botones se vean seleccionados
+        function seleccionarOpcion(index) {
+            const botones = document.querySelectorAll('.opcion-btn');
+            botones.forEach(b => b.classList.remove('seleccionada'));
+            botones[index].classList.add('seleccionada');
+        }
+    </script>
 </body>
+
 </html>
