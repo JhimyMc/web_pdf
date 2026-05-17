@@ -11,6 +11,11 @@ export default {
 
     theme: {
         extend: {
+            colors: {
+                'playdf-rojo': '#E50914', // Color rojo del aplicativo
+                'playdf-dark': '#121212', // Fondo oscuro principal
+                'playdf-card': '#1E1E1E', // Fondo oscuro para las tarjetas/formularios
+            },
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
