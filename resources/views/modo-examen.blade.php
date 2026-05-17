@@ -4,239 +4,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlayDF - Modo Examen</title>
-    {{-- Agregamos FontAwesome para el icono de la bandera --}}
+    <title>PlayDF - Menú de Exámenes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     @vite(['resources/css/app.css', 'resources/css/modo-examen.css', 'resources/js/modo-examen.js'])
+
+    <script>
+        window.isLoggedIn = @json(Auth::check());
+        window.loginRoute = "{{ route('login') }}";
+    </script>
 </head>
 
-<body class="body-examen" data-auth="{{ Auth::check() ? 'true' : 'false' }}">
+<body class="cuerpo-aplicacion font-sans min-h-screen flex flex-col items-center justify-center p-4">
 
-    <header class="header-principal flex-wrap gap-4">
-        <div class="contenedor-logo-gamificacion flex-wrap">
-            <div class="logo-contenedor" onclick="window.location.href='/'" style="cursor:pointer">
-                <span class="logo-letra-p">P</span>
-                <div class="logo-bloque-derecho">
-                    <span class="logo-texto-lay">lay</span>
-                    <span class="logo-texto-df">DF</span>
-                </div>
-            </div>
+    <a href="/"
+        class="absolute top-6 left-6 text-slate-400 hover:text-red-500 transition-colors flex items-center gap-2 font-medium">
+        <i class="fa-solid fa-arrow-left"></i> Volver a Inicio
+    </a>
+
+    <div class="max-w-4xl w-full">
+        <div class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-black text-white mb-3">Modo <span class="text-red-500">Examen</span>
+            </h1>
+            <p class="text-slate-400 text-sm md:text-base">Selecciona cómo deseas poner a prueba tus conocimientos hoy.
+            </p>
         </div>
 
-        <div class="nav-auth">
-            @auth
-                <span class="link-auth">{{ Auth::user()->name }}</span>
-            @else
-                <a href="{{ route('login') }}" class="link-auth">Entrar</a>
-            @endauth
-        </div>
-    </header>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
 
-    <main class="layout-examen">
-        <div class="contenedor-examen">
-
-            {{-- PANTALLA 1: INGRESO DE CÓDIGO (ESTUDIANTE) --}}
-            <div id="pantalla-ingreso" class="pantalla-examen activa">
-                <h2 class="titulo-pantalla">Unirse al Examen</h2>
-                <div class="form-examen">
-                    <label class="label-examen">Código de Sala (5 dígitos):</label>
-                    <input type="text" id="input-codigo" class="input-examen" maxlength="5" placeholder="EJ: FNAF5"
-                        style="text-transform: uppercase;">
-
-                    <label class="label-examen">Tu Nombre o Apodo:</label>
-                    <input type="text" id="input-nombre" class="input-examen" placeholder="Escribe tu nombre aquí">
-
-                    <button class="boton-accion-principal" onclick="validarYUnirse()">INGRESAR A LA SALA</button>
+            <div
+                class="tarjeta-menu p-8 rounded-3xl border border-slate-800 flex flex-col items-center text-center transition-all hover:-translate-y-2">
+                <div class="bg-blue-500/10 p-5 rounded-full mb-5">
+                    <i class="fa-solid fa-right-to-bracket text-blue-500 text-4xl"></i>
                 </div>
+                <h2 class="text-xl font-bold text-white mb-2">Unirse a Sala</h2>
+                <p class="text-slate-400 text-xs mb-6 flex-1">Ingresa con un código de sala provisto por un docente o
+                    creador. No requiere registro.</p>
+
+                <div class="w-full space-y-3 mb-4">
+                    <input type="text" id="input-codigo-sala" placeholder="Código de 5 dígitos"
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-center text-white uppercase font-bold tracking-widest focus:border-blue-500 outline-none"
+                        maxlength="5">
+                    <input type="text" id="input-nombre-estudiante" placeholder="Tu Nombre o Apodo"
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-center text-white focus:border-blue-500 outline-none">
+                </div>
+                <button id="btn-unirse-sala"
+                    class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-blue-500/20">
+                    Ingresar
+                </button>
             </div>
 
-            {{-- PANTALLA 2: ESPERA (LOBBY) --}}
-            <div id="pantalla-espera" class="pantalla-examen">
-                <h2 class="titulo-pantalla">¡Listo, <span id="nombre-espera"></span>!</h2>
-                <div class="status-box">
-                    <span class="punto-verde-parpadeante"></span>
-                    Esperando que el profesor inicie el examen...
-                </div>
-                <div class="codigo-sala-container">
-                    <small>CÓDIGO:</small> <b id="codigo-ver">-----</b>
-                </div>
-                <p style="text-align: center; color: #888;">El examen comenzará automáticamente en tu pantalla.</p>
-            </div>
-
-            {{-- PANTALLA 3: EL EXAMEN (DINÁMICO) --}}
-            <div id="pantalla-quiz" class="pantalla-examen">
-                <div class="header-quiz">
-                    <span>Pregunta <b id="pregunta-actual-num">1</b></span>
-                    {{-- BOTÓN DE BANDERA --}}
-                    <button id="btn-bandera" class="btn-flag" onclick="toggleFlag()"
-                        title="Reportar error en esta pregunta">
-                        <i class="fa-solid fa-flag"></i> <span id="txt-bandera">Reportar</span>
-                    </button>
-                </div>
-
-                <h2 id="pregunta-texto" class="titulo-pantalla">Cargando pregunta...</h2>
-
-                <div id="contenedor-opciones" class="opciones-quiz">
-                </div>
-
-                <div class="navegacion-quiz">
-                    <button class="boton-accion-exito" id="btn-siguiente" onclick="enviarRespuesta()">
-                        CONFIRMAR Y SIGUIENTE
-                    </button>
-                </div>
-            </div>
-
-            {{-- PANTALLA 4: RESULTADOS --}}
-            <div id="pantalla-resultado" class="pantalla-examen">
-                <div class="card-resultado">
-                    <h2>🏆 ¡Examen Terminado!</h2>
-                    <p>Tu puntuación es:</p>
-                    <div class="score-final">
-                        <span id="nota-valor">0</span><small>/20</small>
+            <div
+                class="tarjeta-menu relative overflow-hidden p-8 rounded-3xl border border-slate-800 flex flex-col items-center text-center transition-all hover:-translate-y-2">
+                @if (!Auth::check())
+                    <div
+                        class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center p-6 rounded-3xl border border-slate-800">
+                        <i class="fa-solid fa-lock text-red-500 text-3xl mb-3"></i>
+                        <p class="text-white font-bold mb-1">Acceso Restringido</p>
+                        <p class="text-slate-400 text-xs mb-4">Inicia sesión para crear salas.</p>
+                        <a href="{{ route('login') }}"
+                            class="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-6 rounded-xl transition-colors text-sm">Iniciar
+                            Sesión</a>
                     </div>
-                    <button class="boton-accion-principal" onclick="window.location.href='/'">Volver al Inicio</button>
+                @endif
+                <div class="bg-red-500/10 p-5 rounded-full mb-5">
+                    <i class="fa-solid fa-users-rectangle text-red-500 text-4xl"></i>
                 </div>
+                <h2 class="text-xl font-bold text-white mb-2">Crear Sala Live</h2>
+                <p class="text-slate-400 text-xs mb-6 flex-1">Configura un cuestionario en vivo, invita a participantes
+                    y evalúa resultados en tiempo real.</p>
+                <button id="btn-crear-sala"
+                    class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-red-500/20">
+                    Configurar Nueva Sala
+                </button>
+            </div>
+
+            <div
+                class="tarjeta-menu p-6 rounded-3xl border border-slate-800 flex flex-col items-center text-center transition-all hover:border-emerald-500/50 cursor-pointer">
+                <i class="fa-solid fa-user-astronaut text-emerald-500 text-3xl mb-3"></i>
+                <h2 class="text-lg font-bold text-white mb-1">Modo Solitario</h2>
+                <p class="text-slate-400 text-xs">Ponte a prueba tú mismo sin competir.</p>
+            </div>
+
+            <div
+                class="tarjeta-menu p-6 rounded-3xl border border-slate-800 flex flex-col items-center text-center transition-all hover:border-amber-500/50 cursor-pointer relative overflow-hidden">
+                @if (!Auth::check())
+                    <div
+                        class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-3xl">
+                        <i class="fa-solid fa-lock text-amber-500"></i>
+                    </div>
+                @endif
+                <i class="fa-solid fa-clock-rotate-left text-amber-500 text-3xl mb-3"></i>
+                <h2 class="text-lg font-bold text-white mb-1">Historial de Salas</h2>
+                <p class="text-slate-400 text-xs">Revisa métricas y descargas de PDF.</p>
+                <button id="btn-historial" class="hidden absolute inset-0 w-full h-full"></button>
             </div>
 
         </div>
-    </main>
-
-    @include('partials.footer')
-
-    {{-- Script de lógica en tiempo real --}}
-    <script>
-        let roomCode = '';
-        let studentName = '';
-        let currentQuestionIndex = 0;
-        let isFlagged = false;
-        let questions = [];
-
-        function irA(id) {
-            document.querySelectorAll('.pantalla-examen').forEach(p => p.classList.remove('activa'));
-            document.getElementById(id).classList.add('activa');
-        }
-
-        async function validarYUnirse() {
-            roomCode = document.getElementById('input-codigo').value.toUpperCase();
-            studentName = document.getElementById('input-nombre').value;
-
-            if (roomCode.length < 5 || studentName === "") {
-                alert("Completa los datos");
-                return;
-            }
-
-            // Llamada a Laravel para verificar si la sala existe
-            const response = await fetch(`/api/rooms/${roomCode}/status`);
-            if (response.ok) {
-                document.getElementById('nombre-espera').innerText = studentName;
-                document.getElementById('codigo-ver').innerText = roomCode;
-                irA('pantalla-espera');
-                empezarPolling();
-            } else {
-                alert("La sala no existe o ya terminó.");
-            }
-        }
-
-        function empezarPolling() {
-            const interval = setInterval(async () => {
-                const response = await fetch(`/api/rooms/${roomCode}/status`);
-                const data = await response.json();
-
-                // Si el docente cambió el estado a "iniciado" (ej: current_question >= 0)
-                if (data.current_question >= 0) {
-                    clearInterval(interval);
-                    questions = JSON.parse(data.questions);
-                    iniciarQuiz();
-                }
-            }, 3000);
-        }
-
-        function iniciarQuiz() {
-            irA('pantalla-quiz');
-            mostrarPregunta();
-        }
-
-        function mostrarPregunta() {
-            const q = questions[currentQuestionIndex];
-            document.getElementById('pregunta-texto').innerText = q.titulo;
-            document.getElementById('pregunta-actual-num').innerText = currentQuestionIndex + 1;
-
-            const contenedor = document.getElementById('contenedor-opciones');
-            contenedor.innerHTML = '';
-            isFlagged = false; // Reset bandera
-            actualizarEstiloBandera();
-
-            q.opciones.forEach((op, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'opcion-btn';
-                btn.innerText = op;
-                btn.onclick = () => seleccionarOpcion(index);
-                contenedor.appendChild(btn);
-            });
-        }
-
-        function toggleFlag() {
-            isFlagged = !isFlagged;
-            actualizarEstiloBandera();
-        }
-
-        function actualizarEstiloBandera() {
-            const btn = document.getElementById('btn-bandera');
-            btn.style.color = isFlagged ? '#e50914' : '#888';
-            document.getElementById('txt-bandera').innerText = isFlagged ? 'Reportada' : 'Reportar';
-        }
-
-        async function enviarRespuesta() {
-            const q = questions[currentQuestionIndex];
-            const seleccion = document.querySelector(
-            '.opcion-btn.seleccionada'); // Asumiendo que añades esta clase al hacer clic
-
-            if (!seleccion) {
-                alert("Selecciona una opción antes de continuar");
-                return;
-            }
-
-            const indiceSeleccionado = Array.from(seleccion.parentNode.children).indexOf(seleccion);
-            const esCorrecta = (indiceSeleccionado === q.respuesta_correcta);
-
-            const payload = {
-                room_code: roomCode,
-                student_name: studentName,
-                question_index: currentQuestionIndex,
-                selected_option: indiceSeleccionado,
-                is_flagged: isFlagged,
-                is_correct: esCorrecta
-            };
-
-            try {
-                await fetch('/api/responses/send', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                // Pasar a la siguiente o terminar
-                if (currentQuestionIndex < questions.length - 1) {
-                    currentQuestionIndex++;
-                    mostrarPregunta();
-                } else {
-                    irA('pantalla-resultado');
-                    // Aquí podrías calcular la nota final basada en las respuestas correctas
-                }
-            } catch (error) {
-                console.error("Error al enviar respuesta:", error);
-            }
-        }
-
-        // Pequeño ajuste para que los botones se vean seleccionados
-        function seleccionarOpcion(index) {
-            const botones = document.querySelectorAll('.opcion-btn');
-            botones.forEach(b => b.classList.remove('seleccionada'));
-            botones[index].classList.add('seleccionada');
-        }
-    </script>
+    </div>
 </body>
 
 </html>

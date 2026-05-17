@@ -3,33 +3,24 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\RoomController;
-use App\Http\Controllers\Api\ResponseController;
-use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\QuizController;
 
 // =========================================================================
-// RUTAS PÚBLICAS (Usuarios no autenticados)
+// RUTAS PÚBLICAS (Alumnos Uniéndose y Webhooks de n8n)
 // =========================================================================
 
-// Autenticación Inicial
+// Autenticación desde App Android
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
-// Docente (Android Studio)
-Route::post('/rooms/create', [RoomController::class, 'create']);
-Route::get('/rooms/{code}/status', [RoomController::class, 'getStatus']);
+// Los alumnos verifican si la sala existe o hacen polling en vivo
+Route::get('/rooms/{code}/status', [QuizController::class, 'apiGetStatus']);
 
-// Webhook n8n
-Route::post('/rooms/update-questions', [RoomController::class, 'updateQuestions']);
+// Los alumnos envían respuestas
+Route::post('/responses/send', [QuizController::class, 'apiSaveResponse']);
 
-// Alumnos (Web y App)
-Route::post('/rooms/{code}/submit', [ResponseController::class, 'store']);
-Route::post('/rooms/{code}/flag', [ResponseController::class, 'flag']);
-
-
-// =========================================================================
-// RUTAS PROTEGIDAS
-// =========================================================================
+// Webhook para que n8n avise que terminó de generar las preguntas de forma asíncrona
+Route::post('/rooms/webhook-n8n', [QuizController::class, 'apiWebhookN8n']);
 
 // Para la App de Android (Token Sanctum)
 Route::middleware('auth:sanctum')->group(function () {
@@ -37,11 +28,4 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     Route::post('/user/update-profile', [AuthController::class, 'updateProfile']);
-});
-
-// Para la Web de PlayDF (Sesión persistente del Navegador)
-Route::middleware('auth')->group(function () {
-    Route::post('/documents/upload', [DocumentController::class, 'upload'])->name('api.documents.upload');
-    Route::post('/chat/ask', [DocumentController::class, 'askChatbot'])->name('api.chat.ask');
-    Route::get('/documents/{id}/messages', [DocumentController::class, 'getMessages'])->name('api.documents.messages');
 });

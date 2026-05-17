@@ -12,9 +12,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('code', 5)->unique()->index();
-            $table->string('pdf_name')->nullable();
+            $table->string('pdf_name')->nullable(); // Para saber de qué PDF salió
+            $table->integer('num_questions')->default(10); // NUEVO: Cantidad de preguntas
+            $table->string('difficulty')->default('intermedio'); // NUEVO: Dificultad (basico, intermedio, avanzado)
             $table->json('questions')->nullable();
-            $table->enum('status', ['generando', 'espera', 'en_vivo', 'finalizado'])->default('generando');
+            $table->enum('status', ['configurando', 'generando', 'espera', 'en_vivo', 'finalizado'])->default('configurando'); // NUEVO: Estado 'configurando'
             $table->timestamps();
         });
     }

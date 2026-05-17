@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurar Sala - PlayDF</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    @vite(['resources/css/app.css', 'resources/css/sala-configurar.css', 'resources/js/sala-configurar.js'])
+</head>
+
+<body class="cuerpo-aplicacion font-sans min-h-screen flex items-center justify-center p-4 relative">
+
+    <a href="/modo-examen"
+        class="absolute top-6 left-6 text-slate-400 hover:text-red-500 transition-colors flex items-center gap-2 font-medium z-20">
+        <i class="fa-solid fa-arrow-left"></i> Volver al Menú
+    </a>
+
+    <div id="pantalla-carga"
+        class="fixed inset-0 bg-slate-950/90 z-50 flex-col items-center justify-center hidden backdrop-blur-sm">
+        <i class="fa-solid fa-circle-notch animate-spin text-red-500 text-4xl mb-4"></i>
+        <h2 class="text-white font-bold text-lg">Procesando PDF...</h2>
+        <p class="text-slate-400 text-sm">Extrayendo texto para la IA</p>
+    </div>
+
+    <div
+        class="tarjeta-configuracion max-w-xl w-full p-8 md:p-10 rounded-3xl border border-slate-800 relative overflow-hidden z-10">
+        <div class="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-red-600/10 rounded-full blur-3xl"></div>
+
+        <div class="text-center mb-8 relative z-10">
+            <div class="inline-block bg-red-500/10 p-4 rounded-full mb-4">
+                <i class="fa-solid fa-sliders text-red-500 text-3xl"></i>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-black text-white mb-2">Configurar <span class="text-red-500">Sala
+                    Live</span></h1>
+            <p class="text-slate-400 text-sm">Define los parámetros del cuestionario antes de invitar a los
+                participantes.</p>
+        </div>
+
+        <form action="{{ route('sala.crear') }}" method="POST" class="space-y-6 relative z-10">
+            @csrf
+
+            <div class="grupo-formulario">
+                <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                    <i class="fa-solid fa-file-pdf text-red-500 mr-1"></i> Documento Base
+                </label>
+                <div class="flex gap-2">
+                    <select name="document_id" id="select-documento" required
+                        class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 outline-none hover:border-slate-700 transition-colors cursor-pointer appearance-none custom-select">
+                        <option value="" disabled selected>Selecciona un PDF de tu biblioteca...</option>
+                        @foreach ($documentos as $doc)
+                            <option value="{{ $doc->id }}">{{ $doc->name }}</option>
+                        @endforeach
+                    </select>
+
+                    <input type="file" id="input-subir-pdf" accept=".pdf" class="hidden">
+                    <button type="button" id="btn-subir-pdf"
+                        class="bg-slate-900 border border-slate-800 hover:border-red-500 hover:text-red-400 text-slate-400 px-4 rounded-xl transition-colors"
+                        title="Subir nuevo PDF">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grupo-formulario">
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                        <i class="fa-solid fa-list-ol text-blue-500 mr-1"></i> Cantidad
+                    </label>
+                    <select name="num_questions" required
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 outline-none custom-select">
+                        <option value="5">5 Preguntas</option>
+                        <option value="10" selected>10 Preguntas</option>
+                        <option value="15">15 Preguntas</option>
+                        <option value="20">20 Preguntas</option>
+                    </select>
+                </div>
+
+                <div class="grupo-formulario">
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                        <i class="fa-solid fa-fire text-amber-500 mr-1"></i> Dificultad
+                    </label>
+                    <select name="difficulty" required
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 outline-none custom-select">
+                        <option value="basico">Básico</option>
+                        <option value="intermedio" selected>Intermedio</option>
+                        <option value="avanzado">Avanzado</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit"
+                class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-red-500/20 mt-4 flex items-center justify-center gap-2">
+                Crear Sala y Generar Código <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </form>
+    </div>
+</body>
+
+</html>

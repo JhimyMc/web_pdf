@@ -2,15 +2,18 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\QuizController;
 use Illuminate\Support\Facades\Route;
 
 // Vista de inicio (Landing / Dashboard unificado cargando tus PDFs de la Base de Datos)
 Route::get('/', [DocumentController::class, 'index'])->name('dashboard');
 
 // Área totalmente pública para los alumnos (Ingreso al examen por código sin requerir cuenta)
+
+// Área totalmente pública para los participantes
 Route::view('/modo-examen', 'modo-examen')->name('modo.examen');
-
-
+// NUEVA RUTA PARA JUGAR EL EXAMEN:
+Route::get('/sala/play/{code}', [App\Http\Controllers\QuizController::class, 'play'])->name('sala.play');
 // 🔒 RUTAS PROTEGIDAS: Solo usuarios autenticados (Docentes)
 Route::middleware('auth')->group(function () {
 
@@ -24,13 +27,22 @@ Route::middleware('auth')->group(function () {
         return view('crear-sala');
     })->name('docente.crear-sala');
 
-    // 🚀 PETICIONES ASÍNCRONAS (AJAX / FETCH): Comparten la sesión del docente logueado
+    // 🚀 PETICIONES ASÍNCRONAS DE BIENVENIDA (AJAX / FETCH)
     Route::post('/ajax/documents/upload', [DocumentController::class, 'upload']);
     Route::get('/ajax/documents/{id}/messages', [DocumentController::class, 'messages']);
     Route::delete('/documentos/{id}', [DocumentController::class, 'destroy'])->name('documentos.destroy');
     Route::post('/ajax/chat/ask', [DocumentController::class, 'ask']);
+
+    // Modo Examen - Vistas de gestión de salas
+    Route::get('/sala/configurar', [QuizController::class, 'configurar'])->name('sala.configurar');
+    Route::post('/sala/crear', [QuizController::class, 'crearSala'])->name('sala.crear');
+    Route::get('/sala/dashboard/{code}', [QuizController::class, 'dashboard'])->name('sala.dashboard');
+
+    // 🛠️ Endpoints del Dashboard del Docente (Movidos aquí para compartir la Sesión Web activa)
+    Route::post('/sala/api/rooms/{code}/generate', [QuizController::class, 'apiGenerateQuestions']);
+    Route::post('/sala/api/rooms/{code}/start', [QuizController::class, 'apiStartRoom']);
+    Route::post('/sala/api/rooms/{code}/end', [QuizController::class, 'apiEndRoom']);
+    Route::delete('/sala/api/rooms/{code}', [QuizController::class, 'apiDeleteRoom']);
 });
 
-
-// Archivo de autenticación por defecto de Laravel (Breeze/Jetstream)
 require __DIR__ . '/auth.php';

@@ -1,0 +1,29 @@
+.cuerpo-aplicacion {
+    background-color: var(--color-fondo);
+    /* Sutil gradiente para no ser totalmente negro */
+    background-image: radial-gradient(circle at center, #0f0f0f 0%, #000000 100%);
+}
+
+.tarjeta-configuracion {
+    background-color: var(--color-panel);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Estilo para los Select para quitar la flecha por defecto de Windows/Mac y poner algo limpio */
+.custom-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+.custom-select:focus {
+    border-color: var(--color-primario);
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2);
+}
+
+.grupo-formulario select option {
+    background-color: var(--color-panel);
+    color: var(--color-texto);
+}

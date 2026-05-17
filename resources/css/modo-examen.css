@@ -1,27 +1,18 @@
-/* Estilos a medida para los botones de las opciones del examen */
-.opcion-btn-custom {
-    width: 100%;
-    text-align: left;
-    background-color: #0f172a;
-    border: 1px solid #334155;
-    padding: 1rem;
-    border-radius: 0.75rem;
-    font-size: 0.875rem;
-    color: #cbd5e1;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
+.cuerpo-aplicacion {
+    background-color: var(--color-fondo);
+    background-image: radial-gradient(circle at top right, rgba(239, 68, 68, 0.05), transparent 40%),
+                      radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.05), transparent 40%);
 }
 
-.opcion-btn-custom:hover {
-    background-color: #1e293b;
-    border-color: #475569;
+.tarjeta-menu {
+    background-color: var(--color-panel);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* Estado activo cuando el alumno selecciona una opción */
-.opcion-btn-custom.seleccionada {
-    background-color: #1e3a8a;
-    border-color: #3b82f6;
-    color: #ffffff;
-    font-weight: 600;
-    box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+.tarjeta-menu:hover {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+}
+
+input::placeholder {
+    color: var(--color-gris-oscuro);
 }
