@@ -57,7 +57,7 @@ class AuthController extends Controller
         // 2. Intentamos iniciar sesión
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $user = Auth::user();
-            
+
             return response()->json([
                 'exito' => true,
                 'mensaje' => 'Login exitoso',
@@ -79,16 +79,31 @@ class AuthController extends Controller
     /**
      * Actualizar perfil
      */
-    public function updateProfile(Request $request) 
+    /**
+     * Actualizar perfil
+     */
+    // Asegúrate de tener esta importación arriba del archivo
+
+    public function updateProfile(Request $request)
     {
-        $user = auth()->user(); // Obtiene el usuario por el token (requiere middleware auth:sanctum en rutas)
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        // EXPLICACIÓN: Buscamos al usuario directamente en la base de datos por su ID.
+        // Esto le asegura a Laravel y a tu editor que '$user' es un modelo Eloquent real.
+        $user = User::find($request->user()->id);
 
         if (!$user) {
-            return response()->json(['mensaje' => 'No autorizado'], 401);
+            return response()->json([
+                'exito' => false,
+                'mensaje' => 'Usuario no encontrado'
+            ], 404);
         }
 
+        // Actualizamos el nombre y guardamos
         $user->name = $request->name;
-        $user->save();
+        $user->save(); // <--- Aquí ya no dará ningún error
 
         return response()->json([
             'exito' => true,

@@ -411,4 +411,60 @@ class QuizController extends Controller
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
+    public function apiObtenerPdfsDocente($userId)
+    {
+        try {
+            // Obtenemos los documentos pertenecientes al ID enviado
+            $documentos = \App\Models\Document::where('user_id', $userId)
+                ->latest()
+                ->get(['id', 'nombre', 'user_id']); // Enviamos solo las columnas necesarias
+
+            return response()->json($documentos, 200);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Error en apiObtenerPdfsDocente: " . $e->getMessage());
+            return response()->json(['error' => 'No se pudieron obtener los documentos'], 500);
+        }
+    }
+    // Método para registrar o validar que un alumno entra a la sala
+    public function apiUnirseSalaApp(Request $request)
+    {
+        $request->validate([
+            'room_code' => 'required|string',
+            'student_name' => 'required|string'
+        ]);
+
+        $room = Room::where('code', strtoupper($request->room_code))->first();
+
+        if (!$room) {
+            return response()->json(['success' => false, 'message' => 'La sala no existe.'], 404);
+        }
+
+        // Opcional: puedes validar si la sala está en estado 'finalizado'
+        if ($room->status === 'finalizado') {
+            return response()->json(['success' => false, 'message' => 'Esta sala ya ha concluido.'], 400);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Te has unido exitosamente.']);
+    }
+
+    // Método para que desde la app se actualice el estado del examen de forma remota
+    public function apiCambiarEstadoSalaApp(Request $request, $code)
+    {
+        $request->validate([
+            'status' => 'required|string' // 'espera', 'jugando' o 'finalizado'
+        ]);
+
+        $room = Room::where('code', strtoupper($code))->first();
+
+        if (!$room) {
+            return response()->json(['success' => false, 'message' => 'La sala no existe.'], 404);
+        }
+
+        $room->update(['status' => $request->status]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'El estado de la sala cambió a: ' . $request->status
+        ]);
+    }
 }
