@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btnEnviar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
 
             if (seleccionActual && seleccionActual.esCorrecta) {
-                puntuacionTotal += 20; // Ajusta los puntos como prefieras
+                puntuacionTotal += 1; // Ajusta los puntos como prefieras
             }
 
             const payload = {

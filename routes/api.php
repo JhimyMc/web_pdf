@@ -29,3 +29,12 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::post('/user/update-profile', [AuthController::class, 'updateProfile']);
 });
+
+
+// Rutas para la gestión de Salas desde la App Móvil
+Route::post('/rooms/create-from-app', [QuizController::class, 'apiCrearSalaDesdeApp']);
+Route::get('/rooms/{code}/status', [QuizController::class, 'apiObtenerEstadoSala']);
+Route::post('/rooms/save-response', [QuizController::class, 'apiGuardarRespuestaApp']);
+
+Route::post('/rooms/{code}/start', [QuizController::class, 'apiStartRoom']);
+Route::post('/rooms/{code}/end', [QuizController::class, 'apiEndRoom']);
