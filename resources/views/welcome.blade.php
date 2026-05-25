@@ -27,9 +27,7 @@
                 <i class="fa-solid fa-bars"></i>
             </button>
 
-            <div class="logo-recuadro font-black text-xl md:text-2xl px-3 md:px-4 py-1 rounded-lg">P</div>
-            <span class="text-lg md:text-xl font-bold tracking-tight text-white">Play<span
-                    class="text-primario-resaltado">DF</span></span>
+            @include('partials.logo')
 
             <div
                 class="hidden sm:flex items-center gap-3 ml-2 md:ml-6 racha-nivel-contenedor px-3 py-1 rounded-full text-xs">
