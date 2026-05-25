@@ -1,5 +1,5 @@
 <?php
-
+//C:\laragon\www\web-pdf\app\Http\Controllers\QuizController.php
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -23,9 +23,9 @@ class QuizController extends Controller
     public function crearSala(Request $request)
     {
         $request->validate([
-            'document_id' => 'required|exists:documents,id',
+            'document_id'   => 'required|exists:documents,id',
             'num_questions' => 'required|integer|min:1|max:20',
-            'difficulty' => 'required|in:basico,intermedio,avanzado'
+            'difficulty'    => 'required|in:basico,intermedio,avanzado'
         ]);
 
         $documento = Document::where('id', $request->document_id)
@@ -35,16 +35,16 @@ class QuizController extends Controller
         $code = strtoupper(substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), 0, 5));
 
         $room = Room::create([
-            'user_id' => Auth::id(),
-            'code' => $code,
+            'user_id'  => Auth::id(),
+            'code'     => $code,
             'pdf_name' => $documento->nombre ?? 'Documento_PDF',
-            'status' => 'configurando',
+            'status'   => 'configurando',
         ]);
 
         session(["room_config_{$code}" => [
-            'document_id' => $request->document_id,
+            'document_id'   => $request->document_id,
             'num_questions' => $request->num_questions,
-            'difficulty' => $request->difficulty
+            'difficulty'    => $request->difficulty
         ]]);
 
         return redirect()->route('sala.dashboard', $code);
@@ -71,73 +71,70 @@ class QuizController extends Controller
         $students = $responses->groupBy('student_name')->map(function ($items, $name) {
             $respuestasReales = $items->where('question_index', '>=', 0);
             return [
-                'student_name' => $name,
-                // MEJORA APLICADA: Puntos multiplicados por 1
-                'score' => $respuestasReales->where('is_correct', true)->count() * 1,
-                'is_flagged' => $items->contains('is_flagged', true),
+                'student_name'       => $name,
+                'score'              => $respuestasReales->where('is_correct', true)->count() * 1,
+                'is_flagged'         => $items->contains('is_flagged', true),
                 'answered_questions' => $respuestasReales->count()
             ];
         })->values();
 
-        // Si el modelo no lo convierte automáticamente, lo forzamos a Array
-        $questionsArray = is_string($room->questions) ? json_decode($room->questions, true) : $room->questions;
+        $questionsArray = is_string($room->questions)
+            ? json_decode($room->questions, true)
+            : $room->questions;
 
         return response()->json([
-            'status' => $room->status,
+            'status'    => $room->status,
             'questions' => $questionsArray,
-            'students' => $students
+            'students'  => $students
         ]);
     }
 
-    // 5. Mostrar la vista de juego para el participante (El Lobby con marcado de asistencia -1)
+    // 5. Mostrar la vista de juego para el participante (Lobby con marcado de asistencia -1)
     public function play(Request $request, $code)
     {
-        $room = Room::where('code', $code)->firstOrFail();
-
-        // Capturamos el nombre que viene en la URL (?nombre=Juan)
+        $room   = Room::where('code', $code)->firstOrFail();
         $nombre = $request->query('nombre', 'Participante');
 
-        // REGISTRO DE ASISTENCIA EN TIEMPO REAL: 
-        // Creamos una fila "falsa" con la pregunta -1 apenas entra al lobby 
-        // para que el Dashboard del profesor lo vea conectado inmediatamente.
+        // REGISTRO DE ASISTENCIA: fila con question_index -1 para que
+        // el dashboard del profesor lo vea conectado inmediatamente.
         StudentResponse::firstOrCreate(
             [
-                'room_code' => $room->code,
-                'student_name' => $nombre,
+                'room_code'      => $room->code,
+                'student_name'   => $nombre,
                 'question_index' => -1
             ],
             [
                 'selected_option' => -1,
-                'is_correct' => false,
-                'is_flagged' => false
+                'is_correct'      => false,
+                'is_flagged'      => false
             ]
         );
 
         return view('sala-play', compact('room', 'nombre'));
     }
 
-    // 6. Almacenar o actualizar respuestas enviadas por los alumnos en tiempo real
+    // 6. Almacenar o actualizar respuestas enviadas por los alumnos
     public function apiSaveResponse(Request $request)
     {
         $request->validate([
-            'room_code' => 'required|string',
-            'student_name' => 'required|string',
-            'question_index' => 'required|integer',
+            'room_code'       => 'required|string',
+            'student_name'    => 'required|string',
+            'question_index'  => 'required|integer',
             'selected_option' => 'required|integer',
-            'is_correct' => 'required|boolean',
-            'is_flagged' => 'required|boolean',
+            'is_correct'      => 'required|boolean',
+            'is_flagged'      => 'required|boolean',
         ]);
 
         StudentResponse::updateOrCreate(
             [
-                'room_code' => $request->room_code,
-                'student_name' => $request->student_name,
+                'room_code'      => $request->room_code,
+                'student_name'   => $request->student_name,
                 'question_index' => $request->question_index,
             ],
             [
                 'selected_option' => $request->selected_option,
-                'is_correct' => $request->is_correct,
-                'is_flagged' => $request->is_flagged,
+                'is_correct'      => $request->is_correct,
+                'is_flagged'      => $request->is_flagged,
             ]
         );
 
@@ -151,23 +148,20 @@ class QuizController extends Controller
 
         $config = session("room_config_{$code}") ?? [
             'num_questions' => 5,
-            'difficulty' => 'intermedio',
-            'document_id' => null
+            'difficulty'    => 'intermedio',
+            'document_id'   => null
         ];
 
-        // OBTENEMOS EL TEXTO DESDE TU TABLA REAL DE CHUNKS
         $textoPdf = "Texto no encontrado.";
         if (isset($config['document_id'])) {
             $chunks = \App\Models\DocumentChunk::where('document_id', $config['document_id'])
                 ->orderBy('id', 'asc')
-                ->limit(7) // Límite seguro para LLaMA 3
+                ->limit(7)
                 ->pluck('chunk_text');
 
-            if ($chunks->isNotEmpty()) {
-                $textoPdf = $chunks->implode("\n\n");
-            } else {
-                $textoPdf = "El documento está vacío.";
-            }
+            $textoPdf = $chunks->isNotEmpty()
+                ? $chunks->implode("\n\n")
+                : "El documento está vacío.";
         }
 
         $n8nWebhookUrl = 'http://127.0.0.1:5678/webhook/playdf-examen-sala';
@@ -176,60 +170,31 @@ class QuizController extends Controller
             $room->update(['status' => 'generando']);
 
             $response = Http::timeout(300)->post($n8nWebhookUrl, [
-                'code' => $code,
-                'pdf_name' => $room->pdf_name,
+                'code'          => $code,
+                'pdf_name'      => $room->pdf_name,
                 'num_questions' => $config['num_questions'],
-                'difficulty' => $config['difficulty'],
-                'context' => $textoPdf
+                'difficulty'    => $config['difficulty'],
+                'context'       => $textoPdf
             ]);
 
             if ($response->successful()) {
-                $data = $response->json();
+                $data          = $response->json();
                 $questionsArray = null;
 
                 if (isset($data['questions'])) {
-                    $questionsArray = is_string($data['questions']) ? json_decode($data['questions'], true) : $data['questions'];
+                    $questionsArray = is_string($data['questions'])
+                        ? json_decode($data['questions'], true)
+                        : $data['questions'];
                 } elseif (isset($data['choices'][0]['message']['content'])) {
                     $questionsArray = json_decode($data['choices'][0]['message']['content'], true);
                 }
 
-                // ESCUDO PROTECTOR DE LARAVEL
                 if (is_array($questionsArray)) {
+                    $questionsArray = $this->sanitizarPreguntas($questionsArray, $config['num_questions']);
 
-                    // 1. CORTAR AL NÚMERO EXACTO: Si pidió 10 y llegaron 11, nos quedamos con 10.
-                    if (count($questionsArray) > $config['num_questions']) {
-                        $questionsArray = array_slice($questionsArray, 0, $config['num_questions']);
-                    }
-
-                    // 2. REPARAR OPCIONES INCOMPLETAS: Aseguramos que TODAS tengan exactamente 5 opciones
-                    foreach ($questionsArray as &$q) {
-                        if (!isset($q['opciones']) || !is_array($q['opciones'])) {
-                            $q['opciones'] = ["Opción A", "Opción B", "Opción C", "Opción D", "Opción E"];
-                        }
-
-                        // Si la IA mandó menos de 5 opciones, rellenamos con comodines
-                        $comodines = ["Todas las anteriores", "Ninguna de las anteriores", "Falta información", "No aplica"];
-                        $c = 0;
-                        while (count($q['opciones']) < 5) {
-                            $q['opciones'][] = $comodines[$c] ?? "Otra opción";
-                            $c++;
-                        }
-
-                        // Si mandó más de 5, cortamos
-                        if (count($q['opciones']) > 5) {
-                            $q['opciones'] = array_slice($q['opciones'], 0, 5);
-                        }
-
-                        // Aseguramos que la respuesta correcta no apunte a un número que no existe
-                        if (!isset($q['correcta']) || !is_numeric($q['correcta']) || $q['correcta'] < 0 || $q['correcta'] > 4) {
-                            $q['correcta'] = 0;
-                        }
-                    }
-
-                    // Guardamos las preguntas limpias, recortadas y reparadas
                     $room->update([
                         'questions' => $questionsArray,
-                        'status' => 'espera'
+                        'status'    => 'espera'
                     ]);
 
                     return response()->json(['success' => true, 'status' => 'espera']);
@@ -245,10 +210,10 @@ class QuizController extends Controller
         }
     }
 
-    // 8. Webhook de regreso (Cuando n8n termina de procesar y responde en background)
+    // 8. Webhook de regreso (n8n termina en background)
     public function apiWebhookN8n(Request $request)
     {
-        $code = $request->input('code');
+        $code        = $request->input('code');
         $questionsRaw = $request->input('questions');
 
         $room = Room::where('code', $code)->first();
@@ -257,9 +222,6 @@ class QuizController extends Controller
             return response()->json(['error' => 'Sala no encontrada'], 404);
         }
 
-        $parsedQuestions = null;
-
-        // FILTRO ANTI-ERRORES DE LA IA:
         if (is_string($questionsRaw)) {
             if (preg_match('/\[.*\]/s', $questionsRaw, $matches)) {
                 $parsedQuestions = json_decode($matches[0], true);
@@ -270,26 +232,23 @@ class QuizController extends Controller
             $parsedQuestions = $questionsRaw;
         }
 
-        // FALLBACK: Emergencia en caso de que falle el JSON
         if (!$parsedQuestions || !is_array($parsedQuestions)) {
-            $parsedQuestions = [
-                [
-                    "pregunta" => "La IA tuvo un problema de formato al generar el examen. Por favor avísale al profesor.",
-                    "opciones" => ["Aceptar", "B", "C", "D", "E"],
-                    "correcta" => 0
-                ]
-            ];
+            $parsedQuestions = [[
+                "pregunta" => "La IA tuvo un problema de formato. Por favor avísale al profesor.",
+                "opciones" => ["Aceptar", "B", "C", "D", "E"],
+                "correcta" => 0
+            ]];
         }
 
         $room->update([
             'questions' => $parsedQuestions,
-            'status' => 'espera'
+            'status'    => 'espera'
         ]);
 
         return response()->json(['success' => true, 'message' => 'Preguntas guardadas con éxito']);
     }
 
-    // 9. Iniciar Sala (Docente presiona "Iniciar")
+    // 9. Iniciar Sala
     public function apiStartRoom($code)
     {
         $room = Room::where('code', $code)->firstOrFail();
@@ -297,7 +256,7 @@ class QuizController extends Controller
         return response()->json(['success' => true]);
     }
 
-    // 10. Finalizar Sala (Docente presiona "Finalizar")
+    // 10. Finalizar Sala
     public function apiEndRoom($code)
     {
         $room = Room::where('code', $code)->firstOrFail();
@@ -305,7 +264,7 @@ class QuizController extends Controller
         return response()->json(['success' => true]);
     }
 
-    // 11. Cancelar / Eliminar Sala por completo
+    // 11. Cancelar / Eliminar Sala
     public function apiDeleteRoom($code)
     {
         $room = Room::where('code', $code)->first();
@@ -321,21 +280,80 @@ class QuizController extends Controller
     }
 
     // =========================================================================
-    // EXCLUSIVO PARA LA APP MÓVIL ANDROID (NO AFECTA LA WEB)
+    // EXCLUSIVO PARA LA APP MÓVIL ANDROID
     // =========================================================================
 
+    // Alias de apiGetStatus para la app
     public function apiObtenerEstadoSala($code)
     {
-        // Reutilizamos tu lógica exacta de apiGetStatus para que Android la entienda
         return $this->apiGetStatus($code);
     }
 
+    // Alias de apiSaveResponse para la app
     public function apiGuardarRespuestaApp(Request $request)
     {
-        // Reutilizamos tu lógica exacta de apiSaveResponse para Android
         return $this->apiSaveResponse($request);
     }
 
+    /**
+     * POST /api/rooms/{code}/join
+     *
+     * ✅ NUEVO — Endpoint que llama Android cuando el alumno pulsa "Ingresar".
+     * Recibe el código en el PATH (no en el body) para ser consistente con
+     * la ruta registrada en api.php y con el método unirseASala de Retrofit.
+     *
+     * Body JSON: { "student_name": "Juan" }
+     *
+     * 200 → { "success": true,  "status": "espera"|"generando"|"en_vivo" }
+     * 404 → { "error": "Sala no encontrada." }
+     * 422 → { "error": "..." }
+     */
+    public function apiJoinRoom(Request $request, string $code): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'student_name' => 'required|string|max:60',
+        ]);
+
+        $room = Room::where('code', strtoupper($code))->first();
+
+        if (!$room) {
+            return response()->json(['error' => 'Sala no encontrada.'], 404);
+        }
+
+        if ($room->status === 'configurando') {
+            return response()->json(['error' => 'La sala aún se está configurando.'], 422);
+        }
+
+        if ($room->status === 'finalizado') {
+            return response()->json(['error' => 'La sala ya finalizó.'], 422);
+        }
+
+        // Registrar presencia del alumno usando el mismo patrón que `play()`
+        // (question_index = -1 como "fila de asistencia") para que el dashboard
+        // del docente lo vea conectado inmediatamente, igual que en la web.
+        StudentResponse::firstOrCreate(
+            [
+                'room_code'      => $room->code,
+                'student_name'   => $request->student_name,
+                'question_index' => -1,
+            ],
+            [
+                'selected_option' => -1,
+                'is_correct'      => false,
+                'is_flagged'      => false,
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'status'  => $room->status,
+        ]);
+    }
+
+    /**
+     * POST /api/rooms/create-from-app
+     * Crea una sala enviando el texto del PDF extraído en el móvil.
+     */
     public function apiCrearSalaDesdeApp(Request $request)
     {
         try {
@@ -361,46 +379,30 @@ class QuizController extends Controller
             $n8nWebhookUrl = 'http://127.0.0.1:5678/webhook/playdf-examen-sala';
 
             $response = Http::timeout(120)->post($n8nWebhookUrl, [
-                'code' => $code,
-                'pdf_name' => $room->pdf_name,
+                'code'          => $code,
+                'pdf_name'      => $room->pdf_name,
                 'num_questions' => $request->num_questions,
-                'difficulty' => $request->difficulty,
-                'context' => substr($request->pdf_text, 0, 15000)
+                'difficulty'    => $request->difficulty,
+                'context'       => substr($request->pdf_text, 0, 15000)
             ]);
 
             if ($response->successful()) {
-                $data = $response->json();
+                $data           = $response->json();
                 $questionsArray = null;
 
                 if (isset($data['questions'])) {
-                    $questionsArray = is_string($data['questions']) ? json_decode($data['questions'], true) : $data['questions'];
+                    $questionsArray = is_string($data['questions'])
+                        ? json_decode($data['questions'], true)
+                        : $data['questions'];
                 } elseif (isset($data['choices'][0]['message']['content'])) {
                     $questionsArray = json_decode($data['choices'][0]['message']['content'], true);
                 }
 
                 if (is_array($questionsArray)) {
-                    if (count($questionsArray) > $request->num_questions) {
-                        $questionsArray = array_slice($questionsArray, 0, $request->num_questions);
-                    }
-                    foreach ($questionsArray as &$q) {
-                        if (!isset($q['opciones']) || !is_array($q['opciones'])) {
-                            $q['opciones'] = ["Opción A", "Opción B", "Opción C", "Opción D", "Opción E"];
-                        }
-                        $comodines = ["Todas las anteriores", "Ninguna de las anteriores", "Falta información", "No aplica"];
-                        $c = 0;
-                        while (count($q['opciones']) < 5) {
-                            $q['opciones'][] = $comodines[$c] ?? "Otra opción";
-                            $c++;
-                        }
-                        if (count($q['opciones']) > 5) {
-                            $q['opciones'] = array_slice($q['opciones'], 0, 5);
-                        }
-                        if (!isset($q['correcta']) || !is_numeric($q['correcta']) || $q['correcta'] < 0 || $q['correcta'] > 4) {
-                            $q['correcta'] = 0;
-                        }
-                    }
+                    $questionsArray = $this->sanitizarPreguntas($questionsArray, $request->num_questions);
                     $room->update(['questions' => $questionsArray, 'status' => 'espera']);
                 }
+
                 return response()->json(['success' => true, 'code' => $code], 201);
             }
 
@@ -411,47 +413,52 @@ class QuizController extends Controller
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
+
+    /**
+     * GET /api/docente/{userId}/pdfs
+     * Retorna los PDFs del docente para la app móvil.
+     */
     public function apiObtenerPdfsDocente($userId)
     {
         try {
-            // Obtenemos los documentos pertenecientes al ID enviado
             $documentos = \App\Models\Document::where('user_id', $userId)
                 ->latest()
-                ->get(['id', 'nombre', 'user_id']); // Enviamos solo las columnas necesarias
+                ->get(['id', 'nombre', 'user_id']);
 
             return response()->json($documentos, 200);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("Error en apiObtenerPdfsDocente: " . $e->getMessage());
+            Log::error("Error en apiObtenerPdfsDocente: " . $e->getMessage());
             return response()->json(['error' => 'No se pudieron obtener los documentos'], 500);
         }
     }
-    // Método para registrar o validar que un alumno entra a la sala
+
+    /**
+     * POST /api/rooms/join  (ruta legacy del NetworkClient anterior)
+     * Se conserva para no romper versiones viejas de la app.
+     * Internamente redirige a apiJoinRoom.
+     *
+     * @deprecated Usar POST /api/rooms/{code}/join (apiJoinRoom)
+     */
     public function apiUnirseSalaApp(Request $request)
     {
         $request->validate([
-            'room_code' => 'required|string',
+            'room_code'    => 'required|string',
             'student_name' => 'required|string'
         ]);
 
-        $room = Room::where('code', strtoupper($request->room_code))->first();
-
-        if (!$room) {
-            return response()->json(['success' => false, 'message' => 'La sala no existe.'], 404);
-        }
-
-        // Opcional: puedes validar si la sala está en estado 'finalizado'
-        if ($room->status === 'finalizado') {
-            return response()->json(['success' => false, 'message' => 'Esta sala ya ha concluido.'], 400);
-        }
-
-        return response()->json(['success' => true, 'message' => 'Te has unido exitosamente.']);
+        // Reutiliza la nueva lógica, inyectando el código desde el body
+        $request->merge(['student_name' => $request->student_name]);
+        return $this->apiJoinRoom($request, $request->room_code);
     }
 
-    // Método para que desde la app se actualice el estado del examen de forma remota
+    /**
+     * POST /api/rooms/{code}/change-status
+     * Cambia el estado de la sala desde la app del docente.
+     */
     public function apiCambiarEstadoSalaApp(Request $request, $code)
     {
         $request->validate([
-            'status' => 'required|string' // 'espera', 'jugando' o 'finalizado'
+            'status' => 'required|string'
         ]);
 
         $room = Room::where('code', strtoupper($code))->first();
@@ -466,5 +473,49 @@ class QuizController extends Controller
             'success' => true,
             'message' => 'El estado de la sala cambió a: ' . $request->status
         ]);
+    }
+
+    // =========================================================================
+    // HELPERS PRIVADOS
+    // =========================================================================
+
+    /**
+     * Sanitiza y normaliza el array de preguntas recibido de la IA.
+     * Extrae la lógica repetida en apiGenerateQuestions y apiCrearSalaDesdeApp.
+     */
+    private function sanitizarPreguntas(array $preguntas, int $limite): array
+    {
+        // Cortar al número exacto pedido
+        if (count($preguntas) > $limite) {
+            $preguntas = array_slice($preguntas, 0, $limite);
+        }
+
+        $comodines = ["Todas las anteriores", "Ninguna de las anteriores", "Falta información", "No aplica"];
+
+        foreach ($preguntas as &$q) {
+            // Asegurar que exista el array de opciones
+            if (!isset($q['opciones']) || !is_array($q['opciones'])) {
+                $q['opciones'] = ["Opción A", "Opción B", "Opción C", "Opción D", "Opción E"];
+            }
+
+            // Rellenar si hay menos de 5 opciones
+            $c = 0;
+            while (count($q['opciones']) < 5) {
+                $q['opciones'][] = $comodines[$c] ?? "Otra opción";
+                $c++;
+            }
+
+            // Recortar si hay más de 5
+            if (count($q['opciones']) > 5) {
+                $q['opciones'] = array_slice($q['opciones'], 0, 5);
+            }
+
+            // Asegurar índice de respuesta correcta válido
+            if (!isset($q['correcta']) || !is_numeric($q['correcta']) || $q['correcta'] < 0 || $q['correcta'] > 4) {
+                $q['correcta'] = 0;
+            }
+        }
+
+        return $preguntas;
     }
 }
