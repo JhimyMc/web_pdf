@@ -27,11 +27,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let mapaData = null;
     let mapaId   = null;
+    let nodoSeleccionadoId = null;
 
     const getCsrf = () => {
         const meta = document.querySelector('meta[name="csrf-token"]');
         return meta ? meta.getAttribute('content') : '';
     };
+    // ── Autoguardado Silencioso en Base de Datos ─────────────────
+    async function autoguardarMapa() {
+        if (!mapaId || !mapaData) return;
+        try {
+            await fetch(`/ajax/mapa-mental/${mapaId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': getCsrf(),
+                },
+                body: JSON.stringify({ map_data: mapaData }),
+            });
+            console.log("Cambios guardados en BD");
+        } catch (error) {
+            console.error("No se pudo guardar automáticamente:", error);
+        }
+    }
 
     // ── Solución: Bug de Pantalla Vacía al volver con el botón "Atrás" ──
     window.addEventListener('pageshow', function (event) {
@@ -301,7 +320,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 .data(root.descendants())
                 .join('g')
                 .attr('class', 'node')
-                .attr('transform', d => `translate(${d.y},${d.x})`);
+                .attr('transform', d => `translate(${d.y},${d.x})`)
+                .style('cursor', 'pointer') // Cambia el cursor a manito
+                .on('click', function(event, d) {
+                    // 1. Quitar el resaltado de todos
+                    d3.selectAll('.node rect')
+                        .attr('stroke', n => n.depth === 0 ? '#ef4444' : '#2a2a2a')
+                        .attr('stroke-width', n => n.depth === 0 ? 2.5 : 1.5);
+                    
+                    // 2. Resaltar de AZUL el nodo que acabamos de tocar
+                    d3.select(this).select('rect')
+                        .attr('stroke', '#3b82f6')
+                        .attr('stroke-width', 3);
+                    
+                    // 3. Guardar su ID
+                    nodoSeleccionadoId = d.id;
+                    event.stopPropagation(); // Evita que el clic se propague al fondo
+                });
 
             node.append('rect')
                 .attr('width', nodeWidth)
@@ -386,4 +421,88 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         mostrarEstado('vacio');
     }
+
+    // ── Lógica de Edición del Mapa Mental ───────────────────────
+
+    // Función auxiliar para encontrar el array de nodos (sin importar cómo lo entregó la IA)
+    function obtenerNodosArray() {
+        if (Array.isArray(mapaData)) return mapaData;
+        if (mapaData && Array.isArray(mapaData.nodos)) return mapaData.nodos;
+        if (mapaData && Array.isArray(mapaData.nodes)) return mapaData.nodes;
+        return [];
+    }
+
+    // A) EDITAR TEXTO
+    window.editarNodoActivo = function() {
+        if (!nodoSeleccionadoId) return alert("Primero haz clic en el concepto que deseas editar.");
+        
+        let nodos = obtenerNodosArray();
+        let nodo = nodos.find(n => n.id == nodoSeleccionadoId);
+        if (!nodo) return;
+
+        // Buscamos cuál fue la propiedad de texto que usó la IA (texto, text, label...)
+        let textoActual = nodo.texto || nodo.text || nodo.label || nodo.name || nodo.concepto || "";
+        
+        let nuevoTexto = prompt("Edita el texto:", textoActual);
+        if (nuevoTexto !== null && nuevoTexto.trim() !== "") {
+            nodo.texto = nuevoTexto; // Forzamos estandarizarlo a 'texto'
+            renderMapa(mapaData, true);
+            autoguardarMapa();
+        }
+    };
+
+    // B) AGREGAR RAMA
+    window.agregarRamaActiva = function() {
+        if (!nodoSeleccionadoId) return alert("Haz clic en un concepto padre para agregarle una rama.");
+        
+        let texto = prompt("Escribe el nuevo concepto:");
+        if (texto && texto.trim() !== "") {
+            let nodos = obtenerNodosArray();
+            nodos.push({
+                id: 'nodo_manual_' + Math.random().toString(36).substr(2, 9), // ID único
+                texto: texto.trim(),
+                padre: String(nodoSeleccionadoId)
+            });
+            renderMapa(mapaData, true);
+            autoguardarMapa();
+        }
+    };
+
+    // C) ELIMINAR NODO (Y sus hijos)
+    window.eliminarNodoActivo = function() {
+        if (!nodoSeleccionadoId) return alert("Selecciona el concepto que deseas eliminar.");
+        
+        let nodos = obtenerNodosArray();
+        let nodo = nodos.find(n => n.id == nodoSeleccionadoId);
+        
+        // Evitar que borren la raíz principal por accidente
+        if (!nodo || !nodo.padre || nodo.padre === "SUPER_ROOT_001") {
+            return alert("No puedes eliminar el tema principal. Usa el botón 'Eliminar' general si quieres archivar todo el mapa.");
+        }
+
+        if (confirm("¿Seguro que deseas eliminar este concepto y todas las ramas que dependan de él?")) {
+            // Algoritmo para encontrar todos los hijos, nietos, etc.
+            let idsABorrar = new Set([String(nodoSeleccionadoId)]);
+            let tamañoAnterior = 0;
+            
+            while(idsABorrar.size > tamañoAnterior) {
+                tamañoAnterior = idsABorrar.size;
+                nodos.forEach(n => {
+                    if (idsABorrar.has(String(n.padre))) idsABorrar.add(String(n.id));
+                });
+            }
+
+            // Filtramos conservando solo los que no están en la lista de borrado
+            let nuevosNodos = nodos.filter(n => !idsABorrar.has(String(n.id)));
+            
+            // Actualizamos la variable original respetando su estructura
+            if (Array.isArray(mapaData)) mapaData = nuevosNodos;
+            else if (mapaData.nodos) mapaData.nodos = nuevosNodos;
+            else if (mapaData.nodes) mapaData.nodes = nuevosNodos;
+
+            nodoSeleccionadoId = null; // Limpiamos selección
+            renderMapa(mapaData, true);
+            autoguardarMapa();
+        }
+    };
 });

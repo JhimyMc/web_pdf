@@ -145,17 +145,26 @@
             {{-- Barra de acciones --}}
             <div class="mm-acciones-bar">
                 @auth
-                    <button id="mm-btn-editar" class="mm-btn-secundario">
-                        <i class="fa-solid fa-pen-to-square"></i> Editar
+                    {{-- ACCIONES PARA EL NODO SELECCIONADO --}}
+                    <button id="mm-btn-editar" class="mm-btn-secundario" onclick="window.editarNodoActivo()">
+                        <i class="fa-solid fa-pen-to-square"></i> Editar Nodo
                     </button>
-                    <button id="mm-btn-agregar-rama" class="mm-btn-secundario">
-                        <i class="fa-solid fa-plus"></i> Agregar Rama
+
+                    <button id="mm-btn-agregar-rama" class="mm-btn-secundario" onclick="window.agregarRamaActiva()">
+                        <i class="fa-solid fa-code-branch"></i> Agregar Rama
                     </button>
+
+                    <button id="mm-btn-eliminar-rama" class="mm-btn-secundario" onclick="window.eliminarNodoActivo()">
+                        <i class="fa-solid fa-eraser"></i> Eliminar Rama
+                    </button>
+
+                    {{-- ACCIONES GENERALES DEL MAPA --}}
                     <button id="mm-btn-nuevo" class="mm-btn-secundario">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> Regenerar
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Regenerar Mapa
                     </button>
+
                     <button id="mm-btn-eliminar" class="mm-btn-secundario peligro">
-                        <i class="fa-solid fa-trash-can"></i> Eliminar
+                        <i class="fa-solid fa-trash-can"></i> Eliminar Mapa
                     </button>
                 @endauth
             </div>
