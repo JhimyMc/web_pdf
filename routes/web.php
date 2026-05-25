@@ -3,7 +3,9 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\QuizController;
+use App\Http\Controllers\MindMapController;
 use Illuminate\Support\Facades\Route;
+
 
 // Vista de inicio (Landing / Dashboard unificado cargando tus PDFs de la Base de Datos)
 Route::get('/', [DocumentController::class, 'index'])->name('dashboard');
@@ -43,6 +45,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/sala/api/rooms/{code}/start', [QuizController::class, 'apiStartRoom']);
     Route::post('/sala/api/rooms/{code}/end', [QuizController::class, 'apiEndRoom']);
     Route::delete('/sala/api/rooms/{code}', [QuizController::class, 'apiDeleteRoom']);
+
+    Route::get('/mapa-mental', [MindMapController::class, 'index'])->name('mapa-mental.index');
+    //Mapa Mental AJAX (requieren sesión)
+    Route::post('/ajax/mapa-mental/generar', [MindMapController::class, 'generate'])->name('mapa-mental.generate');
+    Route::put('/ajax/mapa-mental/{id}', [MindMapController::class, 'update'])->name('mapa-mental.update');
+    Route::delete('/ajax/mapa-mental/{id}', [MindMapController::class, 'destroy'])->name('mapa-mental.destroy');
+    Route::post('/ajax/mapa-mental/upload-rapido', [MindMapController::class, 'uploadRapido'])->name('mapa-mental.uploadRapido');
 });
 
 require __DIR__ . '/auth.php';

@@ -176,10 +176,10 @@
                         class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
                         <i class="fa-solid fa-file-lines text-blue-400"></i> Resumen Automático
                     </button>
-                    <button
+                    <a href="{{ route('mapa-mental.index') }}"
                         class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
                         <i class="fa-solid fa-sitemap text-purple-400"></i> Generar Mapa Mental
-                    </button>
+                    </a>
                     <a href="/docente/crear-sala"
                         class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
                         <i class="fa-solid fa-list-check text-emerald-400"></i> Crear Cuestionario / Sala
@@ -246,10 +246,10 @@
                     class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
                     <i class="fa-solid fa-file-lines text-blue-400"></i> Resumen Automático
                 </button>
-                <button
-                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
+                <a href="{{ route('mapa-mental.index') }}"
+                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
                     <i class="fa-solid fa-sitemap text-purple-400"></i> Generar Mapa Mental
-                </button>
+                </a>
                 <a href="/docente/crear-sala"
                     class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
                     <i class="fa-solid fa-list-check text-emerald-400"></i> Crear Cuestionario / Sala

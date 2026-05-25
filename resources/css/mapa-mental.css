@@ -1,0 +1,552 @@
+/* ============================================================
+   MAPA MENTAL — mapa-mental.css
+   C:\laragon\www\web-pdf\resources\css\mapa-mental.css
+   Colores heredados del sistema PlayDF (welcome.css)
+   ============================================================ */
+
+/* ── Variables de color PlayDF ─────────────────────────────── */
+:root {
+    --color-fondo:        #0a0a0a;
+    --color-panel:        #111111;
+    --color-primario:     #ef4444;
+    --color-borde-oscuro: #1f1f1f;
+    --color-borde-input:  #2a2a2a;
+    --color-fondo-input:  #161616;
+    --color-gris-claro:   #a1a1aa;
+    --color-gris-medio:   #71717a;
+    --color-gris-oscuro:  #52525b;
+    --color-texto:        #f4f4f5;
+}
+
+/* ── Layout general ─────────────────────────────────────────── */
+.mm-cuerpo {
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Cabecera (reutiliza estilos de welcome) ────────────────── */
+.mm-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem 4rem;
+    position: relative;
+}
+
+/* ── Estado vacío (sin mapa) ────────────────────────────────── */
+.mm-estado-vacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    flex: 1;
+    min-height: 60vh;
+    text-align: center;
+    animation: mm-fade-in 0.6s ease both;
+}
+
+.mm-icono-vacio {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, rgba(239,68,68,0.18), rgba(168,85,247,0.12) 70%);
+    border: 1px solid rgba(239,68,68,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.4rem;
+    color: var(--color-primario);
+    box-shadow: 0 0 40px rgba(239,68,68,0.15);
+    animation: mm-pulse-glow 3s ease-in-out infinite;
+}
+
+.mm-titulo-vacio {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+}
+
+.mm-subtitulo-vacio {
+    font-size: 0.85rem;
+    color: var(--color-gris-medio);
+    max-width: 360px;
+    line-height: 1.6;
+}
+
+/* ── Botón principal "Generar Diagrama" ─────────────────────── */
+.mm-btn-generar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 60%, #b91c1c 100%);
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 0.85rem 2rem;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 24px rgba(239,68,68,0.35), 0 1px 4px rgba(0,0,0,0.4);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    letter-spacing: 0.01em;
+}
+
+.mm-btn-generar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(239,68,68,0.45), 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.mm-btn-generar:active {
+    transform: translateY(0px) scale(0.98);
+}
+
+/* ── Botones secundarios de acción ──────────────────────────── */
+.mm-acciones-bar {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    animation: mm-fade-in 0.5s ease both;
+}
+
+.mm-btn-secundario {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--color-panel);
+    border: 1px solid var(--color-borde-input);
+    color: var(--color-gris-claro);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.55rem 1.1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.mm-btn-secundario:hover {
+    background-color: var(--color-fondo-input);
+    color: #ffffff;
+    border-color: var(--color-gris-oscuro);
+}
+
+.mm-btn-secundario.peligro:hover {
+    background-color: rgba(239,68,68,0.1);
+    color: var(--color-primario);
+    border-color: rgba(239,68,68,0.4);
+}
+
+.mm-btn-secundario.activo {
+    background-color: var(--color-primario);
+    color: #ffffff;
+    border-color: var(--color-primario);
+}
+
+/* ── Título del mapa activo ─────────────────────────────────── */
+.mm-titulo-mapa {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 0.25rem;
+    text-align: center;
+    letter-spacing: -0.01em;
+}
+
+.mm-meta-mapa {
+    font-size: 0.72rem;
+    color: var(--color-gris-oscuro);
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+/* ── Lienzo SVG del mapa mental ─────────────────────────────── */
+.mm-canvas-wrapper {
+    width: 100%;
+    max-width: 1100px;
+    background: linear-gradient(145deg, #0f0f0f 0%, #111111 100%);
+    border: 1px solid var(--color-borde-oscuro);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 48px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.04) inset;
+    position: relative;
+    min-height: 520px;
+    animation: mm-fade-in 0.5s ease both;
+}
+
+.mm-canvas-wrapper svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* ── Nodos del mapa (SVG foreignObject no disponible en todos, usamos HTML canvas) */
+/* Los nodos se renderizan como divs absolutos sobre el canvas */
+.mm-canvas-inner {
+    position: relative;
+    width: 100%;
+    min-height: 520px;
+}
+
+/* ── Nodo SVG styles ────────────────────────────────────────── */
+.mm-nodo-central rect {
+    filter: drop-shadow(0 4px 16px rgba(239,68,68,0.4));
+}
+
+.mm-nodo-rama rect {
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+}
+
+.mm-nodo-sub rect {
+    filter: drop-shadow(0 1px 4px rgba(0,0,0,0.4));
+}
+
+text {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    user-select: none;
+}
+
+/* ── Líneas de conexión ─────────────────────────────────────── */
+.mm-linea-rama {
+    opacity: 0.6;
+    stroke-linecap: round;
+}
+
+.mm-linea-sub {
+    opacity: 0.35;
+    stroke-linecap: round;
+    stroke-dasharray: 4 3;
+}
+
+/* ── Panel modal de generación ──────────────────────────────── */
+.mm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.82);
+    backdrop-filter: blur(6px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: mm-fade-in 0.2s ease both;
+}
+
+.mm-modal-overlay.oculto {
+    display: none;
+}
+
+.mm-modal {
+    background: var(--color-panel);
+    border: 1px solid var(--color-borde-input);
+    border-radius: 20px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+    animation: mm-slide-up 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+.mm-modal-titulo {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 0.4rem;
+}
+
+.mm-modal-desc {
+    font-size: 0.8rem;
+    color: var(--color-gris-medio);
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+}
+
+.mm-modal-input {
+    width: 100%;
+    background-color: var(--color-fondo-input);
+    border: 1px solid var(--color-borde-input);
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: none;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+.mm-modal-input:focus {
+    border-color: rgba(239,68,68,0.5);
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
+}
+
+.mm-modal-input::placeholder {
+    color: var(--color-gris-oscuro);
+}
+
+.mm-modal-acciones {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    justify-content: flex-end;
+}
+
+.mm-btn-cancelar {
+    background: transparent;
+    border: 1px solid var(--color-borde-input);
+    color: var(--color-gris-claro);
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.mm-btn-cancelar:hover {
+    background-color: var(--color-fondo-input);
+    color: #ffffff;
+}
+
+/* ── Estado de carga (generando) ────────────────────────────── */
+.mm-cargando {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    min-height: 60vh;
+    animation: mm-fade-in 0.4s ease both;
+}
+
+.mm-spinner {
+    width: 64px;
+    height: 64px;
+    position: relative;
+}
+
+.mm-spinner-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid var(--color-borde-input);
+}
+
+.mm-spinner-arc {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    border-top-color: var(--color-primario);
+    animation: mm-spin 0.9s linear infinite;
+}
+
+.mm-spinner-arc-2 {
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-top-color: #a855f7;
+    animation: mm-spin 1.4s linear infinite reverse;
+}
+
+.mm-cargando-titulo {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
+    animation: mm-pulse 2s ease-in-out infinite;
+}
+
+.mm-cargando-sub {
+    font-size: 0.78rem;
+    color: var(--color-gris-oscuro);
+}
+
+/* ── Panel de edición de nodo ───────────────────────────────── */
+.mm-edit-panel {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-panel);
+    border: 1px solid var(--color-borde-input);
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 60;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    animation: mm-slide-up 0.25s ease both;
+    min-width: 320px;
+}
+
+.mm-edit-panel.oculto {
+    display: none;
+}
+
+.mm-edit-input {
+    background: var(--color-fondo-input);
+    border: 1px solid var(--color-borde-input);
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+    outline: none;
+    flex: 1;
+    transition: border-color 0.2s;
+}
+
+.mm-edit-input:focus {
+    border-color: rgba(239,68,68,0.5);
+}
+
+/* ── Tooltip de nodo ────────────────────────────────────────── */
+.mm-tooltip {
+    position: absolute;
+    background: rgba(17,17,17,0.97);
+    border: 1px solid var(--color-borde-input);
+    border-radius: 8px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+    color: var(--color-gris-claro);
+    pointer-events: none;
+    z-index: 70;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.mm-tooltip.visible {
+    opacity: 1;
+}
+
+/* ── Toast de notificación ──────────────────────────────────── */
+.mm-toast {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    background: var(--color-panel);
+    border: 1px solid var(--color-borde-input);
+    border-radius: 12px;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.8rem;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    z-index: 200;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    animation: mm-slide-up 0.3s ease both;
+    max-width: 320px;
+}
+
+.mm-toast.oculto {
+    display: none;
+}
+
+.mm-toast.exito { border-left: 3px solid #22c55e; }
+.mm-toast.error { border-left: 3px solid var(--color-primario); }
+
+/* ── Animaciones ────────────────────────────────────────────── */
+@keyframes mm-fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mm-slide-up {
+    from { opacity: 0; transform: translateY(20px) translateX(-50%); }
+    to   { opacity: 1; transform: translateY(0) translateX(-50%); }
+}
+
+@keyframes mm-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes mm-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.6; }
+}
+
+@keyframes mm-pulse-glow {
+    0%, 100% { box-shadow: 0 0 30px rgba(239,68,68,0.15); }
+    50%       { box-shadow: 0 0 50px rgba(239,68,68,0.3), 0 0 80px rgba(168,85,247,0.1); }
+}
+
+/* Animación de aparición de nodos SVG */
+.mm-nodo-anim {
+    animation: mm-nodo-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+@keyframes mm-nodo-pop {
+    from { opacity: 0; transform: scale(0.3); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.mm-linea-anim {
+    stroke-dasharray: 600;
+    stroke-dashoffset: 600;
+    animation: mm-draw-line 0.6s ease forwards;
+}
+
+@keyframes mm-draw-line {
+    to { stroke-dashoffset: 0; }
+}
+
+/* ── Zoom controls ──────────────────────────────────────────── */
+.mm-zoom-controls {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    z-index: 10;
+}
+
+.mm-zoom-btn {
+    width: 32px;
+    height: 32px;
+    background: var(--color-fondo-input);
+    border: 1px solid var(--color-borde-input);
+    border-radius: 8px;
+    color: var(--color-gris-claro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.mm-zoom-btn:hover {
+    background: var(--color-panel);
+    color: #ffffff;
+}
+
+/* ── Responsivo ─────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .mm-acciones-bar {
+        gap: 0.5rem;
+    }
+    .mm-btn-secundario {
+        font-size: 0.72rem;
+        padding: 0.45rem 0.85rem;
+    }
+    .mm-modal {
+        padding: 1.5rem;
+    }
+    .mm-edit-panel {
+        bottom: 1rem;
+        min-width: calc(100vw - 2rem);
+        border-radius: 14px;
+    }
+}

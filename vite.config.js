@@ -15,6 +15,8 @@ export default defineConfig({
                 'resources/js/sala-configurar.js',
                 'resources/css/sala-dashboard.css',
                 'resources/js/sala-dashboard.js',
+                'resources/css/mapa-mental.css',
+                'resources/js/mapa-mental.js',
             ],
             refresh: true,
         }),
