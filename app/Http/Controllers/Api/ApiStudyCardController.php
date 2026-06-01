@@ -103,9 +103,36 @@ class ApiStudyCardController extends Controller
                 ->where('user_id', $request->user_id)
                 ->firstOrFail();
 
-            $contextoTexto = DocumentChunk::where('document_id', $documento->id)
-                ->pluck('chunk_text')
-                ->implode(' ');
+            // 🚀 SELECCIÓN INTELIGENTE DE CHUNKS (igual que DocumentController)
+            $totalChunks = DocumentChunk::where('document_id', $documento->id)->count();
+
+            if ($totalChunks <= 6) {
+                // PDF corto: enviar todos los chunks
+                $chunksRelevantes = DocumentChunk::where('document_id', $documento->id)
+                    ->orderBy('id', 'asc')
+                    ->get();
+            } else {
+                // PDF largo: tomar muestra estratégica (inicio + medio + fin)
+                $chunksInicio = DocumentChunk::where('document_id', $documento->id)
+                    ->orderBy('id', 'asc')->limit(3)->get();
+
+                $mitad = (int) floor($totalChunks / 2);
+                $chunksMedio = DocumentChunk::where('document_id', $documento->id)
+                    ->orderBy('id', 'asc')->skip($mitad - 1)->take(2)->get();
+
+                $chunksFin = DocumentChunk::where('document_id', $documento->id)
+                    ->orderBy('id', 'desc')->limit(2)->get();
+
+                $chunksRelevantes = $chunksInicio->merge($chunksMedio)->merge($chunksFin);
+            }
+
+            // Construir contexto limitado (~4000 chars para que el LLM no se sature)
+            $contextoTexto = '';
+            foreach ($chunksRelevantes as $chunk) {
+                $fragmento = mb_substr($chunk->chunk_text, 0, 700);
+                $contextoTexto .= $fragmento . "\n\n";
+            }
+            $contextoTexto = mb_substr($contextoTexto, 0, 4000);
 
             if (empty(trim($contextoTexto))) {
                 return response()->json([
@@ -114,27 +141,23 @@ class ApiStudyCardController extends Controller
                 ], 422);
             }
 
-            $response = Http::timeout(300)->post('http://localhost:5678/webhook/playdf-tarjetas-estudio', [
-                'model'    => 'meta-llama-3-8b-instruct',
-                'context'  => mb_substr($contextoTexto, 0, 15000),
-                'question' => 'Genera una lista de tarjetas de estudio con preguntas y respuestas.',
-            ]);
+            // 🔄 INTENTO 1: Contexto completo seleccionado
+            $resultadoIA = $this->llamarN8nTarjetas($contextoTexto);
 
-            if (!$response->successful()) {
+            // 🔄 INTENTO 2: Si falla, intentar con menos contexto
+            if ($resultadoIA === null && $totalChunks > 6) {
+                $contextoReducido = mb_substr($contextoTexto, 0, 2000);
+                $resultadoIA = $this->llamarN8nTarjetas($contextoReducido);
+            }
+
+            if ($resultadoIA === null) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'La IA local no respondió.'
+                    'message' => 'La IA no pudo procesar el documento. Intenta con un PDF más corto.'
                 ], 500);
             }
 
-            $jsonData = $response->json();
-
-            if (isset($jsonData['answer'])) {
-                $rawAnswer = preg_replace('/```json\s*|```\s*/', '', $jsonData['answer']);
-                $cardsData = json_decode(trim($rawAnswer), true);
-            } else {
-                $cardsData = $jsonData;
-            }
+            $cardsData = $resultadoIA;
 
             if (!is_array($cardsData)) {
                 return response()->json([
@@ -206,6 +229,63 @@ class ApiStudyCardController extends Controller
                 'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Llamar a n8n para generar tarjetas de estudio.
+     * Retorna el array de datos decodificado o null si falla.
+     */
+    private function llamarN8nTarjetas(string $contexto): ?array
+    {
+        $maxChars = mb_strlen($contexto);
+        $intentos = 0;
+        $maxIntentos = 2;
+
+        while ($intentos < $maxIntentos) {
+            $intentos++;
+            $textoActual = mb_substr($contexto, 0, $maxChars);
+
+            try {
+                $response = Http::timeout(300)->post('http://localhost:5678/webhook/playdf-tarjetas-estudio', [
+                    'model'    => 'meta-llama-3-8b-instruct',
+                    'context'  => $textoActual,
+                    'question' => 'Genera una lista de tarjetas de estudio con preguntas y respuestas.',
+                ]);
+
+                if (!$response->successful()) {
+                    $maxChars = (int) ($maxChars * 0.5);
+                    continue;
+                }
+
+                $jsonData = $response->json();
+
+                // Decodificar respuesta de n8n
+                $rawAnswer = $jsonData['answer'] ?? null;
+                if ($rawAnswer) {
+                    $rawAnswer = preg_replace('/```json\s*|```\s*/', '', $rawAnswer);
+                    $rawAnswer = preg_replace('/^\s*\n/m', '', $rawAnswer);
+                    $cardsData = json_decode(trim($rawAnswer), true);
+                } else {
+                    $cardsData = $jsonData;
+                }
+
+                // Si es string, intentar decodificar de nuevo
+                if (is_string($cardsData)) {
+                    $cardsData = json_decode($cardsData, true);
+                }
+
+                if (is_array($cardsData)) {
+                    return $cardsData;
+                }
+
+                // JSON inválido: reducir contexto y reintentar
+                $maxChars = (int) ($maxChars * 0.5);
+            } catch (\Exception $e) {
+                $maxChars = (int) ($maxChars * 0.5);
+            }
+        }
+
+        return null;
     }
 
     /**
