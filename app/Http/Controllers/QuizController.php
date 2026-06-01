@@ -529,6 +529,57 @@ class QuizController extends Controller
     }
 
     /**
+     * GET /api/rooms/history?user_id=1
+     * Devuelve el historial de salas del docente para la app móvil.
+     */
+    public function apiHistorialApp(Request $request)
+    {
+        $userId = $request->query('user_id');
+
+        if (!$userId) {
+            return response()->json(['success' => false, 'message' => 'user_id requerido'], 400);
+        }
+
+        $salas = Room::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($room) {
+                $totalEstudiantes = StudentResponse::where('room_code', $room->code)
+                    ->where('question_index', '>=', 0)
+                    ->distinct('student_name')
+                    ->count('student_name');
+
+                $totalRespuestas = StudentResponse::where('room_code', $room->code)
+                    ->where('question_index', '>=', 0)
+                    ->count();
+
+                $totalCorrectas = StudentResponse::where('room_code', $room->code)
+                    ->where('question_index', '>=', 0)
+                    ->where('is_correct', true)
+                    ->count();
+
+                return [
+                    'code'              => $room->code,
+                    'pdf_name'          => $room->pdf_name,
+                    'status'            => $room->status,
+                    'num_questions'     => $room->num_questions,
+                    'difficulty'        => $room->difficulty,
+                    'created_at'        => $room->created_at->format('d/m/Y H:i'),
+                    'finished_at'       => $room->finished_at ? $room->finished_at->format('d/m/Y H:i') : null,
+                    'total_estudiantes' => $totalEstudiantes,
+                    'promedio'          => $totalRespuestas > 0
+                        ? round(($totalCorrectas / $totalRespuestas) * 100, 1)
+                        : 0,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'salas'   => $salas,
+        ]);
+    }
+
+    /**
      * POST /api/rooms/join  (ruta legacy del NetworkClient anterior)
      * Se conserva para no romper versiones viejas de la app.
      * Internamente redirige a apiJoinRoom.
@@ -603,6 +654,86 @@ class QuizController extends Controller
                 'status'      => 'finalizado',
                 'finished_at' => now(),
             ]);
+    }
+
+    /**
+     * GET /api/rooms/{code}/reporte
+     * Devuelve el reporte de una sala para la app móvil.
+     */
+    public function apiReporteApp($code)
+    {
+        $room = Room::where('code', $code)->first();
+
+        if (!$room) {
+            return response()->json(['success' => false, 'message' => 'Sala no encontrada'], 404);
+        }
+
+        $preguntas = is_array($room->questions) ? $room->questions : [];
+
+        $respuestas = StudentResponse::where('room_code', $code)
+            ->where('question_index', '>=', 0)
+            ->orderBy('question_index')
+            ->get();
+
+        // Resumen por estudiante (con detalle por pregunta)
+        $estudiantes = $respuestas->groupBy('student_name')->map(function ($items, $name) use ($preguntas) {
+            $detalle = [];
+            foreach ($preguntas as $idx => $p) {
+                $resp = $items->firstWhere('question_index', $idx);
+                $detalle[] = [
+                    'selected_option' => $resp ? $resp->selected_option : null,
+                    'is_correct'      => $resp ? (bool) $resp->is_correct : false,
+                    'is_flagged'      => $resp ? (bool) $resp->is_flagged : false,
+                    'respondio'       => $resp !== null,
+                ];
+            }
+            $total = count($preguntas);
+            $score = $items->where('is_correct', true)->count();
+
+            return [
+                'student_name'  => $name,
+                'score'         => $score,
+                'total'         => $total,
+                'porcentaje'    => $total > 0 ? round(($score / $total) * 100) : 0,
+                'tiene_bandera' => $items->contains('is_flagged', true),
+                'detalle'       => $detalle,
+            ];
+        })->values();
+
+        // Resumen por pregunta (cuántos respondieron, cuántos acertaron)
+        $preguntasConStats = [];
+        foreach ($preguntas as $idx => $p) {
+            $respondieron = $estudiantes->filter(fn($e) => $e['detalle'][$idx]['respondio'] ?? false)->count();
+            $acertaron = $estudiantes->filter(fn($e) => $e['detalle'][$idx]['is_correct'] ?? false)->count();
+            $banderas = $estudiantes->filter(fn($e) => $e['detalle'][$idx]['is_flagged'] ?? false)->count();
+
+            $preguntasConStats[] = [
+                'pregunta'    => $p['pregunta'] ?? '—',
+                'opciones'    => $p['opciones'] ?? [],
+                'correcta'    => $p['correcta'] ?? 0,
+                'respondieron' => $respondieron,
+                'acertaron'   => $acertaron,
+                'banderas'    => $banderas,
+            ];
+        }
+
+        $totalBanderas = $estudiantes->filter(fn($e) => $e['tiene_bandera'])->count();
+
+        return response()->json([
+            'success'         => true,
+            'room'            => [
+                'code'          => $room->code,
+                'pdf_name'      => $room->pdf_name,
+                'status'        => $room->status,
+                'num_questions' => $room->num_questions,
+                'difficulty'    => $room->difficulty,
+                'created_at'    => $room->created_at->format('d/m/Y H:i'),
+                'finished_at'   => $room->finished_at ? $room->finished_at->format('d/m/Y H:i') : null,
+            ],
+            'preguntas'       => $preguntasConStats,
+            'estudiantes'     => $estudiantes,
+            'total_banderas'  => $totalBanderas,
+        ]);
     }
 
     /**

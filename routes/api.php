@@ -64,6 +64,10 @@ Route::post('/rooms/save-response',      [QuizController::class, 'apiGuardarResp
 Route::post('/rooms/{code}/start',       [QuizController::class, 'apiStartRoom']);
 Route::post('/rooms/{code}/end',         [QuizController::class, 'apiEndRoom']);
 
+// ✅ Historial de salas del docente (para app móvil)
+Route::get('/rooms/history',               [QuizController::class, 'apiHistorialApp']);
+Route::get('/rooms/{code}/reporte',        [QuizController::class, 'apiReporteApp']);
+
 // ══════════════════════════════════════════════════════════════
 // MAPAS MENTALES (app móvil)
 // ══════════════════════════════════════════════════════════════
