@@ -180,12 +180,12 @@
                     </a>
                     <a href="/docente/crear-sala"
                         class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
-                        <i class="fa-solid fa-list-check text-emerald-400"></i> Crear Cuestionario / Sala
+                        <i class="fa-solid fa-list-check text-emerald-400"></i> Crear Cuestionario
                     </a>
-                    <button
+                    <a href="{{ route('tarjetas-estudio.index') }}"
                         class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
                         <i class="fa-solid fa-layer-group text-pink-400"></i> Tarjetas de Estudio
-                    </button>
+                    </a>
                 </div>
             </div>
         </aside>
@@ -250,7 +250,7 @@
                 </a>
                 <a href="/docente/crear-sala"
                     class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
-                    <i class="fa-solid fa-list-check text-emerald-400"></i> Crear Cuestionario / Sala
+                    <i class="fa-solid fa-list-check text-emerald-400"></i> Crear Cuestionario
                 </a>
                 <button
                     class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
