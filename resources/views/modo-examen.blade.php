@@ -69,16 +69,16 @@
                             Sesión</a>
                     </div>
                 @endif
-                <div class="bg-red-500/10 p-5 rounded-full mb-5">
-                    <i class="fa-solid fa-users-rectangle text-red-500 text-4xl"></i>
-                </div>
-                <h2 class="text-xl font-bold text-white mb-2">Crear Sala Live</h2>
-                <p class="text-slate-400 text-xs mb-6 flex-1">Configura un cuestionario en vivo, invita a participantes
-                    y evalúa resultados en tiempo real.</p>
-                <button id="btn-crear-sala"
-                    class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-red-500/20">
-                    Configurar Nueva Sala
-                </button>
+                <div class="bg-red-500/10 p-5 rounded-full mb-5 flex items-center justify-center">
+                @include('partials.iconos', ['name' => 'adjustments-horizontal', 'class' => 'text-red-500', 'size' => 36])
+            </div>
+            <h2 class="text-xl font-bold text-white mb-2">Crear Sala Live</h2>
+            <p class="text-slate-400 text-xs mb-6 flex-1">Configura un cuestionario en vivo, invita a participantes
+                y evalúa resultados en tiempo real.</p>
+            <button id="btn-crear-sala"
+                class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-red-500/20">
+                Configurar Nueva Sala
+            </button>
             </div>
 
             <div

@@ -45,11 +45,7 @@
             </button>
 
             {{-- Logo --}}
-            <a href="/" class="flex items-center gap-3">
-                <div class="logo-recuadro font-black text-xl md:text-2xl px-3 md:px-4 py-1 rounded-lg">P</div>
-                <span class="text-lg md:text-xl font-bold tracking-tight text-white">Play<span
-                        class="primario-resaltado">DF</span></span>
-            </a>
+            @include('partials.logo')
 
             {{-- Racha / Nivel --}}
             <div
