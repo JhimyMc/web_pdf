@@ -1,0 +1,893 @@
+/* ============================================================
+   TARJETAS DE ESTUDIO — tarjetas-estudio.css
+   Colores heredados del sistema PlayDF (welcome.css)
+   ============================================================ */
+
+/* ── Variables de color PlayDF ─────────────────────────────── */
+:root {
+    --color-fondo:        #0a0a0a;
+    --color-panel:        #111111;
+    --color-primario:     #ef4444;
+    --color-borde-oscuro: #1f1f1f;
+    --color-borde-input:  #2a2a2a;
+    --color-fondo-input:  #161616;
+    --color-gris-claro:   #a1a1aa;
+    --color-gris-medio:   #71717a;
+    --color-gris-oscuro:  #52525b;
+    --color-texto:        #f4f4f5;
+}
+
+/* ── Layout general ─────────────────────────────────────────── */
+.te-cuerpo {
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.te-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem 4rem;
+    position: relative;
+}
+
+.te-contenedor {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* ── Estado vacío (sin sets) ────────────────────────────────── */
+.te-estado-vacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    flex: 1;
+    min-height: 60vh;
+    text-align: center;
+    animation: te-fade-in 0.6s ease both;
+}
+
+.te-icono-vacio {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, rgba(236,72,153,0.18), rgba(168,85,247,0.12) 70%);
+    border: 1px solid rgba(236,72,153,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.4rem;
+    color: #ec4899;
+    box-shadow: 0 0 40px rgba(236,72,153,0.15);
+    animation: te-pulse-glow 3s ease-in-out infinite;
+}
+
+.te-titulo-vacio {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+}
+
+.te-subtitulo-vacio {
+    font-size: 0.85rem;
+    color: var(--color-gris-medio);
+    max-width: 400px;
+    line-height: 1.6;
+}
+
+/* ── Botón principal ─────────────────────────────────────────── */
+.te-btn-generar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    background: linear-gradient(135deg, #ec4899 0%, #db2777 60%, #be185d 100%);
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 0.85rem 2rem;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 24px rgba(236,72,153,0.35), 0 1px 4px rgba(0,0,0,0.4);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+}
+
+.te-btn-generar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(236,72,153,0.45), 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.te-btn-generar:active {
+    transform: translateY(0px) scale(0.98);
+}
+
+/* ── Botón secundario ────────────────────────────────────────── */
+.te-btn-secundario {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--color-panel);
+    border: 1px solid var(--color-borde-input);
+    color: var(--color-gris-claro);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.55rem 1.1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.te-btn-secundario:hover {
+    background-color: var(--color-fondo-input);
+    color: #ffffff;
+    border-color: var(--color-gris-oscuro);
+}
+
+.te-btn-secundario.peligro:hover {
+    background-color: rgba(239,68,68,0.1);
+    color: var(--color-primario);
+    border-color: rgba(239,68,68,0.4);
+}
+
+.te-btn-cancelar {
+    background: transparent;
+    border: 1px solid var(--color-borde-input);
+    color: var(--color-gris-claro);
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.te-btn-cancelar:hover {
+    background-color: var(--color-fondo-input);
+    color: #ffffff;
+}
+
+/* ── Lista de sets ───────────────────────────────────────────── */
+.te-lista-sets {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    animation: te-fade-in 0.5s ease both;
+}
+
+.te-set-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--color-panel);
+    border: 1px solid var(--color-borde-oscuro);
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+}
+
+.te-set-item:hover {
+    background-color: var(--color-fondo-input);
+    border-color: var(--color-borde-input);
+    transform: translateX(4px);
+}
+
+.te-set-item:active {
+    transform: scale(0.99);
+}
+
+.te-set-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.te-set-icono {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: rgba(236,72,153,0.1);
+    border: 1px solid rgba(236,72,153,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ec4899;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.te-set-titulo {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.te-set-meta {
+    font-size: 0.72rem;
+    color: var(--color-gris-oscuro);
+    margin-top: 0.15rem;
+}
+
+.te-set-acciones {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.te-btn-eliminar-set {
+    background: transparent;
+    border: none;
+    color: var(--color-gris-oscuro);
+    padding: 0.4rem 0.6rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.15s;
+}
+
+.te-btn-eliminar-set:hover {
+    color: var(--color-primario);
+    background-color: rgba(239,68,68,0.1);
+}
+
+.te-btn-eliminar-set:active {
+    transform: scale(0.92);
+}
+
+/* ── Badge de tarjetas difíciles en la lista ──────────────────── */
+.te-diff-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    background: rgba(250,204,21,0.1);
+    color: #facc15;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 0.1rem 0.45rem;
+    border-radius: 6px;
+    vertical-align: middle;
+    border: 1px solid rgba(250,204,21,0.2);
+    margin-left: 0.35rem;
+}
+
+.te-diff-badge i {
+    font-size: 0.55rem;
+}
+
+/* ── Encabezado de la sección ────────────────────────────────── */
+.te-encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.te-encabezado-titulo {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+}
+
+.te-encabezado-sub {
+    font-size: 0.78rem;
+    color: var(--color-gris-medio);
+    margin-top: 0.15rem;
+}
+
+/* ── Estado de carga ─────────────────────────────────────────── */
+.te-cargando {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    min-height: 60vh;
+    animation: te-fade-in 0.4s ease both;
+}
+
+.te-spinner {
+    width: 64px;
+    height: 64px;
+    position: relative;
+}
+
+.te-spinner-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid var(--color-borde-input);
+}
+
+.te-spinner-arc {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    border-top-color: #ec4899;
+    animation: te-spin 0.9s linear infinite;
+}
+
+.te-spinner-arc-2 {
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-top-color: #a855f7;
+    animation: te-spin 1.4s linear infinite reverse;
+}
+
+.te-cargando-titulo {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
+    animation: te-pulse 2s ease-in-out infinite;
+}
+
+.te-cargando-sub {
+    font-size: 0.78rem;
+    color: var(--color-gris-oscuro);
+}
+
+/* ── Vista de tarjetas individuales (flashcards) ─────────────── */
+.te-cards-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.te-cards-titulo {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.te-cards-counter {
+    font-size: 0.78rem;
+    color: var(--color-gris-medio);
+    background: var(--color-fondo-input);
+    padding: 0.35rem 0.9rem;
+    border-radius: 20px;
+    border: 1px solid var(--color-borde-input);
+}
+
+.te-btn-volver {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: transparent;
+    border: 1px solid var(--color-borde-input);
+    color: var(--color-gris-claro);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+}
+
+.te-btn-volver:hover {
+    background-color: var(--color-fondo-input);
+    color: #ffffff;
+    border-color: var(--color-gris-oscuro);
+}
+
+/* ── Tarjeta flip ─────────────────────────────────────────────── */
+.te-flip-container {
+    width: 100%;
+    max-width: 560px;
+    margin: 0 auto 1.5rem;
+    perspective: 1200px;
+}
+
+.te-flip-card {
+    position: relative;
+    width: 100%;
+    min-height: 320px;
+    cursor: pointer;
+    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    transform-style: preserve-3d;
+}
+
+.te-flip-card.volteada {
+    transform: rotateY(180deg);
+}
+
+.te-flip-front,
+.te-flip-back {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 20px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 1px solid var(--color-borde-oscuro);
+    min-height: 320px;
+    box-sizing: border-box;
+}
+
+.te-flip-front {
+    background: linear-gradient(145deg, #111111 0%, #1a1a1a 100%);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.05) inset;
+}
+
+.te-flip-back {
+    background: linear-gradient(145deg, #0f0f0f 0%, #161616 100%);
+    border-color: rgba(236,72,153,0.2);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 40px rgba(236,72,153,0.06);
+    transform: rotateY(180deg);
+}
+
+/* ── Botón de difícil ─────────────────────────────────────────── */
+.te-dif-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--color-borde-input);
+    color: var(--color-gris-oscuro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+}
+
+.te-dif-btn:hover {
+    background: rgba(0,0,0,0.7);
+    border-color: var(--color-gris-medio);
+    color: var(--color-gris-claro);
+    transform: scale(1.1);
+}
+
+.te-dif-btn.activo {
+    color: #facc15;
+    border-color: rgba(250,204,21,0.5);
+    background: rgba(250,204,21,0.1);
+    box-shadow: 0 0 20px rgba(250,204,21,0.2);
+    animation: te-star-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.te-dif-btn.activo:hover {
+    background: rgba(250,204,21,0.15);
+    border-color: rgba(250,204,21,0.7);
+    color: #facc15;
+}
+
+@keyframes te-star-pop {
+    0%   { transform: scale(0.5); opacity: 0.3; }
+    50%  { transform: scale(1.3); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* ── Contra-rotación para que el botón no se voltee con la tarjeta ── */
+.te-flip-card.volteada .te-dif-btn {
+    transform: rotateY(-180deg);
+}
+
+.te-flip-card.volteada .te-dif-btn:hover {
+    transform: rotateY(-180deg) scale(1.1);
+}
+
+/* ── Borde glow cuando está volteada y es difícil ─────────────── */
+.te-flip-card.volteada .te-dif-btn.activo {
+    box-shadow: 0 0 30px rgba(250,204,21,0.3);
+}
+
+.te-flip-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-gris-oscuro);
+    margin-bottom: 0.75rem;
+}
+
+.te-flip-label.front-label {
+    color: #ec4899;
+}
+
+.te-flip-label.back-label {
+    color: #22c55e;
+}
+
+.te-flip-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+    line-height: 1.6;
+    max-width: 90%;
+    word-break: break-word;
+}
+
+.te-flip-hint {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.68rem;
+    color: var(--color-gris-oscuro);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    animation: te-pulse 2s ease-in-out infinite;
+}
+
+/* ── Barra de progreso (tarjetas repasadas) ─────────────────── */
+.te-progress-container {
+    margin-bottom: 1.25rem;
+    animation: te-fade-in 0.5s ease both;
+}
+
+.te-progress-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+}
+
+.te-progress-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-gris-claro);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.te-progress-label i {
+    color: #22c55e;
+    font-size: 0.65rem;
+}
+
+.te-progress-text {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: var(--color-fondo-input);
+    padding: 0.2rem 0.65rem;
+    border-radius: 10px;
+    border: 1px solid var(--color-borde-input);
+    font-variant-numeric: tabular-nums;
+}
+
+.te-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--color-borde-input);
+    border-radius: 99px;
+    overflow: hidden;
+    position: relative;
+}
+
+.te-progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    min-width: 0;
+}
+
+.te-progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25));
+    border-radius: 99px;
+}
+
+/* ── Completado: pulse verde ─────────────────────────────────── */
+.te-progress-container.completado .te-progress-fill {
+    background: linear-gradient(90deg, #22c55e, #16a34a, #22c55e);
+    background-size: 200% 100%;
+    animation: te-progress-pulse 2s ease-in-out infinite;
+}
+
+.te-progress-container.completado .te-progress-label i {
+    animation: te-check-bounce 0.6s ease;
+}
+
+@keyframes te-progress-pulse {
+    0%, 100% { background-position: 0% 50%; }
+    50%       { background-position: 100% 50%; }
+}
+
+@keyframes te-check-bounce {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.4); }
+    100% { transform: scale(1); }
+}
+
+/* ── Navegación entre tarjetas ───────────────────────────────── */
+.te-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.te-nav-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--color-panel);
+    border: 1px solid var(--color-borde-input);
+    color: var(--color-gris-claro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.15s;
+}
+
+.te-nav-btn:hover {
+    background-color: var(--color-fondo-input);
+    color: #ffffff;
+    border-color: var(--color-gris-oscuro);
+}
+
+.te-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.te-nav-btn:active:not(:disabled) {
+    transform: scale(0.92);
+}
+
+/* ── Modal ────────────────────────────────────────────────────── */
+.te-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.82);
+    backdrop-filter: blur(6px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: te-fade-in 0.2s ease both;
+}
+
+.te-modal-overlay.oculto {
+    display: none;
+}
+
+.te-modal {
+    background: var(--color-panel);
+    border: 1px solid var(--color-borde-input);
+    border-radius: 20px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+    animation: te-slide-up 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+.te-modal-titulo {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 0.4rem;
+}
+
+.te-modal-desc {
+    font-size: 0.8rem;
+    color: var(--color-gris-medio);
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+}
+
+.te-modal-select {
+    width: 100%;
+    background-color: var(--color-fondo-input);
+    border: 1px solid var(--color-borde-input);
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 0.85rem;
+    padding: 0.75rem 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 1rem;
+}
+
+.te-modal-select:focus {
+    border-color: rgba(236,72,153,0.5);
+}
+
+.te-modal-select option {
+    background-color: var(--color-fondo-input);
+    color: #ffffff;
+}
+
+.te-modal-divisor {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+
+.te-modal-divisor-linea {
+    flex: 1;
+    height: 1px;
+    background-color: var(--color-borde-input);
+}
+
+.te-modal-divisor-texto {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-gris-oscuro);
+}
+
+.te-zona-subida {
+    border: 2px dashed var(--color-borde-input);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: rgba(22,22,22,0.3);
+    margin-bottom: 1rem;
+}
+
+.te-zona-subida:hover {
+    border-color: rgba(236,72,153,0.4);
+    background: rgba(22,22,22,0.5);
+}
+
+.te-zona-subida-icono {
+    width: 36px;
+    height: 36px;
+    background: var(--color-fondo-input);
+    margin: 0 auto 0.5rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-gris-oscuro);
+    border: 1px solid var(--color-borde-oscuro);
+}
+
+.te-zona-subida-texto {
+    font-size: 0.78rem;
+    color: var(--color-gris-claro);
+}
+
+.te-modal-acciones {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    justify-content: flex-end;
+}
+
+.te-toast {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    background: var(--color-panel);
+    border: 1px solid var(--color-borde-input);
+    border-radius: 12px;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.8rem;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    z-index: 200;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    animation: te-slide-up 0.3s ease both;
+    max-width: 320px;
+}
+
+.te-toast.oculto {
+    display: none;
+}
+
+.te-toast.exito {
+    border-left: 3px solid #22c55e;
+}
+
+.te-toast.error {
+    border-left: 3px solid var(--color-primario);
+}
+
+/* ── Ocultar estados ──────────────────────────────────────────── */
+.oculto {
+    display: none !important;
+}
+
+/* ── Animaciones ──────────────────────────────────────────────── */
+@keyframes te-fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes te-slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes te-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes te-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.6; }
+}
+
+@keyframes te-pulse-glow {
+    0%, 100% { box-shadow: 0 0 30px rgba(236,72,153,0.15); }
+    50%       { box-shadow: 0 0 50px rgba(236,72,153,0.3), 0 0 80px rgba(168,85,247,0.1); }
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .te-flip-front,
+    .te-flip-back {
+        padding: 1.5rem;
+        min-height: 260px;
+    }
+
+    .te-flip-text {
+        font-size: 0.95rem;
+    }
+
+    .te-set-item {
+        padding: 0.85rem 1rem;
+    }
+
+    .te-set-icono {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
+
+    .te-modal {
+        padding: 1.5rem;
+    }
+}

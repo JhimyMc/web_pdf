@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\MindMapController;
+use App\Http\Controllers\StudyCardController;
 use Illuminate\Support\Facades\Route;
 
 // ══════════════════════════════════════════════════════════════
@@ -59,6 +60,15 @@ Route::middleware('auth')->group(function () {
     Route::put('/ajax/mapa-mental/{id}',          [MindMapController::class, 'update'])->name('mapa-mental.update');
     Route::delete('/ajax/mapa-mental/{id}',       [MindMapController::class, 'destroy'])->name('mapa-mental.destroy');
     Route::post('/ajax/mapa-mental/upload-rapido', [MindMapController::class, 'uploadRapido'])->name('mapa-mental.uploadRapido');
+
+    // ── Tarjetas de Estudio ────────────────────────────────────
+    Route::get('/tarjetas-estudio',                    [StudyCardController::class, 'index'])->name('tarjetas-estudio.index');
+    Route::post('/ajax/tarjetas-estudio/generar',      [StudyCardController::class, 'generate'])->name('tarjetas-estudio.generate');
+    Route::get('/ajax/tarjetas-estudio/{id}',          [StudyCardController::class, 'show'])->name('tarjetas-estudio.show');
+    Route::post('/ajax/tarjetas-estudio/{id}/reviewed',        [StudyCardController::class, 'reviewed'])->name('tarjetas-estudio.reviewed');
+    Route::post('/ajax/tarjetas-estudio/{id}/difficult',       [StudyCardController::class, 'markDifficult'])->name('tarjetas-estudio.markDifficult');
+    Route::delete('/ajax/tarjetas-estudio/{id}/difficult',     [StudyCardController::class, 'unmarkDifficult'])->name('tarjetas-estudio.unmarkDifficult');
+    Route::delete('/ajax/tarjetas-estudio/{id}',               [StudyCardController::class, 'destroy'])->name('tarjetas-estudio.destroy');
 });
 
 require __DIR__ . '/auth.php';
