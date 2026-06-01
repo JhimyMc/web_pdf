@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cardsCounter    = document.getElementById('te-cards-counter');
     const btnPrev         = document.getElementById('te-btn-prev');
     const btnNext         = document.getElementById('te-btn-next');
+    const btnShuffle      = document.getElementById('te-btn-shuffle');
     const btnVolver       = document.getElementById('te-btn-volver');
     const btnNuevoVacio   = document.getElementById('te-btn-nuevo-vacio');
 
@@ -383,6 +384,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    // ── Barajar tarjetas ───────────────────────────────────────
+    function shuffleCards() {
+        for (let i = cardsData.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [cardsData[i], cardsData[j]] = [cardsData[j], cardsData[i]];
+        }
+        currentCardIndex = 0;
+        isFlipped = false;
+        renderTarjetaActual();
+        mostrarToast('Tarjetas barajadas 🔀', 'exito');
+    }
+
+    if (btnShuffle) {
+        btnShuffle.addEventListener('click', shuffleCards);
     }
 
     // ── Navegación entre tarjetas ──────────────────────────────

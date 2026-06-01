@@ -73,6 +73,17 @@ Route::put('/mapa-mental/{id}',      [\App\Http\Controllers\Api\ApiMindMapContro
 Route::delete('/mapa-mental/{id}',   [\App\Http\Controllers\Api\ApiMindMapController::class, 'apiEliminar']);
 
 // ══════════════════════════════════════════════════════════════
+// TARJETAS DE ESTUDIO (app móvil)
+// ══════════════════════════════════════════════════════════════
+Route::get('/tarjetas-estudio/mis-sets', [\App\Http\Controllers\Api\ApiStudyCardController::class, 'apiObtenerMisSets']);
+Route::post('/tarjetas-estudio/generar',  [\App\Http\Controllers\Api\ApiStudyCardController::class, 'apiGenerar']);
+Route::get('/tarjetas-estudio/{id}',       [\App\Http\Controllers\Api\ApiStudyCardController::class, 'apiMostrar']);
+Route::delete('/tarjetas-estudio/{id}',    [\App\Http\Controllers\Api\ApiStudyCardController::class, 'apiEliminar']);
+Route::post('/tarjetas-estudio/{id}/reviewed',  [\App\Http\Controllers\Api\ApiStudyCardController::class, 'apiMarcarRepasada']);
+Route::post('/tarjetas-estudio/{id}/difficult',  [\App\Http\Controllers\Api\ApiStudyCardController::class, 'apiMarcarDificil']);
+Route::delete('/tarjetas-estudio/{id}/difficult', [\App\Http\Controllers\Api\ApiStudyCardController::class, 'apiDesmarcarDificil']);
+
+// ══════════════════════════════════════════════════════════════
 // RUTAS PROTEGIDAS CON SANCTUM (perfil del usuario)
 // ══════════════════════════════════════════════════════════════
 Route::middleware('auth:sanctum')->group(function () {

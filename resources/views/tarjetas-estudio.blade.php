@@ -137,7 +137,12 @@
                     </button>
                     <h2 id="te-cards-titulo" class="te-cards-titulo">Tarjetas</h2>
                 </div>
-                <span id="te-cards-counter" class="te-cards-counter">0 / 0</span>
+                <div class="flex items-center gap-2">
+                    <button id="te-btn-shuffle" class="te-nav-btn" title="Barajar tarjetas">
+                        <i class="fa-solid fa-shuffle"></i>
+                    </button>
+                    <span id="te-cards-counter" class="te-cards-counter">0 / 0</span>
+                </div>
             </div>
 
             {{-- ── Progreso de repaso ─────────────────────────── --}}
