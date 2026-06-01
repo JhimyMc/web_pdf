@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\QuizController;
+use App\Http\Controllers\Api\ApiQuizController;
 use App\Http\Controllers\Api\DocumentController as ApiDocumentController;
 use App\Http\Controllers\DocumentController as WebDocumentController;
 
@@ -41,10 +42,8 @@ Route::get('/rooms/{code}/status', [QuizController::class, 'apiGetStatus']);
 // Envío de respuestas del alumno
 Route::post('/responses/send',     [QuizController::class, 'apiSaveResponse']);
 
-// ✅ ENDPOINT QUE FALTABA: unirse a sala desde Android
-// El alumno llama a este endpoint al pulsar "Ingresar" para registrar
-// su presencia antes de que el polling comience.
-Route::post('/rooms/{code}/join',  [QuizController::class, 'apiJoinRoom']);
+// Unirse a sala desde Android
+Route::post('/rooms/{code}/join',  [ApiQuizController::class, 'apiJoinRoom']);
 
 // Webhook n8n (generación de preguntas IA)
 Route::post('/rooms/webhook-n8n',  [QuizController::class, 'apiWebhookN8n']);
@@ -54,9 +53,10 @@ Route::post('/rooms/webhook-n8n',  [QuizController::class, 'apiWebhookN8n']);
 // (inicio/fin de sala: no usan la sesión web de Laravel,
 //  se autentican con Sanctum en el grupo de abajo)
 // ══════════════════════════════════════════════════════════════
-Route::post('/rooms/create-from-app',    [QuizController::class, 'apiCrearSalaDesdeApp']);
-Route::get('/rooms/{code}/status-app',   [QuizController::class, 'apiObtenerEstadoSala']);
-Route::post('/rooms/save-response',      [QuizController::class, 'apiGuardarRespuestaApp']);
+Route::post('/rooms/create-from-app',       [ApiQuizController::class, 'apiCrearSalaDesdeApp']);
+Route::post('/rooms/create-from-document',  [ApiQuizController::class, 'apiCrearSalaDesdeDocumento']);
+Route::get('/rooms/{code}/status-app',   [ApiQuizController::class, 'apiObtenerEstadoSala']);
+Route::post('/rooms/save-response',      [ApiQuizController::class, 'apiGuardarRespuestaApp']);
 
 // Iniciar / finalizar sala desde la app del docente
 // NOTA: estas rutas ya existen en web.php bajo /sala/api/rooms/{code}/start|end
@@ -64,9 +64,10 @@ Route::post('/rooms/save-response',      [QuizController::class, 'apiGuardarResp
 Route::post('/rooms/{code}/start',       [QuizController::class, 'apiStartRoom']);
 Route::post('/rooms/{code}/end',         [QuizController::class, 'apiEndRoom']);
 
-// ✅ Historial de salas del docente (para app móvil)
-Route::get('/rooms/history',               [QuizController::class, 'apiHistorialApp']);
-Route::get('/rooms/{code}/reporte',        [QuizController::class, 'apiReporteApp']);
+// Historial de salas del docente (app móvil)
+Route::get('/rooms/history',               [ApiQuizController::class, 'apiHistorialApp']);
+Route::get('/rooms/{code}/reporte',        [ApiQuizController::class, 'apiReporteApp']);
+Route::delete('/rooms/{code}',             [QuizController::class, 'apiDeleteRoom']);
 
 // ══════════════════════════════════════════════════════════════
 // MAPAS MENTALES (app móvil)

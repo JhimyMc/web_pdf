@@ -16,6 +16,8 @@ class Room extends Model
         'code',
         'pdf_name',
         'num_questions',
+        'total_batches',
+        'batches_completed',
         'difficulty',
         'questions',
         'status',
