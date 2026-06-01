@@ -16,9 +16,12 @@
 
 <body class="bg-slate-950 font-sans min-h-screen text-white p-4 md:p-8 relative">
 
-    <button id="btn-cancelar-sala"
+    <button id="btn-cancelar-sala" data-status="{{ $room->status }}"
         class="absolute top-6 left-6 text-slate-400 hover:text-red-500 transition-colors flex items-center gap-2 font-medium z-20">
-        <i class="fa-solid fa-arrow-left"></i> Cancelar Sala y Volver
+        <i class="fa-solid fa-arrow-left"></i>
+        <span id="btn-volver-texto">
+            {{ $room->status === 'finalizado' ? 'Volver' : 'Cancelar Sala y Volver' }}
+        </span>
     </button>
 
     <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mt-12">
@@ -57,8 +60,13 @@
                     <i class="fa-solid fa-stop"></i> Finalizar para Todos
                 </button>
 
-                <button id="btn-descargar-reporte"
-                    class="hidden w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition-colors items-center justify-center gap-2">
+                <button id="btn-ver-reporte"
+                    class="hidden w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-colors items-center justify-center gap-2 shadow-lg shadow-blue-500/20">
+                    <i class="fa-solid fa-eye"></i> Ver Reporte Detallado
+                </button>
+
+                <button id="btn-descargar-pdf"
+                    class="hidden w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition-colors items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
                     <i class="fa-solid fa-file-pdf"></i> Descargar Reporte PDF
                 </button>
             </div>

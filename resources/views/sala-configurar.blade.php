@@ -26,6 +26,59 @@
         <p class="text-slate-400 text-sm">Extrayendo texto para la IA</p>
     </div>
 
+    {{-- Modal de sala activa --}}
+    @if($salaActiva)
+    <div id="modal-sala-activa"
+        class="fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl"></div>
+
+            <div class="text-center mb-6 relative z-10">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-500/10 mb-4">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-400 text-2xl"></i>
+                </div>
+                <h2 class="text-xl font-bold text-white mb-2">Ya tienes una sala activa</h2>
+                <p class="text-slate-400 text-sm">Tienes una sala en estado <strong class="text-amber-400">{{ $salaActiva->status }}</strong> que aún no ha finalizado.</p>
+            </div>
+
+            <div class="bg-slate-950 rounded-xl p-4 mb-6 border border-slate-800 relative z-10">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-2xl font-black tracking-widest text-white">{{ $salaActiva->code }}</span>
+                    <span class="text-[10px] font-bold uppercase px-2 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                        {{ $salaActiva->status === 'en_vivo' ? 'En Vivo' : ($salaActiva->status === 'espera' ? 'En Espera' : ($salaActiva->status === 'generando' ? 'Generando' : 'Configurando')) }}
+                    </span>
+                </div>
+                <p class="text-xs text-slate-500">
+                    <i class="fa-solid fa-file-pdf text-red-500 mr-1"></i> {{ $salaActiva->pdf_name }}
+                    &middot; Creada {{ $salaActiva->created_at->diffForHumans() }}
+                </p>
+            </div>
+
+            <div class="flex flex-col gap-3 relative z-10">
+                <a href="{{ route('sala.dashboard', $salaActiva->code) }}"
+                    class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20">
+                    <i class="fa-solid fa-arrow-right"></i> Ir a la sala existente
+                </a>
+                <form action="{{ route('sala.crear') }}" method="POST" id="form-crear-nueva" class="w-full">
+                    @csrf
+                    <input type="hidden" name="document_id" id="modal-document-id" value="">
+                    <input type="hidden" name="num_questions" id="modal-num-questions" value="10">
+                    <input type="hidden" name="difficulty" id="modal-difficulty" value="intermedio">
+                    <button type="submit" id="btn-crear-nueva"
+                        class="w-full bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Crear nueva sala (cerrar la anterior)
+                    </button>
+                </form>
+            </div>
+
+            <button id="btn-cerrar-modal"
+                class="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors z-20">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+    </div>
+    @endif
+
     <div
         class="tarjeta-configuracion max-w-xl w-full p-8 md:p-10 rounded-3xl border border-slate-800 relative overflow-hidden z-10">
         <div class="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-red-600/10 rounded-full blur-3xl"></div>

@@ -88,18 +88,19 @@
                 <p class="text-slate-400 text-xs">Ponte a prueba tú mismo sin competir.</p>
             </div>
 
-            <div
+            <div id="btn-historial"
                 class="tarjeta-menu p-6 rounded-3xl border border-slate-800 flex flex-col items-center text-center transition-all hover:border-amber-500/50 cursor-pointer relative overflow-hidden">
                 @if (!Auth::check())
                     <div
                         class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-3xl">
                         <i class="fa-solid fa-lock text-amber-500"></i>
                     </div>
+                @else
+                    <div class="absolute inset-0 z-10" id="btn-historial-overlay"></div>
                 @endif
                 <i class="fa-solid fa-clock-rotate-left text-amber-500 text-3xl mb-3"></i>
                 <h2 class="text-lg font-bold text-white mb-1">Historial de Salas</h2>
                 <p class="text-slate-400 text-xs">Revisa métricas y descargas de PDF.</p>
-                <button id="btn-historial" class="hidden absolute inset-0 w-full h-full"></button>
             </div>
 
         </div>

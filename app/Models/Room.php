@@ -15,13 +15,17 @@ class Room extends Model
         'user_id',
         'code',
         'pdf_name',
+        'num_questions',
+        'difficulty',
         'questions',
         'status',
+        'finished_at',
     ];
 
     // Le decimos a Laravel que 'questions' es un JSON en la BD pero aquí lo maneje como Array
     protected $casts = [
-        'questions' => 'array',
+        'questions'   => 'array',
+        'finished_at' => 'datetime',
     ];
 
     // Relación: Una sala tiene muchas respuestas de estudiantes

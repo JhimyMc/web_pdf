@@ -15,8 +15,16 @@ class QuizController extends Controller
     // 1. Mostrar la vista para configurar una nueva sala
     public function configurar()
     {
+        $this->limpiarSalasExpiradas();
+
         $documentos = Document::where('user_id', Auth::id())->latest()->get();
-        return view('sala-configurar', compact('documentos'));
+
+        // Detectar si ya hay una sala activa (no finalizada)
+        $salaActiva = Room::where('user_id', Auth::id())
+            ->whereIn('status', ['configurando', 'generando', 'espera', 'en_vivo'])
+            ->first();
+
+        return view('sala-configurar', compact('documentos', 'salaActiva'));
     }
 
     // 2. Procesar el formulario y crear la sala en la BD
@@ -28,6 +36,9 @@ class QuizController extends Controller
             'difficulty'    => 'required|in:basico,intermedio,avanzado'
         ]);
 
+        // Si el usuario ya tiene una sala activa, cancelarla automáticamente
+        $this->cancelarSalasActivas();
+
         $documento = Document::where('id', $request->document_id)
             ->where('user_id', Auth::id())
             ->firstOrFail();
@@ -35,10 +46,12 @@ class QuizController extends Controller
         $code = strtoupper(substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), 0, 5));
 
         $room = Room::create([
-            'user_id'  => Auth::id(),
-            'code'     => $code,
-            'pdf_name' => $documento->nombre ?? 'Documento_PDF',
-            'status'   => 'configurando',
+            'user_id'       => Auth::id(),
+            'code'          => $code,
+            'pdf_name'      => $documento->name ?? 'Documento_PDF',
+            'num_questions' => $request->num_questions,
+            'difficulty'    => $request->difficulty,
+            'status'        => 'configurando',
         ]);
 
         session(["room_config_{$code}" => [
@@ -53,6 +66,8 @@ class QuizController extends Controller
     // 3. Mostrar el Panel de Control del Creador (Docente)
     public function dashboard($code)
     {
+        $this->limpiarSalasExpiradas();
+
         $room = Room::where('code', $code)->where('user_id', Auth::id())->firstOrFail();
         return view('sala-dashboard', compact('room'));
     }
@@ -139,22 +154,22 @@ class QuizController extends Controller
         );
 
         return response()->json(['success' => true]);
-    }
-
-    // 7. Disparar generación asíncrona enviando los CHUNKS reales del PDF
+    }    // 7. Disparar generación asíncrona enviando los CHUNKS reales del PDF
     public function apiGenerateQuestions($code)
     {
         $room = Room::where('code', $code)->firstOrFail();
 
-        $config = session("room_config_{$code}") ?? [
-            'num_questions' => 5,
-            'difficulty'    => 'intermedio',
-            'document_id'   => null
-        ];
+        // Usar num_questions desde el modelo Room (ya se guarda al crear)
+        $numQuestions = $room->num_questions ?? 5;
+        $difficulty   = $room->difficulty ?? 'intermedio';
+
+        // Respaldo desde session por si el docente usó flujo anterior
+        $config = session("room_config_{$code}");
+        $documentId = $config['document_id'] ?? null;
 
         $textoPdf = "Texto no encontrado.";
-        if (isset($config['document_id'])) {
-            $chunks = \App\Models\DocumentChunk::where('document_id', $config['document_id'])
+        if ($documentId) {
+            $chunks = \App\Models\DocumentChunk::where('document_id', $documentId)
                 ->orderBy('id', 'asc')
                 ->limit(7)
                 ->pluck('chunk_text');
@@ -172,8 +187,8 @@ class QuizController extends Controller
             $response = Http::timeout(300)->post($n8nWebhookUrl, [
                 'code'          => $code,
                 'pdf_name'      => $room->pdf_name,
-                'num_questions' => $config['num_questions'],
-                'difficulty'    => $config['difficulty'],
+                'num_questions' => $numQuestions,
+                'difficulty'    => $difficulty,
                 'context'       => $textoPdf
             ]);
 
@@ -190,7 +205,7 @@ class QuizController extends Controller
                 }
 
                 if (is_array($questionsArray)) {
-                    $questionsArray = $this->sanitizarPreguntas($questionsArray, $config['num_questions']);
+                    $questionsArray = $this->sanitizarPreguntas($questionsArray, $numQuestions);
 
                     $room->update([
                         'questions' => $questionsArray,
@@ -240,6 +255,9 @@ class QuizController extends Controller
             ]];
         }
 
+        // Sanitizar preguntas al límite real de la sala
+        $parsedQuestions = $this->sanitizarPreguntas($parsedQuestions, $room->num_questions ?? 10);
+
         $room->update([
             'questions' => $parsedQuestions,
             'status'    => 'espera'
@@ -260,11 +278,89 @@ class QuizController extends Controller
     public function apiEndRoom($code)
     {
         $room = Room::where('code', $code)->firstOrFail();
-        $room->update(['status' => 'finalizado']);
+        $room->update([
+            'status'      => 'finalizado',
+            'finished_at' => now(),
+        ]);
         return response()->json(['success' => true]);
     }
 
-    // 11. Cancelar / Eliminar Sala
+    // 11. Ver reporte detallado de la sala (docente)
+    public function reporte($code)
+    {
+        $room = Room::where('code', $code)->where('user_id', Auth::id())->firstOrFail();
+
+        $preguntas = is_array($room->questions) ? $room->questions : [];
+
+        $respuestas = StudentResponse::where('room_code', $code)
+            ->where('question_index', '>=', 0)
+            ->orderBy('question_index')
+            ->get();
+
+        // Agrupar respuestas por estudiante
+        $estudiantes = $respuestas->groupBy('student_name')->map(function ($items, $name) use ($preguntas) {
+            $detallePreguntas = [];
+            foreach ($preguntas as $idx => $p) {
+                $resp = $items->firstWhere('question_index', $idx);
+                $detallePreguntas[] = [
+                    'index'           => $idx,
+                    'pregunta'        => $p['pregunta'] ?? '—',
+                    'opciones'        => $p['opciones'] ?? [],
+                    'correcta'        => $p['correcta'] ?? 0,
+                    'selected_option' => $resp ? $resp->selected_option : null,
+                    'is_correct'      => $resp ? $resp->is_correct : false,
+                    'is_flagged'      => $resp ? $resp->is_flagged : false,
+                    'respondio'       => $resp !== null,
+                ];
+            }
+            return [
+                'student_name' => $name,
+                'detalle'      => $detallePreguntas,
+                'score'        => $items->where('is_correct', true)->count(),
+                'total'        => count($preguntas),
+                'tieneBandera' => $items->contains('is_flagged', true),
+            ];
+        })->values();
+
+        return view('sala-reporte', compact('room', 'preguntas', 'estudiantes'));
+    }
+
+    // 12. Historial de salas del docente
+    public function historial()
+    {
+        $this->limpiarSalasExpiradas();
+
+        $salas = Room::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($room) {
+                $totalEstudiantes = StudentResponse::where('room_code', $room->code)
+                    ->where('question_index', '>=', 0)
+                    ->distinct('student_name')
+                    ->count('student_name');
+
+                $totalRespuestas = StudentResponse::where('room_code', $room->code)
+                    ->where('question_index', '>=', 0)
+                    ->count();
+
+                $totalCorrectas = StudentResponse::where('room_code', $room->code)
+                    ->where('question_index', '>=', 0)
+                    ->where('is_correct', true)
+                    ->count();
+
+                $room->total_estudiantes = $totalEstudiantes;
+                $room->total_respuestas  = $totalRespuestas;
+                $room->promedio          = $totalRespuestas > 0
+                    ? round(($totalCorrectas / $totalRespuestas) * 100, 1)
+                    : 0;
+
+                return $room;
+            });
+
+        return view('sala-historial', compact('salas'));
+    }
+
+    // 13. Cancelar / Eliminar Sala
     public function apiDeleteRoom($code)
     {
         $room = Room::where('code', $code)->first();
@@ -472,6 +568,64 @@ class QuizController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'El estado de la sala cambió a: ' . $request->status
+        ]);
+    }
+
+    // =========================================================================
+    // AUTO-EXPIRACIÓN DE SALAS
+    // =========================================================================
+
+    /**
+     * Cancela salas que llevan más de 30 min sin iniciar el examen.
+     * Estados expirables: configurando, generando, espera.
+     */
+    private function limpiarSalasExpiradas(): void
+    {
+        $limite = now()->subMinutes(30);
+
+        Room::where('user_id', Auth::id())
+            ->whereIn('status', ['configurando', 'generando', 'espera'])
+            ->where('created_at', '<', $limite)
+            ->update([
+                'status'      => 'finalizado',
+                'finished_at' => now(),
+            ]);
+    }
+
+    /**
+     * Cancela todas las salas activas del usuario (para permitir crear una nueva).
+     */
+    private function cancelarSalasActivas(): void
+    {
+        Room::where('user_id', Auth::id())
+            ->whereIn('status', ['configurando', 'generando', 'espera', 'en_vivo'])
+            ->update([
+                'status'      => 'finalizado',
+                'finished_at' => now(),
+            ]);
+    }
+
+    /**
+     * GET /sala/api/check-active-room
+     * Devuelve información si el usuario tiene una sala activa.
+     */
+    public function apiCheckActiveRoom()
+    {
+        $room = Room::where('user_id', Auth::id())
+            ->whereIn('status', ['configurando', 'generando', 'espera', 'en_vivo'])
+            ->first();
+
+        if (!$room) {
+            return response()->json(['active' => false]);
+        }
+
+        return response()->json([
+            'active'    => true,
+            'code'      => $room->code,
+            'status'    => $room->status,
+            'pdf_name'  => $room->pdf_name,
+            'created_at' => $room->created_at->format('d/m/Y H:i'),
+            'minutos_transcurridos' => $room->created_at->diffInMinutes(now()),
         ]);
     }
 

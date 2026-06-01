@@ -1,0 +1,57 @@
+.cuerpo-aplicacion {
+    background-color: var(--color-fondo);
+    background-image: radial-gradient(circle at top right, rgba(239, 68, 68, 0.05), transparent 40%),
+                      radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.05), transparent 40%);
+}
+
+.cabecera-principal {
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-borde-oscuro);
+}
+
+.contenedor-principal {
+    min-height: calc(100vh - 120px);
+}
+
+.sala-tarjeta {
+    background-color: var(--color-panel);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+.sala-tarjeta:hover {
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.7);
+}
+
+.usuario-identificado {
+    color: var(--color-gris-claro);
+}
+
+.boton-salir {
+    color: var(--color-gris-medio);
+    transition: color 0.2s ease;
+}
+
+.boton-salir:hover {
+    color: var(--color-primario);
+}
+
+/* Scrollbar estilizada */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-gris-oscuro);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gris-medio);
+}

@@ -1,0 +1,51 @@
+.cuerpo-aplicacion {
+    background-color: var(--color-fondo);
+    background-image: radial-gradient(circle at top right, rgba(239, 68, 68, 0.05), transparent 40%),
+                      radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.05), transparent 40%);
+    min-height: 100vh;
+}
+
+.estadistica-tarjeta {
+    background-color: var(--color-panel);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.estadistica-tarjeta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+}
+
+.pregunta-bloque {
+    background-color: var(--color-panel);
+    transition: all 0.3s ease;
+}
+
+.pregunta-bloque:hover {
+    border-color: rgba(239, 68, 68, 0.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.respuesta-item {
+    transition: all 0.2s ease;
+}
+
+.respuesta-item:hover {
+    transform: translateX(4px);
+}
+
+/* Overlay de carga PDF */
+#overlay-carga-pdf {
+    z-index: 9999;
+}
+
+#overlay-carga-pdf .animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+

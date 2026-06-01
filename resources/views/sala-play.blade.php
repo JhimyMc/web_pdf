@@ -12,7 +12,7 @@
     <meta name="room-code" content="{{ $room->code }}">
     <meta name="user-name" content="{{ $nombre }}">
 
-    @vite(['resources/css/app.css', 'resources/js/sala-play.js'])
+    @vite(['resources/css/app.css', 'resources/css/sala-play.css', 'resources/js/sala-play.js'])
 </head>
 
 <body class="bg-slate-950 font-sans min-h-screen text-white flex flex-col relative overflow-hidden">

@@ -51,6 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/sala/api/rooms/{code}/start',    [QuizController::class, 'apiStartRoom']);
     Route::post('/sala/api/rooms/{code}/end',      [QuizController::class, 'apiEndRoom']);
     Route::delete('/sala/api/rooms/{code}',        [QuizController::class, 'apiDeleteRoom']);
+    Route::get('/sala/api/check-active-room',    [QuizController::class, 'apiCheckActiveRoom']);
 
     // ── Mapas mentales ──────────────────────────────────────
     Route::get('/mapa-mental',                    [MindMapController::class, 'index'])->name('mapa-mental.index');

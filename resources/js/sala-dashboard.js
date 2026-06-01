@@ -11,7 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const btnIniciar = document.getElementById('btn-iniciar-examen');
     const btnFinalizar = document.getElementById('btn-finalizar-examen');
-    const btnDescargar = document.getElementById('btn-descargar-reporte');
+    const btnVerReporte = document.getElementById('btn-ver-reporte');
+    const btnDescargarPdf = document.getElementById('btn-descargar-pdf');
     const tablaBody = document.getElementById('tabla-estudiantes-body');
     const contadorAlumnos = document.getElementById('contador-alumnos');
     const filtroInput = document.getElementById('filtro-alumnos');
@@ -88,10 +89,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnIniciar.classList.remove('hidden');
                 btnIniciar.className = "w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20";
             }
-            if (btnFinalizar) btnFinalizar.classList.add('hidden');
-            if (btnDescargar) btnDescargar.classList.add('hidden');
+            if (btnFinalizar) btnFinalizar.classList.add('hidden');            if (btnVerReporte) btnVerReporte.classList.add('hidden');
+            if (btnDescargarPdf) btnDescargarPdf.classList.add('hidden');
             if (btnReintentar) btnReintentar.classList.add('hidden');
-        } 
+        }
         else if (estado === 'en_vivo') {
             statusText.innerText = "¡Examen en curso!";
             statusContainer.className = "bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl p-3 text-sm font-medium";
@@ -103,7 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnFinalizar.classList.add('flex');
                 
             }
-            if (btnDescargar) btnDescargar.classList.add('hidden');
+            if (btnVerReporte) btnVerReporte.classList.add('hidden');
+            if (btnDescargarPdf) btnDescargarPdf.classList.add('hidden');
             if (btnReintentar) btnReintentar.classList.add('hidden');
         }
         else if (estado === 'finalizado') {
@@ -113,10 +115,18 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (btnIniciar) btnIniciar.classList.add('hidden');
             if (btnFinalizar) btnFinalizar.classList.add('hidden');
-            if (btnDescargar) {
-                btnDescargar.classList.remove('hidden');
-                btnDescargar.classList.add('flex');
+            if (btnVerReporte) {
+                btnVerReporte.classList.remove('hidden');
+                btnVerReporte.classList.add('flex');
             }
+            if (btnDescargarPdf) {
+                btnDescargarPdf.classList.remove('hidden');
+                btnDescargarPdf.classList.add('flex');
+            }
+            
+            // Cambiar botón Volver (ya no cancelar)
+            const btnVolverTexto = document.getElementById('btn-volver-texto');
+            if (btnVolverTexto) btnVolverTexto.textContent = 'Volver';
             
             if (intervaloPolling) clearInterval(intervaloPolling);
             if (btnReintentar) btnReintentar.classList.add('hidden');
@@ -214,16 +224,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (btnDescargar) {
-        btnDescargar.addEventListener('click', () => {
+    // Botón: Ver Reporte Detallado
+    if (btnVerReporte) {
+        btnVerReporte.addEventListener('click', () => {
+            window.location.href = `/sala/reporte/${roomCode}`;
+        });
+    }
+
+    // Botón: Descargar PDF
+    if (btnDescargarPdf) {
+        btnDescargarPdf.addEventListener('click', () => {
             window.open(`/sala/reporte/${roomCode}`, '_blank');
         });
     }
 
-    // BOTÓN DE CANCELAR REPARADO Y ESCUCHANDO DENTRO DEL BODY
+    // BOTÓN DE VOLVER / CANCELAR (según estado de la sala)
     const btnCancelar = document.getElementById('btn-cancelar-sala');
     if (btnCancelar) {
         btnCancelar.addEventListener('click', async () => {
+            // Si la sala ya finalizó, solo volver sin eliminar
+            if (currentStatus === 'finalizado') {
+                window.location.href = '/sala/historial';
+                return;
+            }
+
             if (!confirm("¿Estás seguro de que deseas cancelar esta sala? Todos los alumnos serán desconectados y la sala se eliminará.")) return;
             
             try {
@@ -247,5 +271,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert("Error de red al intentar cancelar la sala.");
             }
         });
+
     }
 });
