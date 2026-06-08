@@ -31,8 +31,8 @@
 
             <div
                 class="hidden sm:flex items-center gap-3 ml-2 md:ml-6 racha-nivel-contenedor px-3 py-1 rounded-full text-xs">
-                <span class="text-amber-400">🔥 Racha: 5 Días</span>
-                <span class="text-blue-400">⭐ Nivel 12</span>
+                <span class="text-amber-400"><i class="fa-solid fa-fire"></i> Racha: <span id="header-streak">-</span></span>
+                <span class="text-blue-400"><i class="fa-solid fa-star"></i> Nivel <span id="header-level">-</span></span>
             </div>
         </div>
 
@@ -154,10 +154,10 @@
                 <h3 class="seccion-subtitulo text-xs font-bold uppercase tracking-wider mb-3">Sostenibilidad y Repaso
                 </h3>
                 <div class="space-y-2">
-                    <button
+                    <a href="{{ route('srs.index') }}"
                         class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
                         <i class="fa-solid fa-brain text-amber-500"></i> Repetición Espaciada (SRS)
-                    </button>
+                    </a>
                     <a href="/modo-examen"
                         class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
                         <i class="fa-solid fa-graduation-cap"></i> Modo Examen
@@ -186,6 +186,21 @@
                         class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
                         <i class="fa-solid fa-layer-group text-pink-400"></i> Tarjetas de Estudio
                     </a>
+                    @auth
+                    <a href="{{ route('ahorcado.index') }}"
+                        class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
+                        <i class="fa-solid fa-puzzle-piece text-violet-400"></i> Ahorcado
+                    </a>
+                    @endauth
+                </div>
+            </div>
+
+            <div class="divisor-linea my-4"></div>
+
+            <div>
+                <h3 class="seccion-subtitulo text-xs font-bold uppercase tracking-wider mb-3">Logros</h3>
+                <div id="header-achievements" class="space-y-2">
+                    <p class="text-xs text-slate-500">Inicia sesión para ver tus logros</p>
                 </div>
             </div>
         </aside>
@@ -252,20 +267,26 @@
                     class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
                     <i class="fa-solid fa-list-check text-emerald-400"></i> Crear Cuestionario
                 </a>
-                <button
+                <a href="{{ route('tarjetas-estudio.index') }}"
                     class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
                     <i class="fa-solid fa-layer-group text-pink-400"></i> Tarjetas de Estudio
-                </button>
+                </a>
+                @auth
+                <a href="{{ route('ahorcado.index') }}"
+                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
+                    <i class="fa-solid fa-puzzle-piece text-violet-400"></i> Ahorcado
+                </a>
+                @endauth
             </div>
 
             <div class="divisor-linea my-4"></div>
 
             <h3 class="seccion-subtitulo text-[11px] font-bold uppercase tracking-wider mb-2">Repaso</h3>
             <div class="space-y-2">
-                <button
+                <a href="{{ route('srs.index') }}"
                     class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
                     <i class="fa-solid fa-brain text-amber-500"></i> Repetición Espaciada (SRS)
-                </button>
+                </a>
                 <a href="/modo-examen"
                     class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
                     <i class="fa-solid fa-graduation-cap text-red-500"></i> Modo Examen
@@ -278,6 +299,76 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Cargar gamificación del header
+            @auth
+            fetch('/ajax/gamification/stats')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success && data.gamification) {
+                        const g = data.gamification;
+                        document.getElementById('header-streak').textContent = g.current_streak + ' Días';
+                        document.getElementById('header-level').textContent = g.level;
+                    }
+                })
+                .catch(() => {});
+
+            // Cargar notificaciones pendientes
+            fetch('/ajax/notifications/pending')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.notifications && data.notifications.length > 0 && !document.getElementById('srs-notifications-banner')) {
+                        const banner = document.createElement('div');
+                        banner.id = 'srs-notifications-banner';
+                        banner.className = 'fixed bottom-4 right-4 z-50 max-w-sm';
+
+                        function dismissBanner() {
+                            banner.style.transition = 'opacity 0.3s, transform 0.3s';
+                            banner.style.opacity = '0';
+                            banner.style.transform = 'translateY(10px)';
+                            setTimeout(() => banner.remove(), 300);
+                        }
+
+                        data.notifications.forEach((n, i) => {
+                            const card = document.createElement('div');
+                            card.className = 'mb-2 p-3 rounded-xl shadow-lg border flex items-center gap-3 cursor-pointer transition-all hover:scale-[1.02] relative';
+                            card.style.backgroundColor = n.color + '15';
+                            card.style.borderColor = n.color + '40';
+                            card.innerHTML = `
+                                <i class="fa-solid fa-${n.icon}" style="color:${n.color};font-size:1.2rem"></i>
+                                <div class="flex-1">
+                                    <div class="text-xs font-bold" style="color:${n.color}">${n.title}</div>
+                                    <div class="text-[11px] text-slate-400">${n.message}</div>
+                                </div>
+                                <button class="absolute top-1.5 right-1.5 text-slate-500 hover:text-white transition-colors p-1 text-[10px]" title="Cerrar">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            `;
+                            // Click en la card (excepto la X) navega a la URL
+                            card.addEventListener('click', (e) => {
+                                if (!e.target.closest('button')) {
+                                    window.location.href = n.url;
+                                }
+                            });
+                            // Click en la X cierra solo esa notificación
+                            const closeBtn = card.querySelector('button');
+                            closeBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                card.style.transition = 'opacity 0.2s, transform 0.2s';
+                                card.style.opacity = '0';
+                                card.style.transform = 'translateX(20px)';
+                                setTimeout(() => {
+                                    card.remove();
+                                    if (banner.children.length === 0) dismissBanner();
+                                }, 200);
+                            });
+                            banner.appendChild(card);
+                        });
+                        document.body.appendChild(banner);
+                    }
+                })
+                .catch(() => {});
+            @endauth
+
             const btnAbrir = document.getElementById('btn-abrir-menu-movil');
             const btnCerrar = document.getElementById('btn-cerrar-menu-movil');
             const menuMovil = document.getElementById('menu-movil-drawer');

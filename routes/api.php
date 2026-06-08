@@ -19,6 +19,7 @@ Route::get('/documentos/{id}/historial', [ApiDocumentController::class, 'apiObte
 
 Route::post('/docente/subir-pdf', [ApiDocumentController::class, 'apiSubirPdfDocente']);
 Route::get('/docente/pdfs',       [ApiDocumentController::class, 'apiObtenerPdfsDocente']);
+Route::delete('/docente/documentos/{id}', [\App\Http\Controllers\Api\ApiDocumentController::class, 'apiEliminarDocumento']);
 
 // ══════════════════════════════════════════════════════════════
 // AUTH
@@ -87,6 +88,29 @@ Route::delete('/tarjetas-estudio/{id}',    [\App\Http\Controllers\Api\ApiStudyCa
 Route::post('/tarjetas-estudio/{id}/reviewed',  [\App\Http\Controllers\Api\ApiStudyCardController::class, 'apiMarcarRepasada']);
 Route::post('/tarjetas-estudio/{id}/difficult',  [\App\Http\Controllers\Api\ApiStudyCardController::class, 'apiMarcarDificil']);
 Route::delete('/tarjetas-estudio/{id}/difficult', [\App\Http\Controllers\Api\ApiStudyCardController::class, 'apiDesmarcarDificil']);
+
+// ══════════════════════════════════════════════════════════════
+// REPETICIÓN ESPACIADA (SRS) — app móvil
+// ══════════════════════════════════════════════════════════════
+Route::get('/srs/{id}/queue', [\App\Http\Controllers\Api\ApiSrsController::class, 'apiGetReviewQueue']);
+Route::post('/srs/sync',      [\App\Http\Controllers\Api\ApiSrsController::class, 'apiSync']);
+Route::post('/srs/{id}/review', [\App\Http\Controllers\Api\ApiSrsController::class, 'apiReview']);
+Route::get('/srs/stats',      [\App\Http\Controllers\Api\ApiSrsController::class, 'apiStats']);
+
+// ══════════════════════════════════════════════════════════════
+// GAMIFICACIÓN (app móvil)
+// ══════════════════════════════════════════════════════════════
+Route::get('/gamification/stats',       [\App\Http\Controllers\GamificationController::class, 'apiStats']);
+Route::get('/gamification/leaderboard', [\App\Http\Controllers\GamificationController::class, 'apiLeaderboard']);
+Route::get('/notifications/pending',    [\App\Http\Controllers\GamificationController::class, 'pendingNotifications']);
+
+// ══════════════════════════════════════════════════════════════
+// AHORCADO (app móvil)
+// ══════════════════════════════════════════════════════════════
+Route::get('/ahorcado/difficult-cards', [\App\Http\Controllers\HangmanController::class, 'apiGetDifficultCards']);
+Route::post('/ahorcado/start',          [\App\Http\Controllers\HangmanController::class, 'apiStartGame']);
+Route::post('/ahorcado/guess',          [\App\Http\Controllers\HangmanController::class, 'apiGuess']);
+Route::get('/ahorcado/history',         [\App\Http\Controllers\HangmanController::class, 'apiHistory']);
 
 // ══════════════════════════════════════════════════════════════
 // RUTAS PROTEGIDAS CON SANCTUM (perfil del usuario)

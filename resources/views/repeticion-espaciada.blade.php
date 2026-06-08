@@ -4,23 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tarjetas de Estudio — PlayDF</title>
+    <title>Repetición Espaciada — PlayDF</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    @vite(['resources/css/app.css', 'resources/css/welcome.css', 'resources/css/tarjetas-estudio.css', 'resources/js/app.js', 'resources/js/tarjetas-estudio.js'])
+    @vite(['resources/css/app.css', 'resources/css/welcome.css', 'resources/css/repeticion-espaciada.css', 'resources/js/app.js', 'resources/js/repeticion-espaciada.js'])
 
     <script>
         window.isLoggedIn = @json(Auth::check());
         window.loginRoute = "{{ route('login') }}";
-
-        // Pasar los sets de tarjetas al JS (formateados desde el controlador)
-        window.teSetsIniciales = @json($setsData);
+        window.srsSetsIniciales = @json($setsData);
     </script>
 </head>
 
-<body class="te-cuerpo font-sans min-h-screen flex flex-col">
+<body class="srs-cuerpo font-sans min-h-screen flex flex-col">
 
     {{-- ══════════════════════════════════════════════════════
          CABECERA — exactamente igual a welcome.blade.php
@@ -68,7 +66,7 @@
             </a>
             <i class="fa-solid fa-chevron-right text-[9px]"></i>
             <span style="color: var(--color-gris-claro)">
-                <i class="fa-solid fa-layer-group text-pink-400 mr-1"></i>Tarjetas de Estudio
+                <i class="fa-solid fa-brain text-amber-400 mr-1"></i>Repetición Espaciada
             </span>
         </div>
     </div>
@@ -76,94 +74,138 @@
     {{-- ══════════════════════════════════════════════════════
          CONTENIDO PRINCIPAL
     ══════════════════════════════════════════════════════ --}}
-    <main class="te-main flex-1">
+    <main class="srs-main flex-1">
 
-        {{-- ── Estado: VACÍO (sin tarjetas) ─────────────────────── --}}
-        <div id="te-estado-vacio" class="te-estado-vacio">
-            <div class="te-icono-vacio">
-                <i class="fa-solid fa-layer-group"></i>
+        {{-- ── Estado: VACÍO (sin sets) ─────────────────────── --}}
+        <div id="srs-estado-vacio" class="srs-estado-vacio">
+            <div class="srs-icono-vacio">
+                <i class="fa-solid fa-brain"></i>
             </div>
             <div>
-                <h2 class="te-titulo-vacio">Tarjetas de Estudio</h2>
-                <p class="te-subtitulo-vacio">
-                    Genera tarjetas de estudio con preguntas y respuestas a partir de tus PDFs.
-                    Ideal para repasar conceptos clave de forma rápida y efectiva.
+                <h2 class="srs-titulo-vacio">Repetición Espaciada</h2>
+                <p class="srs-subtitulo-vacio">
+                    Sincroniza tus tarjetas de estudio con el algoritmo SM-2 para optimizar tu repaso.
+                    Las tarjetas se programan automáticamente según tu dificultad percibida.
                 </p>
             </div>
             @auth
-                <button id="te-btn-nuevo-vacio" class="te-btn-generar">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i>
-                    Generar Tarjetas
-                </button>
+                @if(count($setsData) > 0)
+                    <button id="srs-btn-sincronizar-vacio" class="srs-btn-primario">
+                        <i class="fa-solid fa-rotate"></i>
+                        Sincronizar Tarjetas
+                    </button>
+                @endif
             @else
-                <a href="{{ route('login') }}" class="te-btn-generar" style="text-decoration:none">
+                <a href="{{ route('login') }}" class="srs-btn-primario" style="text-decoration:none">
                     <i class="fa-solid fa-lock"></i>
-                    Inicia sesión para generar
+                    Inicia sesión para comenzar
                 </a>
             @endauth
         </div>
 
         {{-- ── Estado: CARGANDO ────────────────────────────────── --}}
-        <div id="te-estado-cargando" class="te-cargando oculto">
-            <div class="te-spinner">
-                <div class="te-spinner-ring"></div>
-                <div class="te-spinner-arc"></div>
-                <div class="te-spinner-arc-2"></div>
+        <div id="srs-estado-cargando" class="srs-cargando oculto">
+            <div class="srs-spinner">
+                <div class="srs-spinner-ring"></div>
+                <div class="srs-spinner-arc"></div>
+                <div class="srs-spinner-arc-2"></div>
             </div>
-            <p class="te-cargando-titulo">Generando tus tarjetas de estudio...</p>
-            <p class="te-cargando-sub">La IA está extrayendo conceptos clave del documento.</p>
+            <p class="srs-cargando-titulo">Preparando tu repaso...</p>
+            <p class="srs-cargando-sub">Cargando tarjetas programadas para hoy.</p>
         </div>
 
         {{-- ── Estado: LISTA DE SETS ───────────────────────────── --}}
-        <div id="te-estado-lista" class="te-contenedor oculto">
-            <div class="te-encabezado">
-                <div>
-                    <div class="te-encabezado-titulo">Tus Tarjetas de Estudio</div>
-                    <div class="te-encabezado-sub">Selecciona un set para comenzar a repasar</div>
+        <div id="srs-estado-lista" class="srs-contenedor oculto">
+
+            {{-- Stats globales --}}
+            <div id="srs-stats-bar" class="srs-stats-bar">
+                <div class="srs-stat-item">
+                    <div class="srs-stat-num" id="srs-stat-due">0</div>
+                    <div class="srs-stat-label">Para hoy</div>
                 </div>
-                <button onclick="window.abrirModal()" class="te-btn-generar" style="font-size:0.82rem; padding:0.6rem 1.2rem">
-                    <i class="fa-solid fa-plus"></i> Nuevo Set
+                <div class="srs-stat-divider"></div>
+                <div class="srs-stat-item">
+                    <div class="srs-stat-num" id="srs-stat-mastered">0</div>
+                    <div class="srs-stat-label">Dominadas</div>
+                </div>
+                <div class="srs-stat-divider"></div>
+                <div class="srs-stat-item">
+                    <div class="srs-stat-num" id="srs-stat-total">0</div>
+                    <div class="srs-stat-label">Total</div>
+                </div>
+            </div>
+
+            <div class="srs-encabezado">
+                <div>
+                    <div class="srs-encabezado-titulo">Tus Sets — Repetición Espaciada</div>
+                    <div class="srs-encabezado-sub">Selecciona un set para comenzar a repasar</div>
+                </div>
+                <button onclick="srsSincronizarTodos()" class="srs-btn-primario" style="font-size:0.82rem; padding:0.6rem 1.2rem">
+                    <i class="fa-solid fa-rotate"></i> Sincronizar
                 </button>
             </div>
-            <div id="te-lista-sets" class="te-lista-sets"></div>
+
+            <div id="srs-lista-sets" class="srs-lista-sets"></div>
         </div>
 
-        {{-- ── Estado: TARJETAS INDIVIDUALES ───────────────────── --}}
-        <div id="te-estado-cards" class="te-contenedor oculto">
-            <div class="te-cards-header">
+        {{-- ── Estado: REVISIÓN DE TARJETAS ───────────────────── --}}
+        <div id="srs-estado-revision" class="srs-contenedor oculto">
+            <div class="srs-revision-header">
                 <div class="flex items-center gap-3">
-                    <button id="te-btn-volver" class="te-btn-volver">
+                    <button id="srs-btn-volver" class="srs-btn-volver">
                         <i class="fa-solid fa-arrow-left"></i> Volver
                     </button>
-                    <h2 id="te-cards-titulo" class="te-cards-titulo">Tarjetas</h2>
+                    <div>
+                        <h2 id="srs-revision-titulo" class="srs-revision-titulo">Repasando</h2>
+                        <div id="srs-revision-sub" class="srs-revision-sub"></div>
+                    </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button id="te-btn-shuffle" class="te-nav-btn" title="Barajar tarjetas">
-                        <i class="fa-solid fa-shuffle"></i>
-                    </button>
-                    <span id="te-cards-counter" class="te-cards-counter">0 / 0</span>
+                <div class="srs-revision-counter" id="srs-revision-counter">0 / 0</div>
+            </div>
+
+            {{-- Barra de progreso --}}
+            <div id="srs-progress-container" class="srs-progress-container">
+                <div class="srs-progress-bar">
+                    <div id="srs-progress-fill" class="srs-progress-fill" style="width: 0%;"></div>
                 </div>
             </div>
 
-            {{-- ── Progreso de repaso ─────────────────────────── --}}
-            <div id="te-progress-container" class="te-progress-container">
-                <div class="te-progress-info">
-                    <span class="te-progress-label"><i class="fa-regular fa-circle-check"></i> Repasadas</span>
-                    <span id="te-progress-text" class="te-progress-text">0 / 0</span>
-                </div>
-                <div class="te-progress-bar">
-                    <div id="te-progress-fill" class="te-progress-fill" style="width: 0%;"></div>
-                </div>
-            </div>
+            {{-- Tarjeta actual --}}
+            <div id="srs-card-container"></div>
 
-            <div id="te-cards-container"></div>
-
-            <div class="te-nav">
-                <button id="te-btn-prev" class="te-nav-btn" disabled>
-                    <i class="fa-solid fa-chevron-left"></i>
+            {{-- Botones de calidad SM-2 --}}
+            <div id="srs-quality-buttons" class="srs-quality-buttons oculto">
+                <button class="srs-q-btn srs-q-again" data-quality="0" title="No recuerdo (Reiniciar)">
+                    <i class="fa-solid fa-xmark"></i>
+                    <span>Otra vez</span>
+                    <small>1 día</small>
                 </button>
-                <button id="te-btn-next" class="te-nav-btn">
-                    <i class="fa-solid fa-chevron-right"></i>
+                <button class="srs-q-btn srs-q-hard" data-quality="1" title="Difícil">
+                    <i class="fa-solid fa-doubledown"></i>
+                    <span>Difícil</span>
+                    <small id="srs-q-hard-interval">1 día</small>
+                </button>
+                <button class="srs-q-btn srs-q-good" data-quality="2" title="Bien">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Bien</span>
+                    <small id="srs-q-good-interval">3 días</small>
+                </button>
+                <button class="srs-q-btn srs-q-easy" data-quality="3" title="Fácil">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Fácil</span>
+                    <small id="srs-q-easy-interval">7 días</small>
+                </button>
+            </div>
+
+            {{-- Completado --}}
+            <div id="srs-completado" class="srs-completado oculto">
+                <div class="srs-completado-icono">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h3 class="srs-completado-titulo">¡Repaso completado!</h3>
+                <p class="srs-completado-texto">Has revisado todas las tarjetas pendientes para hoy.</p>
+                <button onclick="srsVolverALista()" class="srs-btn-primario">
+                    <i class="fa-solid fa-arrow-left"></i> Volver a la lista
                 </button>
             </div>
         </div>
@@ -171,63 +213,11 @@
     </main>
 
     {{-- ══════════════════════════════════════════════════════
-         MODAL — Seleccionar PDF para generar tarjetas
-    ══════════════════════════════════════════════════════ --}}
-    <div id="te-modal-overlay" class="te-modal-overlay oculto">
-        <div class="te-modal">
-            <div class="flex items-center justify-between mb-2">
-                <h2 class="te-modal-titulo flex items-center gap-2.5">
-                    <i class="fa-solid fa-layer-group text-pink-500"></i> Generar Tarjetas
-                </h2>
-                <button onclick="window.cerrarModal()" class="text-zinc-400 hover:text-white transition-colors">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            <p class="te-modal-desc">Selecciona un PDF de tu lista o sube uno nuevo para generar las tarjetas.</p>
-
-            <form id="te-form-generar" class="space-y-4">
-                <div>
-                    <label class="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">
-                        Seleccionar PDF Existente
-                    </label>
-                    <select id="te-select-documento" class="te-modal-select">
-                        <option value="">-- Elige un documento --</option>
-                        @foreach ($documentos as $doc)
-                            <option value="{{ $doc->id }}">{{ $doc->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="te-modal-divisor">
-                    <div class="te-modal-divisor-linea"></div>
-                    <span class="te-modal-divisor-texto">O Sube Uno Nuevo</span>
-                    <div class="te-modal-divisor-linea"></div>
-                </div>
-
-                <div id="te-zona-subida" class="te-zona-subida">
-                    <input type="file" id="te-file-rapido" accept=".pdf" class="hidden">
-                    <div class="te-zona-subida-icono">
-                        <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
-                    </div>
-                    <span id="te-text-upload" class="te-zona-subida-texto">Arrastra o haz clic para subir un PDF</span>
-                </div>
-
-                <div class="te-modal-acciones">
-                    <button type="button" onclick="window.cerrarModal()" class="te-btn-cancelar">Cancelar</button>
-                    <button type="submit" class="te-btn-generar" style="padding:0.6rem 1.2rem; font-size:0.82rem">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> Generar Tarjetas
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    {{-- ══════════════════════════════════════════════════════
          TOAST DE NOTIFICACIÓN
     ══════════════════════════════════════════════════════ --}}
-    <div id="te-toast" class="te-toast oculto">
+    <div id="srs-toast" class="srs-toast oculto">
         <i class="fa-solid fa-circle-check" style="color: #22c55e; flex-shrink:0;"></i>
-        <span id="te-toast-msg">Cambios guardados</span>
+        <span id="srs-toast-msg">Operación exitosa</span>
     </div>
 
     {{-- ══════════════════════════════════════════════════════
@@ -259,17 +249,11 @@
                 <a href="/docente/crear-sala"
                     class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
                     <i class="fa-solid fa-list-check text-emerald-400"></i> Crear Cuestionario
-                </a>                    <a href="{{ route('tarjetas-estudio.index') }}"
-                        class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5"
-                        style="color: #ffffff; border-color: rgba(236,72,153,0.4);">
-                        <i class="fa-solid fa-layer-group text-pink-400"></i> Tarjetas de Estudio
-                    </a>
-                    @auth
-                    <a href="{{ route('ahorcado.index') }}"
-                        class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
-                        <i class="fa-solid fa-puzzle-piece text-violet-400"></i> Ahorcado
-                    </a>
-                    @endauth
+                </a>
+                <a href="{{ route('tarjetas-estudio.index') }}"
+                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
+                    <i class="fa-solid fa-layer-group text-pink-400"></i> Tarjetas de Estudio
+                </a>
             </div>
 
             <div class="divisor-linea my-4"></div>
@@ -277,8 +261,9 @@
             <h3 class="seccion-subtitulo text-[11px] font-bold uppercase tracking-wider mb-2">Repaso</h3>
             <div class="space-y-2">
                 <a href="{{ route('srs.index') }}"
-                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
-                    <i class="fa-solid fa-brain text-amber-500"></i> Repetición Espaciada (SRS)
+                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5"
+                    style="color: #ffffff; border-color: rgba(245,158,11,0.4);">
+                    <i class="fa-solid fa-brain text-amber-400"></i> Repetición Espaciada (SRS)
                 </a>
                 <a href="/modo-examen"
                     class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
@@ -288,10 +273,8 @@
         </div>
     </aside>
 
-    {{-- Footer --}}
     @include('partials.footer')
 
-    {{-- Script inline para el menú móvil --}}
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const btnAbrir = document.getElementById('btn-abrir-menu-movil');

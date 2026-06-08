@@ -6,6 +6,9 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\MindMapController;
 use App\Http\Controllers\StudyCardController;
+use App\Http\Controllers\SrsController;
+use App\Http\Controllers\GamificationController;
+use App\Http\Controllers\HangmanController;
 use Illuminate\Support\Facades\Route;
 
 // ══════════════════════════════════════════════════════════════
@@ -69,6 +72,23 @@ Route::middleware('auth')->group(function () {
     Route::post('/ajax/tarjetas-estudio/{id}/difficult',       [StudyCardController::class, 'markDifficult'])->name('tarjetas-estudio.markDifficult');
     Route::delete('/ajax/tarjetas-estudio/{id}/difficult',     [StudyCardController::class, 'unmarkDifficult'])->name('tarjetas-estudio.unmarkDifficult');
     Route::delete('/ajax/tarjetas-estudio/{id}',               [StudyCardController::class, 'destroy'])->name('tarjetas-estudio.destroy');
+
+    // ── Repetición Espaciada (SRS) ──────────────────────────────
+    Route::get('/repeticion-espaciada',                     [SrsController::class, 'index'])->name('srs.index');
+    Route::get('/ajax/srs/{id}/queue',                      [SrsController::class, 'getReviewQueue'])->name('srs.queue');
+    Route::post('/ajax/srs/sync',                           [SrsController::class, 'sync'])->name('srs.sync');
+    Route::post('/ajax/srs/{id}/review',                    [SrsController::class, 'review'])->name('srs.review');
+    Route::get('/ajax/srs/stats',                           [SrsController::class, 'stats'])->name('srs.stats');
+
+    // ── Gamificación ──────────────────────────────────────────────
+    Route::get('/ajax/gamification/stats',       [GamificationController::class, 'stats'])->name('gamification.stats');
+    Route::get('/ajax/gamification/leaderboard', [GamificationController::class, 'leaderboard'])->name('gamification.leaderboard');
+    Route::get('/ajax/notifications/pending',    [GamificationController::class, 'pendingNotifications'])->name('notifications.pending');
+
+    // ── Ahorcado ──────────────────────────────────────────────────
+    Route::get('/ahorcado',                          [HangmanController::class, 'index'])->name('ahorcado.index');
+    Route::post('/ajax/ahorcado/start',              [HangmanController::class, 'startGame'])->name('ahorcado.start');
+    Route::post('/ajax/ahorcado/guess',              [HangmanController::class, 'guess'])->name('ahorcado.guess');
 });
 
 require __DIR__ . '/auth.php';
