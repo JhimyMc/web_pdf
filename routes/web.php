@@ -91,4 +91,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/ajax/ahorcado/guess',              [HangmanController::class, 'guess'])->name('ahorcado.guess');
 });
 
+// ══════════════════════════════════════════════════════════════
+// FIREBASE GOOGLE SIGN-IN (web)
+// ══════════════════════════════════════════════════════════════
+Route::post('/auth/google', [\App\Http\Controllers\FirebaseAuthWebController::class, 'handleGoogleLogin'])
+    ->name('auth.google');
+
 require __DIR__ . '/auth.php';

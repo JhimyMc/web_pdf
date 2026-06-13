@@ -27,6 +27,9 @@ Route::delete('/docente/documentos/{id}', [\App\Http\Controllers\Api\ApiDocument
 Route::post('/login',    [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
+// Firebase Google Sign-In (para la app Android)
+Route::post('/auth/google', [\App\Http\Controllers\Api\FirebaseAuthController::class, 'loginWithGoogle']);
+
 // ══════════════════════════════════════════════════════════════
 // DOCUMENTOS (app)
 // ══════════════════════════════════════════════════════════════
