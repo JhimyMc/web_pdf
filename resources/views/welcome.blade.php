@@ -67,9 +67,10 @@
                     <i class="fa-solid fa-plus text-blue-400"></i> Cargar Documento
                 </button>
 
-                <button class="boton-deshabilitado w-full text-xs py-2 px-4 rounded-xl cursor-not-allowed mb-6">
-                    Conexión de Conceptos
-                </button>
+                <a href="{{ route('sala.historial') }}"
+                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors mb-6">
+                    <i class="fa-solid fa-clock-rotate-left text-amber-500"></i> Historial de Examenes
+                </a>
 
                 <h4 class="seccion-subtitulo-atenuado text-xs font-bold uppercase tracking-wider mb-2">Archivos
                     Recientes</h4>
@@ -133,17 +134,17 @@
                         demoras</p>
                 </div>
 
-                <!-- Chat: hijo normal del flex (NO absoluto) -->
+                <!-- Chat: flex child que respeta el espacio del search bar -->
                 <div id="contenedor-chat"
-                    class="chat-contenedor-ia absolute inset-0 rounded-2xl p-4 hidden flex-col overflow-hidden z-0">
-                    <div id="historial-chat" class="w-full flex-1 min-h-0 overflow-y-auto space-y-3 pr-1">
+                    class="chat-contenedor-ia absolute inset-0 rounded-2xl p-4 hidden flex-col z-0">
+                    <div id="historial-chat" class="w-full flex-1 min-h-0 overflow-y-auto space-y-3 pr-1 pb-2">
                     </div>
                 </div>
             </div>
 
             <!-- Barra de búsqueda -->
             <div id="wrapper-busqueda"
-                class="barra-busqueda w-full relative flex items-center rounded-2xl px-4 py-3 mt-3 transition-all">
+                class="barra-busqueda w-full relative flex items-center rounded-2xl px-4 py-3 mt-3 transition-all z-10">
                 <i class="fa-solid fa-wand-magic-sparkles mr-3 icono-magia"></i>
                 <input type="text" id="input-pregunta"
                     class="w-full bg-transparent focus:outline-none text-sm cursor-not-allowed"
@@ -175,17 +176,13 @@
             <div>
                 <h3 class="seccion-subtitulo text-xs font-bold uppercase tracking-wider mb-3">Herramientas IA</h3>
                 <div class="space-y-2">
-                    <button
-                        class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
-                        <i class="fa-solid fa-file-lines text-blue-400"></i> Resumen Automático
-                    </button>
                     <a href="{{ route('mapa-mental.index') }}"
                         class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
                         <i class="fa-solid fa-sitemap text-purple-400"></i> Generar Mapa Mental
                     </a>
-                    <a href="/docente/crear-sala"
+                    <a href="{{ route('solo-exam.configurar') }}"
                         class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
-                        <i class="fa-solid fa-list-check text-emerald-400"></i> Crear Cuestionario
+                        <i class="fa-solid fa-pen-to-square text-emerald-400"></i> Crear Cuestionario
                     </a>
                     <a href="{{ route('tarjetas-estudio.index') }}"
                         class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
@@ -260,17 +257,17 @@
 
             <h3 class="seccion-subtitulo text-[11px] font-bold uppercase tracking-wider mb-2">Herramientas IA</h3>
             <div class="space-y-2">
-                <button
-                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
-                    <i class="fa-solid fa-file-lines text-blue-400"></i> Resumen Automático
-                </button>
                 <a href="{{ route('mapa-mental.index') }}"
                     class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
                     <i class="fa-solid fa-sitemap text-purple-400"></i> Generar Mapa Mental
                 </a>
-                <a href="/docente/crear-sala"
+                <a href="{{ route('solo-exam.configurar') }}"
                     class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
-                    <i class="fa-solid fa-list-check text-emerald-400"></i> Crear Cuestionario
+                    <i class="fa-solid fa-pen-to-square text-emerald-400"></i> Crear Cuestionario
+                </a>
+                <a href="{{ route('sala.historial') }}"
+                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
+                    <i class="fa-solid fa-clock-rotate-left text-amber-500"></i> Historial de Examenes
                 </a>
                 <a href="{{ route('tarjetas-estudio.index') }}"
                     class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">

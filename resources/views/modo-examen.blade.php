@@ -81,12 +81,12 @@
             </button>
             </div>
 
-            <div
+            <a href="{{ route('solo-exam.configurar') }}"
                 class="tarjeta-menu p-6 rounded-3xl border border-slate-800 flex flex-col items-center text-center transition-all hover:border-emerald-500/50 cursor-pointer">
-                <i class="fa-solid fa-user-astronaut text-emerald-500 text-3xl mb-3"></i>
-                <h2 class="text-lg font-bold text-white mb-1">Modo Solitario</h2>
-                <p class="text-slate-400 text-xs">Ponte a prueba tú mismo sin competir.</p>
-            </div>
+                <i class="fa-solid fa-pen-to-square text-emerald-500 text-3xl mb-3"></i>
+                <h2 class="text-lg font-bold text-white mb-1">Crear Cuestionario</h2>
+                <p class="text-slate-400 text-xs">Genera tu propio examen individual con IA.</p>
+            </a>
 
             <div id="btn-historial"
                 class="tarjeta-menu p-6 rounded-3xl border border-slate-800 flex flex-col items-center text-center transition-all hover:border-amber-500/50 cursor-pointer relative overflow-hidden">

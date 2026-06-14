@@ -123,3 +123,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', fn(Request $r) => $r->user());
     Route::post('/user/update-profile', [AuthController::class, 'updateProfile']);
 });
+
+// ══════════════════════════════════════════════════════════════
+// EXAMEN INDIVIDUAL (app móvil - sin auth:sanctum, usa session)
+// ══════════════════════════════════════════════════════════════
+Route::post('/solo-exam/crear',            [\App\Http\Controllers\SoloExamController::class, 'apiCrear']);
+Route::get('/solo-exam/status/{code}',     [\App\Http\Controllers\SoloExamController::class, 'apiStatus']);
+Route::post('/solo-exam/guardar-respuesta', [\App\Http\Controllers\SoloExamController::class, 'apiGuardarRespuesta']);
+Route::post('/solo-exam/finalizar/{code}', [\App\Http\Controllers\SoloExamController::class, 'apiFinalizar']);
+Route::get('/solo-exam/reporte/{code}',    [\App\Http\Controllers\SoloExamController::class, 'apiReporte']);
+Route::get('/solo-exam/historial',         [\App\Http\Controllers\SoloExamController::class, 'apiHistorial']);

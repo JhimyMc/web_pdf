@@ -188,6 +188,7 @@
 #historial-chat {
     scrollbar-width: thin;
     scrollbar-color: var(--color-borde-input) transparent;
+    overscroll-behavior: contain;
 }
 
 /* Animación fade-in para mensajes del chat */

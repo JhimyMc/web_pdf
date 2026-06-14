@@ -14,6 +14,7 @@ class Room extends Model
     protected $fillable = [
         'user_id',
         'code',
+        'is_individual',
         'pdf_name',
         'num_questions',
         'total_batches',

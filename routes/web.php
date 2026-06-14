@@ -9,6 +9,7 @@ use App\Http\Controllers\StudyCardController;
 use App\Http\Controllers\SrsController;
 use App\Http\Controllers\GamificationController;
 use App\Http\Controllers\HangmanController;
+use App\Http\Controllers\SoloExamController;
 use Illuminate\Support\Facades\Route;
 
 // ══════════════════════════════════════════════════════════════
@@ -56,6 +57,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/sala/api/rooms/{code}/end',      [QuizController::class, 'apiEndRoom']);
     Route::delete('/sala/api/rooms/{code}',        [QuizController::class, 'apiDeleteRoom']);
     Route::get('/sala/api/check-active-room',    [QuizController::class, 'apiCheckActiveRoom']);
+
+    // ── Examen Individual (Modo Solitario) ─────────────────────
+    Route::get('/solo-exam/configurar',            [SoloExamController::class, 'configurar'])->name('solo-exam.configurar');
+    Route::post('/solo-exam/crear',                [SoloExamController::class, 'crear'])->name('solo-exam.crear');
+    Route::get('/solo-exam/play/{code}',           [SoloExamController::class, 'play'])->name('solo-exam.play');
+    Route::get('/solo-exam/reporte/{code}',        [SoloExamController::class, 'reporte'])->name('solo-exam.reporte');
+    Route::get('/solo-exam/api/status/{code}',     [SoloExamController::class, 'apiStatus'])->name('solo-exam.api.status');
+    Route::post('/solo-exam/api/guardar-respuesta', [SoloExamController::class, 'guardarRespuesta'])->name('solo-exam.api.guardar');
+    Route::post('/solo-exam/api/marcar-dificil', [SoloExamController::class, 'marcarDificil'])->name('solo-exam.api.dificil');
+    Route::post('/solo-exam/api/finalizar/{code}', [SoloExamController::class, 'finalizar'])->name('solo-exam.api.finalizar');
 
     // ── Mapas mentales ──────────────────────────────────────
     Route::get('/mapa-mental',                    [MindMapController::class, 'index'])->name('mapa-mental.index');

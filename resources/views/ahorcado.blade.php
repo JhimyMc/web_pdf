@@ -34,7 +34,15 @@
         .card-item .play-icon { color: var(--purple); }
 
         .hangman-board { text-align: center; margin-bottom: 24px; }
-        .hangman-drawing { font-size: 14px; color: var(--text-sub); margin-bottom: 16px; font-family: monospace; line-height: 1.4; white-space: pre; }
+        .hangman-svg { max-width: 200px; width: 100%; margin: 0 auto 16px; }
+        .hangman-svg .gallows { stroke: var(--border); stroke-width: 3; fill: none; stroke-linecap: round; }
+        .hangman-svg .body-part { stroke: var(--red); stroke-width: 3; fill: none; stroke-linecap: round; opacity: 0; transition: opacity 0.4s ease; }
+        .hangman-svg .body-part.visible { opacity: 1; }
+        .hangman-svg .head { stroke: var(--red); stroke-width: 3; fill: none; opacity: 0; transition: opacity 0.4s ease; }
+        .hangman-svg .head.visible { opacity: 1; }
+        .hangman-svg .face { stroke: var(--red); stroke-width: 2; fill: none; opacity: 0; transition: opacity 0.4s ease; }
+        .hangman-svg .face.visible { opacity: 1; }
+        .hangman-svg .gallows-accent { stroke: var(--purple); stroke-width: 2; fill: none; opacity: 0.3; }
 
         .phrase-display { font-size: 28px; font-weight: 800; letter-spacing: 4px; margin: 20px 0; min-height: 40px; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
         .phrase-char { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 44px; border-bottom: 3px solid var(--border); font-size: 20px; transition: all 0.3s; }
@@ -107,7 +115,36 @@
 
         <div class="game-area" id="gameArea">
             <div class="hangman-board">
-                <div class="hangman-drawing" id="hangmanDrawing"></div>
+                <svg class="hangman-svg" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Gallows -->
+                    <line class="gallows" x1="30" y1="210" x2="170" y2="210"/>
+                    <line class="gallows" x1="60" y1="210" x2="60" y2="20"/>
+                    <line class="gallows" x1="60" y1="20" x2="130" y2="20"/>
+                    <line class="gallows" x1="130" y1="20" x2="130" y2="45"/>
+                    <!-- Decorative accent -->
+                    <line class="gallows-accent" x1="55" y1="215" x2="175" y2="215"/>
+
+                    <!-- Head -->
+                    <circle class="head" id="hmHead" cx="130" cy="65" r="20"/>
+                    <!-- Eyes (X X when dead) -->
+                    <line class="face" id="hmEyeL1" x1="122" y1="60" x2="126" y2="64"/>
+                    <line class="face" id="hmEyeL2" x1="126" y1="60" x2="122" y2="64"/>
+                    <line class="face" id="hmEyeR1" x1="134" y1="60" x2="138" y2="64"/>
+                    <line class="face" id="hmEyeR2" x1="138" y1="60" x2="134" y2="64"/>
+                    <!-- Mouth (sad) -->
+                    <path class="face" id="hmMouth" d="M124,76 Q130,72 136,76"/>
+
+                    <!-- Body -->
+                    <line class="body-part" id="hmBody" x1="130" y1="85" x2="130" y2="140"/>
+                    <!-- Left Arm -->
+                    <line class="body-part" id="hmArmL" x1="130" y1="100" x2="105" y2="125"/>
+                    <!-- Right Arm -->
+                    <line class="body-part" id="hmArmR" x1="130" y1="100" x2="155" y2="125"/>
+                    <!-- Left Leg -->
+                    <line class="body-part" id="hmLegL" x1="130" y1="140" x2="110" y2="180"/>
+                    <!-- Right Leg -->
+                    <line class="body-part" id="hmLegR" x1="130" y1="140" x2="150" y2="180"/>
+                </svg>
                 <div class="attempts-bar" id="attemptsBar"></div>
                 <p style="color:var(--text-sub);font-size:13px" id="hintText"></p>
             </div>
@@ -153,13 +190,13 @@ let maxAttempts = 5;
 let maskedPhrase = '';
 let gameOver = false;
 
-const hangmanStages = [
-    '',
-    '  O',
-    '  O\n /',
-    '  O\n /|',
-    '  O\n /|\\',
-    '  O\n /|\\\n /',
+const hangmanParts = [
+    'hmHead',   // 1 error: cabeza
+    'hmBody',   // 2 errores: cuerpo
+    'hmArmL',   // 3 errores: brazo izq
+    'hmArmR',   // 4 errores: brazo der
+    'hmLegL',   // 5 errores: ambas piernas (game over)
+    'hmLegR',   // 5 errores: ambas piernas (game over)
 ];
 
 function startGame(cardId, setId, cardIndex) {
@@ -189,6 +226,8 @@ function startGame(cardId, setId, cardIndex) {
     });
 }
 
+let secretPhrase = '';
+
 function guessLetter(letter, btn) {
     if (gameOver || guessedLetters.includes(letter)) return;
 
@@ -216,6 +255,7 @@ function guessLetter(letter, btn) {
 
         if (data.game_over) {
             gameOver = true;
+            secretPhrase = data.secret_phrase || maskedPhrase;
             showResult(data.won, data.xp_earned, data.new_achievements || []);
         }
     });
@@ -244,7 +284,15 @@ function renderPhrase() {
 }
 
 function updateDrawing() {
-    document.getElementById('hangmanDrawing').textContent = hangmanStages[Math.min(wrongGuesses, hangmanStages.length - 1)];
+    // Mostrar partes del cuerpo según errores
+    for (let i = 0; i < wrongGuesses && i < hangmanParts.length; i++) {
+        const el = document.getElementById(hangmanParts[i]);
+        if (el) el.classList.add('visible');
+    }
+    // Mostrar cara (ojos + boca) cuando hay cabeza
+    if (wrongGuesses >= 1) {
+        document.querySelectorAll('.face').forEach(f => f.classList.add('visible'));
+    }
 }
 
 function renderKeyboard() {
@@ -276,7 +324,8 @@ function showResult(won, xp, achievements) {
         if (xp > 0) html += `<div class="xp-badge">+${xp} XP</div>`;
     } else {
         html = `<h2 style="color:var(--red)">Perdiste</h2>`;
-        html += `<p>La frase era: <strong>${maskedPhrase.replace(/_/g, '___')}</strong></p>`;
+        html += `<p>La respuesta correcta era:</p>`;
+        html += `<div style="font-size:20px;font-weight:800;color:var(--green);letter-spacing:3px;margin:12px 0;padding:12px 20px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:10px;display:inline-block">${secretPhrase}</div>`;
     }
 
     if (achievements.length > 0) {
@@ -294,7 +343,8 @@ function showResult(won, xp, achievements) {
 function resetGame() {
     document.getElementById('cardSelect').style.display = 'block';
     document.getElementById('gameArea').classList.remove('active');
-    document.getElementById('hangmanDrawing').textContent = '';
+    // Resetear SVG
+    document.querySelectorAll('.body-part, .head, .face').forEach(el => el.classList.remove('visible'));
     guessedLetters = [];
     wrongGuesses = 0;
     gameOver = false;

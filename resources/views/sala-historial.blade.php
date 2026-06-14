@@ -38,9 +38,19 @@
     <main class="contenedor-principal flex-grow w-full max-w-7xl mx-auto p-4 md:p-8">
         <div class="mb-8">
             <h1 class="text-2xl md:text-3xl font-black text-white mb-2">
-                Historial de <span class="text-red-500">Salas</span>
+                Historial de <span class="text-red-500">Examenes</span>
             </h1>
-            <p class="text-slate-400 text-sm">Revisa métricas, descarga reportes y gestiona tus salas anteriores.</p>
+            <p class="text-slate-400 text-sm">Revisa métricas, descarga reportes y gestiona tus exámenes anteriores.</p>
+            <div class="flex gap-3 mt-4">
+                <a href="{{ route('sala.configurar') }}"
+                    class="bg-red-600 hover:bg-red-500 text-white text-xs font-bold py-2 px-4 rounded-xl transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Nueva Sala Live
+                </a>
+                <a href="{{ route('solo-exam.configurar') }}"
+                    class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 px-4 rounded-xl transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i> Crear Cuestionario Individual
+                </a>
+            </div>
         </div>
 
         <!-- Filtros -->
@@ -73,7 +83,7 @@
                     <i class="fa-solid fa-clock-rotate-left text-3xl text-slate-600"></i>
                 </div>
                 <h3 class="text-xl font-bold text-white mb-2">No hay salas aún</h3>
-                <p class="text-slate-400 text-sm mb-6">Crea tu primera sala desde el modo examen.</p>
+                <p class="text-slate-400 text-sm mb-6">Crea tu primera sala desde el modo examen o un cuestionario individual.</p>
                 <a href="{{ route('sala.configurar') }}"
                     class="inline-block bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-lg shadow-red-500/20">
                     <i class="fa-solid fa-plus mr-2"></i> Crear Sala
@@ -129,10 +139,17 @@
                         </div>
 
                         <div class="flex items-center gap-3 text-xs border-t border-slate-800 pt-4">
+                            @if($sala->is_individual)
+                            <div class="flex items-center gap-1.5 text-emerald-400">
+                                <i class="fa-solid fa-user"></i>
+                                <span>Individual</span>
+                            </div>
+                            @else
                             <div class="flex items-center gap-1.5 text-slate-400">
                                 <i class="fa-solid fa-users"></i>
                                 <span>{{ $sala->total_estudiantes }} estudiantes</span>
                             </div>
+                            @endif
                             @if($sala->promedio > 0)
                                 <div class="flex items-center gap-1.5">
                                     <i class="fa-solid fa-chart-line text-emerald-400"></i>
@@ -142,6 +159,12 @@
                         </div>
 
                         <div class="flex gap-2 mt-4">
+                            @if($sala->is_individual)
+                            <a href="{{ route('solo-exam.reporte', $sala->code) }}"
+                                class="flex-1 bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-white font-medium py-2.5 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-eye"></i> Ver Reporte
+                            </a>
+                            @else
                             <a href="{{ route('sala.reporte', $sala->code) }}"
                                 class="flex-1 bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white font-medium py-2.5 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5">
                                 <i class="fa-solid fa-eye"></i> Ver Reporte
@@ -150,6 +173,7 @@
                                 class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white font-medium py-2.5 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5">
                                 <i class="fa-solid fa-gauge"></i> Dashboard
                             </a>
+                            @endif
                         </div>
                     </div>
                 @endforeach

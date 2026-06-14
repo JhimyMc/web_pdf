@@ -93,14 +93,17 @@ class GenerateQuestionsBatch implements ShouldQueue
                 ]];
             }
 
+            // Para exámenes individuales, ir directo a 'en_vivo' (sin paso de iniciar)
+            $nuevoStatus = $room->is_individual ? 'en_vivo' : 'espera';
+
             $room->update([
                 'questions'         => $todasLasPreguntas,
-                'status'            => 'espera',
+                'status'            => $nuevoStatus,
                 'batches_completed' => $this->totalBatches,
             ]);
 
             Log::info("[Job] Batch FINAL {$this->batchIndex}/{$this->totalBatches} COMPLETO para sala {$this->roomCode}. " .
-                count($todasLasPreguntas) . " preguntas guardadas.");
+                count($todasLasPreguntas) . " preguntas guardadas. Status: {$nuevoStatus}");
         } else {
             $room->update([
                 'questions'         => $todasLasPreguntas,
@@ -185,23 +188,58 @@ class GenerateQuestionsBatch implements ShouldQueue
      */
     private function getSystemPrompt(): string
     {
-        return "Eres un profesor universitario experto creando exámenes. Tu tarea es generar EXACTAMENTE la cantidad de preguntas solicitadas basándote EXCLUSIVAMENTE en el texto.\n\n"
-            . "REGLAS ESTRICTAS:\n"
-            . "1. Devuelve ÚNICAMENTE un array JSON válido. NADA de texto antes o después.\n"
-            . "2. Las preguntas deben ser SOBRE EL CONTENIDO TEMÁTICO del texto, NO sobre el archivo, documento o PDF en sí.\n"
-            . "3. NUNCA generes preguntas como: '¿Dónde se almacena?', '¿Qué tipo de archivo es?', '¿Cuál es el título del documento?'.\n"
-            . "4. VARIEDAD: Las preguntas NO DEBEN REPETIRSE. Cambia de tema, explora todo el texto.\n"
-            . "5. OPCIONES LIMPIAS: NO incluyas letras como \"A)\", \"B)\", \"C)\" ni viñetas en las opciones. Escribe solo el texto de la respuesta.\n"
-            . "6. ESTRUCTURA: Exactamente 5 opciones por pregunta. La clave 'correcta' debe ser un número entero (0 al 4).\n"
-            . "7. Dificultad solicitada: {$this->difficulty}.\n\n"
-            . "EJEMPLO DEL FORMATO ESPERADO:\n"
+        $difficultad = $this->difficulty;
+
+        $instruccionesDificultad = match($difficultad) {
+            'basico' => "NIVEL BÁSICO: Preguntas de comprensión directa. El estudiante debe recordar datos explícitos del texto (nombres, cifras, definiciones textuales, pasos de un proceso). Las opciones incorrectas deben ser plausibles pero claramente diferentes al contenido del texto.",
+            'intermedio' => "NIVEL INTERMEDIO: Preguntas de aplicación e interpretación. El estudiante debe aplicar conceptos del texto a situaciones, comparar ideas, identificar relaciones causa-efecto, o deducir información implícita basándose en los datos del texto.",
+            'avanzado' => "NIVEL AVANZADO: Preguntas de análisis y síntesis. El estudiante debe evaluar argumentos del texto, identificar fortalezas/debilidades, hacer inferencias complejas, o conectar conceptos de diferentes secciones del documento.",
+            default => "Genera preguntas variadas cubriendo diferentes niveles de comprensión del texto.",
+        };
+
+        return "Eres un profesor universitario experto en diseño de exámenes. Tu ÚNICO trabajo es generar preguntas de opción múltiple basadas EXCLUSIVAMENTE en el texto provisto.\n\n"
+            . "═══ REGLAS FUNDAMENTALES ═══\n"
+            . "1. RESPUESTA ÚNICA: Devuelve SOLO un array JSON válido. NINGÚN texto, explicación o markdown antes o después del array.\n"
+            . "2. CADA PREGUNTA DEBE OBLIGATORIAMENTE citar o referirse a un dato ESPECÍFICO, CONCRETO y VERIFICABLE del texto.\n"
+            . "   ✅ BIEN: 'Según el texto, ¿cuántos bytes de memoria libre tiene el programa?'\n"
+            . "   ❌ MAL: '¿Cuánta memoria libre tiene el programa?' (sin contexto del texto)\n"
+            . "   ❌ MAL: '¿Qué es la memoria?' (genérico, no requiere leer el texto)\n"
+            . "3. PROHIBICIÓN ABSOLUTA de preguntas genéricas. Está TAJANTEMENTE PROHIBIDO preguntar:\n"
+            . "   • Sobre el archivo en sí (tipo, formato, nombre, tamaño, ubicación)\n"
+            . "   • Sobre el documento como objeto (título, idioma, autor, fecha de creación)\n"
+            . "   • Preguntas que cualquier persona podría responder SIN leer el contenido\n"
+            . "   • Preguntas tipo '¿Cuál es el contenido principal?' o '¿Qué trata el texto?'\n"
+            . "   • Preguntas que empiecen con '¿Qué tipo de...', '¿Cuál es el...', '¿Dónde está...'\n"
+            . "4. CADA PREGUNTA debe ser respondida CORRECTAMENTE solo leyendo el texto. Si la respuesta no está explícita o implícita en el texto, NO crees esa pregunta.\n"
+            . "5. VARIEDAD OBLIGATORIA:\n"
+            . "   • Explora TODAS las secciones y párrafos del texto\n"
+            . "   • NO repitas el mismo concepto en más de 2 preguntas\n"
+            . "   • Alterna entre: datos numéricos, definiciones, procesos, comparaciones, consecuencias\n"
+            . "6. OPCIONES:\n"
+            . "   • Exactamente 5 opciones por pregunta (índices 0-4)\n"
+            . "   • La opción correcta debe ser INDISCUTIBLEMENTE correcta según el texto\n"
+            . "   • Las incorrectas deben ser PLAUSIBLES (del mismo dominio temático) pero falsas según el texto\n"
+            . "   • SIN prefijos: no uses 'A)', 'B)', '1.', '•', etc. Solo el texto limpio\n"
+            . "   • Cada opción debe tener entre 5 y 100 caracteres\n"
+            . "   • NO uses 'Todas las anteriores', 'Ninguna de las anteriores', ni placeholders\n"
+            . "7. FORMATO JSON ESTRICTO:\n"
+            . "   • La clave 'correcta' es un entero del 0 al 4\n"
+            . "   • Cada pregunta es un objeto con: pregunta (string), opciones (array de 5 strings), correcta (int)\n"
+            . "8. {$instruccionesDificultad}\n\n"
+            . "═══ FORMATO DE SALIDA ═══\n"
             . "[\n"
             . "  {\n"
-            . "    \"pregunta\": \"¿Cuál es el propósito principal de un Firewall?\",\n"
-            . "    \"opciones\": [\"Bloquear accesos no autorizados\", \"Acelerar el internet\", \"Crear copias de seguridad\", \"Revisar el código fuente\", \"Ninguna de las anteriores\"],\n"
+            . "    \"pregunta\": \"¿Qué función específica realiza el método X según se describe en el texto?\",\n"
+            . "    \"opciones\": [\"Descripción basada en el texto\", \"Opción plausible pero incorrecta\", \"Otra opción del dominio\", \"Cuarta opción coherente\", \"Quinta opción razonable\"],\n"
             . "    \"correcta\": 0\n"
             . "  }\n"
-            . "]";
+            . "]\n\n"
+            . "═══ VERIFICACIÓN FINAL ═══\n"
+            . "Antes de devolver tu respuesta, verifica CADA pregunta:\n"
+            . "• ¿La respuesta está claramente en el texto? (Si no, ELIMINA la pregunta)\n"
+            . "• ¿Es específica y no genérica? (Si es genérica, REESCRÍBELA)\n"
+            . "• ¿Solo hay 1 respuesta correcta? (Si hay ambigüedad, CAMBIA la pregunta)\n"
+            . "• ¿El JSON es válido y parseable? (Verifica comas, comillas, corchetes)";
     }
 
     /**

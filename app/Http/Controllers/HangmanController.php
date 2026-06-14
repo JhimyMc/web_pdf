@@ -203,7 +203,7 @@ class HangmanController extends Controller
             $newAchievements = $gamification->checkAchievements();
         }
 
-        return response()->json([
+        $response = [
             'success'          => true,
             'correct'          => $result['correct'],
             'game_over'        => $result['game_over'],
@@ -216,7 +216,14 @@ class HangmanController extends Controller
             'xp_earned'        => $xpEarned,
             'leveled_up'       => $leveledUp,
             'new_achievements' => $newAchievements,
-        ]);
+        ];
+
+        // Revelar la respuesta correcta cuando el juego termina
+        if ($result['game_over']) {
+            $response['secret_phrase'] = $game->secret_phrase;
+        }
+
+        return response()->json($response);
     }
 
     // ══════════════════════════════════════════════════════════════
@@ -380,7 +387,7 @@ class HangmanController extends Controller
             $newAchievements = $gamification->checkAchievements();
         }
 
-        return response()->json([
+        $response = [
             'success'          => true,
             'correct'          => $result['correct'],
             'game_over'        => $result['game_over'],
@@ -393,7 +400,13 @@ class HangmanController extends Controller
             'xp_earned'        => $xpEarned,
             'leveled_up'       => $leveledUp,
             'new_achievements' => $newAchievements,
-        ]);
+        ];
+
+        if ($result['game_over']) {
+            $response['secret_phrase'] = $game->secret_phrase;
+        }
+
+        return response()->json($response);
     }
 
     /**
