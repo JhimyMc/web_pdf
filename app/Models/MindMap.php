@@ -14,10 +14,14 @@ class MindMap extends Model
         'prompt_original',
         'map_data',
         'status',
+        'chunks_total',
+        'chunks_completed',
+        'partial_results',
     ];
 
     protected $casts = [
-        'map_data' => 'array',
+        'map_data'        => 'array',
+        'partial_results' => 'array',
     ];
 
     public function user(): BelongsTo

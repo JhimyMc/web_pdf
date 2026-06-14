@@ -63,6 +63,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/ajax/mapa-mental/{id}',          [MindMapController::class, 'update'])->name('mapa-mental.update');
     Route::delete('/ajax/mapa-mental/{id}',       [MindMapController::class, 'destroy'])->name('mapa-mental.destroy');
     Route::post('/ajax/mapa-mental/upload-rapido', [MindMapController::class, 'uploadRapido'])->name('mapa-mental.uploadRapido');
+    Route::get('/ajax/mapa-mental/{id}/status', [MindMapController::class, 'checkStatus'])->name('mapa-mental.status');
 
     // ── Tarjetas de Estudio ────────────────────────────────────
     Route::get('/tarjetas-estudio',                    [StudyCardController::class, 'index'])->name('tarjetas-estudio.index');

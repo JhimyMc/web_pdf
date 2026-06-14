@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
             historialChat.innerHTML = '';
 
             const welcomeDiv = document.createElement('div');
-            welcomeDiv.className = 'flex justify-start';
+            welcomeDiv.className = 'flex justify-start chat-msg-animate';
             welcomeDiv.innerHTML = `
                 <div class="bg-gradient-to-br from-slate-950 to-slate-900 border border-slate-800 text-slate-200 text-xs p-4 rounded-2xl rounded-tl-none max-w-sm shadow-xl">
                     <p class="font-bold text-blue-400 mb-1">PlayDF Listo</p>
@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(data.success && data.messages && data.messages.length > 0) {
                 data.messages.forEach(msg => {
                     const msgDiv = document.createElement('div');
-                    msgDiv.className = msg.sender === 'user' ? 'flex justify-end' : 'flex justify-start';
+                    msgDiv.className = (msg.sender === 'user' ? 'flex justify-end' : 'flex justify-start') + ' chat-msg-animate';
                     
                     // ✨ CORRECCIÓN AQUÍ: Se añade marked.parse() y la clase markdown-body también al cargar el historial del bot
                     msgDiv.innerHTML = msg.sender === 'user' 
@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!query || !documentoSeleccionadoId) return;
 
         const userDiv = document.createElement('div');
-        userDiv.className = 'flex justify-end';
+        userDiv.className = 'flex justify-end chat-msg-animate';
         userDiv.innerHTML = `<div class="bg-blue-600 text-white text-xs p-3 rounded-2xl rounded-tr-none max-w-xs shadow-md">${query}</div>`;
         historialChat.appendChild(userDiv);
         
@@ -221,8 +221,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const loadId = 'load-' + Date.now();
         const loadDiv = document.createElement('div');
-        loadDiv.className = 'flex justify-start opacity-60';
-        loadDiv.innerHTML = `<div id="${loadId}" class="text-slate-400 text-xs p-2 italic">Procesando...</div>`;
+        loadDiv.className = 'flex justify-start chat-msg-animate';
+        loadDiv.innerHTML = `
+            <div id="${loadId}" class="bg-slate-950 border border-slate-800 text-slate-400 text-xs px-4 py-3 rounded-2xl rounded-tl-none shadow-md flex items-center gap-1.5">
+                <span class="typing-dot" style="animation-delay: 0s"></span>
+                <span class="typing-dot" style="animation-delay: 0.15s"></span>
+                <span class="typing-dot" style="animation-delay: 0.3s"></span>
+            </div>`;
         historialChat.appendChild(loadDiv);
         historialChat.scrollTop = historialChat.scrollHeight;
 
@@ -241,7 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 if(document.getElementById(loadId)) document.getElementById(loadId).parentElement.remove();
                 const errorDiv = document.createElement('div');
-                errorDiv.className = 'flex justify-start';
+                errorDiv.className = 'flex justify-start chat-msg-animate';
                 errorDiv.innerHTML = `<div class="bg-red-950 border border-red-800 text-red-300 text-xs p-3 rounded-2xl rounded-tl-none max-w-xs shadow-md">⚠️ Error del servidor.</div>`;
                 historialChat.appendChild(errorDiv);
                 return;
@@ -251,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(document.getElementById(loadId)) document.getElementById(loadId).parentElement.remove();
 
             const botDiv = document.createElement('div');
-            botDiv.className = 'flex justify-start';
+            botDiv.className = 'flex justify-start chat-msg-animate';
             
             // ✨ CORRECCIÓN AQUÍ: Garantizar el parsing correcto
             botDiv.innerHTML = `<div class="bg-slate-950 border border-slate-800 text-slate-200 text-xs p-3 rounded-2xl rounded-tl-none max-w-xs shadow-md markdown-body">${marked.parse(data.answer)}</div>`;
@@ -259,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             if(document.getElementById(loadId)) document.getElementById(loadId).parentElement.remove();
             const fatalDiv = document.createElement('div');
-            fatalDiv.className = 'flex justify-start';
+            fatalDiv.className = 'flex justify-start chat-msg-animate';
             fatalDiv.innerHTML = `<div class="bg-red-950 border border-red-800 text-red-300 text-xs p-3 rounded-2xl rounded-tl-none max-w-xs shadow-md">🚨 Error de red.</div>`;
             historialChat.appendChild(fatalDiv);
         }

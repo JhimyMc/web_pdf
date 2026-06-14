@@ -185,6 +185,61 @@
     border: 1px solid var(--color-borde-oscuro);
 }
 
+#historial-chat {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-borde-input) transparent;
+}
+
+/* Animación fade-in para mensajes del chat */
+@keyframes chat-msg-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chat-msg-animate {
+    animation: chat-msg-in 0.3s ease-out forwards;
+}
+
+/* Typing indicator dots */
+.typing-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #94a3b8;
+    animation: typing-bounce 1.2s ease-in-out infinite;
+}
+
+@keyframes typing-bounce {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+    30% {
+        transform: translateY(-4px);
+        opacity: 1;
+    }
+}
+
+#historial-chat::-webkit-scrollbar {
+    width: 4px;
+}
+
+#historial-chat::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#historial-chat::-webkit-scrollbar-thumb {
+    background-color: var(--color-borde-input);
+    border-radius: 4px;
+}
+
 /* Barra de Busqueda Inferior */
 .barra-busqueda {
     background-color: var(--color-fondo);

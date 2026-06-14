@@ -212,6 +212,12 @@ class StudyCardController extends Controller
             }
             $contextoTexto = mb_substr($contextoTexto, 0, 4000);
 
+            // Fallback: si no hay chunks, usar extracted_text directamente del documento
+            if (empty(trim($contextoTexto))) {
+                $contextoTexto = $documento->extracted_text ?? '';
+                $contextoTexto = mb_substr($contextoTexto, 0, 4000);
+            }
+
             if (empty(trim($contextoTexto))) {
                 return response()->json([
                     'success' => false,

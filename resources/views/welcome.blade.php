@@ -96,9 +96,11 @@
             </div>
         </aside>
 
-        <section class="col-span-1 md:col-span-2 flex flex-col justify-between h-[calc(100vh-140px)] md:h-[80vh] gap-4">
+        <section class="col-span-1 md:col-span-2 flex flex-col h-[calc(100vh-140px)] md:h-[80vh]">
 
-            <div class="flex-grow relative flex flex-col">
+            <!-- Zona de contenido principal (flex-grow) -->
+            <div class="flex-1 min-h-0 relative rounded-2xl overflow-hidden">
+                <!-- Drop zone: overlay absoluto -->
                 <div id="zona-drop"
                     class="zona-arrastre absolute inset-0 border-2 border-dashed rounded-2xl p-6 md:p-8 flex flex-col items-center justify-center transition-all cursor-pointer z-10">
                     <div class="insignia-pdf font-black text-xl px-4 py-2 rounded-xl mb-3">PDF</div>
@@ -118,6 +120,7 @@
                     </button>
                 </div>
 
+                <!-- Pantalla de carga: overlay absoluto -->
                 <div id="pantalla-carga"
                     class="pantalla-carga-ia absolute inset-0 rounded-2xl p-8 hidden flex-col items-center justify-center text-center z-20 backdrop-blur-sm">
                     <div class="relative w-20 h-20 mb-4">
@@ -130,15 +133,17 @@
                         demoras</p>
                 </div>
 
+                <!-- Chat: hijo normal del flex (NO absoluto) -->
                 <div id="contenedor-chat"
-                    class="chat-contenedor-ia absolute inset-0 rounded-2xl p-4 hidden flex-col justify-between overflow-hidden z-0">
-                    <div id="historial-chat" class="w-full flex-grow overflow-y-auto space-y-3 pr-1 max-h-[52vh]">
+                    class="chat-contenedor-ia absolute inset-0 rounded-2xl p-4 hidden flex-col overflow-hidden z-0">
+                    <div id="historial-chat" class="w-full flex-1 min-h-0 overflow-y-auto space-y-3 pr-1">
                     </div>
                 </div>
             </div>
 
+            <!-- Barra de búsqueda -->
             <div id="wrapper-busqueda"
-                class="barra-busqueda w-full relative flex items-center rounded-2xl px-4 py-3 transition-all">
+                class="barra-busqueda w-full relative flex items-center rounded-2xl px-4 py-3 mt-3 transition-all">
                 <i class="fa-solid fa-wand-magic-sparkles mr-3 icono-magia"></i>
                 <input type="text" id="input-pregunta"
                     class="w-full bg-transparent focus:outline-none text-sm cursor-not-allowed"

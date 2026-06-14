@@ -78,6 +78,7 @@ Route::delete('/rooms/{code}',             [QuizController::class, 'apiDeleteRoo
 // ══════════════════════════════════════════════════════════════
 Route::get('/mapa-mental/mis-mapas', [\App\Http\Controllers\Api\ApiMindMapController::class, 'apiObtenerMisMapas']);
 Route::post('/mapa-mental/generar',  [\App\Http\Controllers\Api\ApiMindMapController::class, 'apiGenerar']);
+Route::get('/mapa-mental/{id}/status', [\App\Http\Controllers\Api\ApiMindMapController::class, 'apiCheckStatus']);
 Route::put('/mapa-mental/{id}',      [\App\Http\Controllers\Api\ApiMindMapController::class, 'apiAutoguardar']);
 Route::delete('/mapa-mental/{id}',   [\App\Http\Controllers\Api\ApiMindMapController::class, 'apiEliminar']);
 

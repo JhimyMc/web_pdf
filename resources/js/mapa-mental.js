@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let mapaData = null;
     let mapaId   = null;
     let nodoSeleccionadoId = null;
+    let pollingInterval = null;
 
     const getCsrf = () => {
         const meta = document.querySelector('meta[name="csrf-token"]');
@@ -124,12 +125,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Si subió un archivo rápido
             if (!docId && fileRapido && fileRapido.files.length > 0) {
+                // Capturar referencia al archivo ANTES de cerrar el modal (reset limpia el input)
+                const archivoPDF = fileRapido.files[0];
+                pdfName = archivoPDF.name;
+
                 mostrarEstado('cargando');
                 cerrarModal();
 
                 const formData = new FormData();
-                formData.append('file', fileRapido.files[0]);
-                pdfName = fileRapido.files[0].name; // Capturamos el nombre del archivo
+                formData.append('file', archivoPDF);
 
                 try {
                     const uploadRes = await fetch('/ajax/mapa-mental/upload-rapido', {
@@ -175,14 +179,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (data.success) {
+                    // Si el mapa está procesando (PDF grande → cola de trabajos)
+                    if (data.status === 'procesando') {
+                        mapaId = data.mapa_id;
+                        mostrarEstado('cargando');
+                        iniciarPollingStatus(data.mapa_id, pdfName || data.titulo);
+                        return;
+                    }
+
+                    // Si el mapa ya está listo (PDF pequeño → sincrónico)
                     mapaData = data.map_data;
                     mapaId   = data.mapa_id;
 
                     mostrarEstado('mapa');
                     const tituloEl = document.getElementById('mm-titulo-mapa');
-                    
-                    // Aseguramos que el título visible sea el devuelto por BD o el nombre del PDF
-                    const tituloFinal = data.titulo || pdfName || data.map_data.titulo;
+                    const tituloFinal = data.titulo || pdfName || (data.map_data && data.map_data.titulo);
                     if (tituloEl) tituloEl.textContent = tituloFinal;
 
                     if (typeof renderMapa === 'function') {
@@ -228,7 +239,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
     
 
-    // ── Motor de Renderizado Visual a Prueba de Fallos ──
+    // ── Aplanar nodos jerárquicos recursivamente a formato plano ──
+    function aplanarNodosRecursive(nodos) {
+        const resultado = [];
+        let idCounter = 1;
+
+        function procesar(nodo, padreId) {
+            const titulo = nodo.titulo || nodo.texto || nodo.text || nodo.label || nodo.name || '';
+            if (!titulo.trim()) return;
+
+            const nodeId = nodo.id || ('ai_' + (idCounter++));
+            resultado.push({
+                id: String(nodeId),
+                texto: titulo.trim(),
+                titulo: titulo.trim(),
+                padre: padreId
+            });
+
+            // Procesar hijos recursivamente
+            if (Array.isArray(nodo.hijos)) {
+                nodo.hijos.forEach(h => procesar(h, String(nodeId)));
+            }
+            // Procesar sub-nodos (otros nombres posibles)
+            if (Array.isArray(nodo.children)) {
+                nodo.children.forEach(h => procesar(h, String(nodeId)));
+            }
+        }
+
+        nodos.forEach(n => {
+            // Si ya tiene id y padre, probablemente es plano — solo limpiar
+            if (n.id && (n.padre !== undefined || n.parent !== undefined)) {
+                const padre = n.padre || n.parent || null;
+                resultado.push({
+                    id: String(n.id),
+                    texto: n.texto || n.text || n.titulo || n.label || 'Sin texto',
+                    titulo: n.titulo || n.texto || n.text || n.label || '',
+                    padre: padre === null || padre === '' || padre === undefined ? null : String(padre)
+                });
+            } else {
+                // Es jerárquico — aplanar recursivamente
+                procesar(n, null);
+            }
+        });
+
+        return resultado;
+    }
+
+    // ── Motor de Renderizado Visual Premium ──
     window.renderMapa = function(mapData) {
         if (typeof d3 === 'undefined') {
             console.error("D3.js no está cargado.");
@@ -236,34 +293,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const svg = d3.select('#mm-canvas-svg');
-        svg.selectAll('*').remove(); // Limpiar lienzo
+        svg.selectAll('*').remove();
 
-        // 1. EXTRAER DATOS (Soporta múltiples formatos de la IA)
+        // Paleta de colores por profundidad
+        const DEPTH_COLORS = [
+            { bg: '#6366f1', border: '#818cf8', text: '#ffffff' },  // Raíz: indigo
+            { bg: '#0891b2', border: '#22d3ee', text: '#ffffff' },  // Nivel 1: cyan
+            { bg: '#059669', border: '#34d399', text: '#ffffff' },  // Nivel 2: emerald
+            { bg: '#d97706', border: '#fbbf24', text: '#ffffff' },  // Nivel 3: amber
+            { bg: '#7c3aed', border: '#a78bfa', text: '#ffffff' },  // Nivel 4: violet
+        ];
+        const getNodeColor = (depth) => DEPTH_COLORS[Math.min(depth, DEPTH_COLORS.length - 1)];
+
+        // 1. EXTRAER DATOS
         let nodosRAW = [];
-        if (Array.isArray(mapData)) {
-            nodosRAW = mapData;
-        } else if (mapData && Array.isArray(mapData.nodos)) {
-            nodosRAW = mapData.nodos;
-        } else if (mapData && Array.isArray(mapData.nodes)) {
-            nodosRAW = mapData.nodes;
-        }
+        if (Array.isArray(mapData)) nodosRAW = mapData;
+        else if (mapData && Array.isArray(mapData.nodos)) nodosRAW = mapData.nodos;
+        else if (mapData && Array.isArray(mapData.nodes)) nodosRAW = mapData.nodes;
+
+        nodosRAW = aplanarNodosRecursive(nodosRAW);
 
         if (nodosRAW.length === 0) {
-            svg.append('text').attr('x', 50).attr('y', 50).attr('fill', '#ef4444').text('El JSON de la IA llegó vacío.');
+            svg.append('text').attr('x', 50).attr('y', 50).attr('fill', '#ef4444').attr('font-size', '14px').text('No se generaron datos del mapa mental.');
             return;
         }
 
-        // 2. LIMPIEZA BLINDADA
-        const ids = new Set(nodosRAW.map(n => String(n.id || Math.random())));
-        
+        // 2. LIMPIEZA
         let nodosLimpios = nodosRAW.map(n => {
-            let textoReal = n.texto || n.text || n.label || n.name || n.concepto || "Sin texto";
+            let textoReal = n.texto || n.text || n.label || n.name || n.concepto || n.titulo || "Sin texto";
             let padreReal = n.padre || n.parent || null;
-
+            let idReal = n.id || ('auto_' + Math.random().toString(36).substr(2, 9));
             return {
-                id: String(n.id),
+                id: String(idReal),
                 texto: String(textoReal),
-                padre: (padreReal === null || padreReal === "" || !ids.has(String(padreReal))) ? null : String(padreReal)
+                padre: (padreReal === null || padreReal === "" || padreReal === undefined) ? null : String(padreReal)
             };
         });
 
@@ -272,41 +335,52 @@ document.addEventListener('DOMContentLoaded', () => {
         if (raices.length > 1) {
             const idSuperRaiz = "SUPER_ROOT_001";
             let tituloStr = mapData.titulo || mapData.title || "Tema Principal";
-            
             nodosLimpios.push({ id: idSuperRaiz, texto: String(tituloStr), padre: null });
             nodosLimpios = nodosLimpios.map(n => {
                 if (n.padre === null && n.id !== idSuperRaiz) n.padre = idSuperRaiz;
                 return n;
             });
         } else if (raices.length === 0) {
-            nodosLimpios[0].padre = null; 
+            nodosLimpios[0].padre = null;
         }
 
         try {
             // 3. JERARQUÍA D3
             const root = d3.stratify().id(d => d.id).parentId(d => d.padre)(nodosLimpios);
 
-            // 4. MEDIDAS Y LAYOUT (Aumenté un poco el tamaño para que quepa mejor el texto)
-            const nodeWidth = 200; 
-            const nodeHeight = 60; 
-            const treeLayout = d3.tree().nodeSize([nodeHeight + 35, nodeWidth + 60]);
+            // 4. LAYOUT
+            const nodeWidth = 220;
+            const nodeHeight = 64;
+            const treeLayout = d3.tree().nodeSize([nodeHeight + 40, nodeWidth + 70]);
             treeLayout(root);
 
-            // 5. CAPA DE ZOOM
+            // 5. ZOOM
             const g = svg.append('g').attr('class', 'mm-capa-nodos');
             const zoom = d3.zoom()
                 .scaleExtent([0.1, 3])
                 .on('zoom', (event) => g.attr('transform', event.transform));
             svg.call(zoom);
 
-            // 6. DIBUJAR CONEXIONES
+            // 6. DEFINIR DEFS (sombras, gradientes)
+            const defs = svg.append('defs');
+
+            // Filtro de sombra suave
+            const filter = defs.append('filter').attr('id', 'node-shadow').attr('x', '-20%').attr('y', '-20%').attr('width', '140%').attr('height', '140%');
+            filter.append('feDropShadow').attr('dx', '0').attr('dy', '2').attr('stdDeviation', '4').attr('flood-color', 'rgba(0,0,0,0.35)');
+
+            // Filtro de sombra para nodo raíz
+            const filterRoot = defs.append('filter').attr('id', 'root-shadow').attr('x', '-30%').attr('y', '-30%').attr('width', '160%').attr('height', '160%');
+            filterRoot.append('feDropShadow').attr('dx', '0').attr('dy', '3').attr('stdDeviation', '6').attr('flood-color', 'rgba(99,102,241,0.4)');
+
+            // 7. DIBUJAR CONEXIONES con gradiente de color
             g.selectAll('.link')
                 .data(root.links())
                 .join('path')
-                .attr('class', 'link') 
+                .attr('class', 'link')
                 .attr('fill', 'none')
-                .attr('stroke', '#52525b')
-                .attr('stroke-width', 2)
+                .attr('stroke', d => getNodeColor(d.source.depth).border)
+                .attr('stroke-width', d => Math.max(1.5, 3 - d.source.depth * 0.5))
+                .attr('stroke-opacity', 0.6)
                 .attr('d', d => {
                     const startX = d.source.y + nodeWidth;
                     const startY = d.source.x + nodeHeight / 2;
@@ -315,58 +389,74 @@ document.addEventListener('DOMContentLoaded', () => {
                     return `M ${startX} ${startY} C ${(startX + endX) / 2} ${startY}, ${(startX + endX) / 2} ${endY}, ${endX} ${endY}`;
                 });
 
-            // 7. DIBUJAR NODOS
+            // 8. DIBUJAR NODOS con diseño premium
             const node = g.selectAll('.node')
                 .data(root.descendants())
                 .join('g')
                 .attr('class', 'node')
                 .attr('transform', d => `translate(${d.y},${d.x})`)
-                .style('cursor', 'pointer') // Cambia el cursor a manito
+                .style('cursor', 'pointer')
                 .on('click', function(event, d) {
-                    // 1. Quitar el resaltado de todos
                     d3.selectAll('.node rect')
-                        .attr('stroke', n => n.depth === 0 ? '#ef4444' : '#2a2a2a')
-                        .attr('stroke-width', n => n.depth === 0 ? 2.5 : 1.5);
-                    
-                    // 2. Resaltar de AZUL el nodo que acabamos de tocar
+                        .attr('stroke-width', n => n.depth === 0 ? 2 : 1.5)
+                        .style('filter', n => n.depth === 0 ? 'url(#root-shadow)' : 'url(#node-shadow)');
                     d3.select(this).select('rect')
                         .attr('stroke', '#3b82f6')
-                        .attr('stroke-width', 3);
-                    
-                    // 3. Guardar su ID
+                        .attr('stroke-width', 3)
+                        .style('filter', 'url(#root-shadow)');
                     nodoSeleccionadoId = d.id;
-                    event.stopPropagation(); // Evita que el clic se propague al fondo
+                    event.stopPropagation();
                 });
 
+            // Fondo del nodo con gradiente por profundidad
             node.append('rect')
-                .attr('width', nodeWidth)
+                .attr('width', d => d.depth === 0 ? nodeWidth + 20 : nodeWidth)
                 .attr('height', nodeHeight)
-                .attr('rx', 8)
-                .attr('fill', '#161616')
-                .attr('stroke', d => d.depth === 0 ? '#ef4444' : '#2a2a2a')
-                .attr('stroke-width', d => d.depth === 0 ? 2.5 : 1.5);
+                .attr('rx', 12)
+                .attr('x', d => d.depth === 0 ? -10 : 0)
+                .attr('fill', d => getNodeColor(d.depth).bg)
+                .attr('stroke', d => getNodeColor(d.depth).border)
+                .attr('stroke-width', d => d.depth === 0 ? 2 : 1.5)
+                .style('filter', d => d.depth === 0 ? 'url(#root-shadow)' : 'url(#node-shadow)');
 
-            // 🌟 SOLUCIÓN AL TEXTO: Usamos foreignObject para que actúe como un div HTML normal
+            // Icono de profundidad (pequeño punto)
+            node.filter(d => d.depth > 0)
+                .append('circle')
+                .attr('cx', 14)
+                .attr('cy', nodeHeight / 2)
+                .attr('r', 3)
+                .attr('fill', d => getNodeColor(d.depth).border)
+                .attr('opacity', 0.7);
+
+            // Texto del nodo — contenedor flex que centra el texto interno
             node.append('foreignObject')
-                .attr('width', nodeWidth)
+                .attr('width', d => d.depth === 0 ? nodeWidth : nodeWidth - 16)
                 .attr('height', nodeHeight)
+                .attr('x', d => d.depth === 0 ? 0 : 8)
                 .append('xhtml:div')
-                .style('width', `${nodeWidth}px`)
+                .style('width', '100%')
                 .style('height', `${nodeHeight}px`)
                 .style('display', 'flex')
                 .style('align-items', 'center')
                 .style('justify-content', 'center')
-                .style('padding', '0 10px') // Margen interno para que no pegue en los bordes
+                .style('padding', '8px 12px')
                 .style('box-sizing', 'border-box')
-                .style('color', '#f4f4f5')
-                .style('font-size', '12px')
-                .style('font-family', 'sans-serif')
-                .style('font-weight', d => d.depth === 0 ? '700' : '500')
+                .attr('title', d => d.data.texto)
+                .append('xhtml:span')
+                .style('color', d => getNodeColor(d.depth).text)
+                .style('font-size', d => d.depth === 0 ? '14px' : d.depth === 1 ? '12px' : '11px')
+                .style('font-family', "'Inter', 'Segoe UI', sans-serif")
+                .style('font-weight', d => d.depth === 0 ? '700' : d.depth === 1 ? '600' : '400')
                 .style('text-align', 'center')
+                .style('line-height', '1.3')
+                .style('display', '-webkit-box')
+                .style('-webkit-line-clamp', '3')
+                .style('-webkit-box-orient', 'vertical')
                 .style('overflow', 'hidden')
+                .style('word-break', 'break-word')
                 .text(d => d.data.texto);
 
-            // 8. AUTO-ENCUADRE Y BOTONES DE ZOOM
+            // 9. AUTO-ENCUADRE
             function autoFit() {
                 const svgNode = svg.node();
                 if (!svgNode) return;
@@ -375,37 +465,83 @@ document.addEventListener('DOMContentLoaded', () => {
                 const bounds = g.node().getBBox();
 
                 if (bounds.width === 0) {
-                    const safeView = d3.zoomIdentity.translate(width / 3, height / 2).scale(0.85);
-                    svg.call(zoom.transform, safeView);
+                    svg.call(zoom.transform, d3.zoomIdentity.translate(width / 3, height / 2).scale(0.85));
                     return;
                 }
 
                 const dx = bounds.width, dy = bounds.height;
                 const x = bounds.x + dx / 2, y = bounds.y + dy / 2;
                 let scale = 0.85 / Math.max(dx / width, dy / height);
-                scale = Math.max(0.2, Math.min(1.1, scale));
+                scale = Math.max(0.15, Math.min(1.2, scale));
 
                 const transform = d3.zoomIdentity.translate(width / 2 - scale * x, height / 2 - scale * y).scale(scale);
-                svg.transition().duration(600).call(zoom.transform, transform);
+                svg.transition().duration(700).call(zoom.transform, transform);
 
-                // 🌟 SOLUCIÓN A LOS BOTONES: Usar Javascript nativo evita el error que detenía el mapa
+                // Botones de zoom
                 const btnZoomIn = document.getElementById('btn-zoom-in');
                 const btnZoomOut = document.getElementById('btn-zoom-out');
                 const btnZoomFit = document.getElementById('btn-zoom-fit');
-
                 if(btnZoomIn) btnZoomIn.onclick = () => svg.transition().call(zoom.scaleBy, 1.3);
                 if(btnZoomOut) btnZoomOut.onclick = () => svg.transition().call(zoom.scaleBy, 0.7);
                 if(btnZoomFit) btnZoomFit.onclick = () => svg.transition().call(zoom.transform, transform);
             }
 
             autoFit();
-            setTimeout(autoFit, 200);
+            setTimeout(autoFit, 300);
 
         } catch (error) {
             console.error("Error crítico construyendo la jerarquía:", error);
             svg.append('text').attr('x', 40).attr('y', 40).attr('fill', '#ef4444').text("No se pudo dibujar el mapa (revisa F12).");
         }
     };
+
+    // ── Polling para mapas en proceso (PDFs grandes) ──────────────
+    function iniciarPollingStatus(mapId, titulo) {
+        // Evitar múltiples intervalos concurrentes
+        if (pollingInterval) clearInterval(pollingInterval);
+        let intentos = 0;
+        const maxIntentos = 120; // Máx 10 minutos (5s x 120)
+
+        pollingInterval = setInterval(async () => {
+            intentos++;
+
+            if (intentos > maxIntentos) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+                alert("El mapa mental está tomando demasiado tiempo. Intenta con un documento más pequeño.");
+                mostrarEstado('vacio');
+                return;
+            }
+
+            try {
+                const res = await fetch(`/ajax/mapa-mental/${mapId}/status`);
+                const data = await res.json();
+
+                if (data.status === 'activo') {
+                    clearInterval(pollingInterval);
+                    pollingInterval = null;
+                    mapaData = data.map_data;
+                    mapaId = data.mapa_id || mapId;
+
+                    mostrarEstado('mapa');
+                    const tituloEl = document.getElementById('mm-titulo-mapa');
+                    if (tituloEl) tituloEl.textContent = data.titulo || titulo;
+
+                    if (typeof renderMapa === 'function') {
+                        renderMapa(mapaData, true);
+                    }
+                } else if (data.status === 'error') {
+                    clearInterval(pollingInterval);
+                    pollingInterval = null;
+                    alert("Hubo un error al procesar el mapa mental. Intenta con otro documento.");
+                    mostrarEstado('vacio');
+                }
+                // Si sigue 'procesando', continuamos el polling
+            } catch (err) {
+                console.error("Error en polling de mapa mental:", err);
+            }
+        }, 5000); // Cada 5 segundos
+    }
 
     // ── Carga de datos Inicial ────────────────────────────────────
     const mapaInicial = window.mmMapaInicial;
