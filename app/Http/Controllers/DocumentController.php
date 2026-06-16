@@ -8,11 +8,14 @@ use App\Models\DocumentChunk;
 use App\Models\ChatMessage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Smalot\PdfParser\Parser;
+use App\Traits\ConnectsToLMStudio;
 
 class DocumentController extends Controller
 {
+    use ConnectsToLMStudio;
     public function index()
     {
         $documentos = Auth::check() ? Document::where('user_id', Auth::id())->latest()->get() : collect();
@@ -170,31 +173,25 @@ class DocumentController extends Controller
             }
         }
 
-        // Construimos el bloque de texto final que viajará a n8n
+        // Construimos el bloque de texto final que viajará a la IA
         foreach ($chunksRelevantes as $chunk) {
             $contextoParaLaIA .= $chunk->chunk_text . "\n\n";
         }
-        $n8nWebhookUrl = 'http://127.0.0.1:5678/webhook/playdf-chat';
 
         try {
-            $response = Http::timeout(300)->post($n8nWebhookUrl, [
-                'model' => 'meta-llama-3-8b-instruct',
-                'question' => $request->question,
-                'context' => $contextoParaLaIA
-            ]);
+            $systemPrompt = "Eres un asistente experto en análisis de documentos. Responde preguntas sobre el contenido del documento de forma clara y concisa. Si la información no está en el texto, indica que no puedes responderla basándote en el documento proporcionado.";
+            $userMessage = "Contexto del documento:\n\n{$contextoParaLaIA}\n\nPregunta: {$request->question}";
 
-            if ($response->successful()) {
-                $resultado = $response->json();
-                $textoIA = $resultado['answer'] ?? ($resultado['choices'][0]['message']['content'] ?? null);
+            $resultado = $this->llamarLMStudio($systemPrompt, $userMessage, 0.7, 1024);
 
-                if (!$textoIA) {
-                    $textoIA = "⚠️ Error en formato JSON de n8n.";
-                }
+            if ($resultado) {
+                $textoIA = $resultado['content'];
             } else {
-                $textoIA = "⚠️ El servidor de n8n denegó la petición (Código HTTP: " . $response->status() . ").";
+                $textoIA = "⚠️ No se pudo conectar con el motor de IA. Intenta más tarde.";
             }
         } catch (\Exception $e) {
-            $textoIA = "🔌 Error de comunicación con n8n: " . $e->getMessage();
+            Log::error('[Chat] Error al llamar LM Studio: ' . $e->getMessage());
+            $textoIA = "🔌 Error de comunicación con la IA: " . $e->getMessage();
         }
 
         ChatMessage::create([

@@ -170,7 +170,7 @@ class SoloExamController extends Controller
     }
 
     /**
-     * API: Marcar pregunta como difícil (para el ahorcado).
+     * API: Marcar pregunta como difícil (para el ahorcado) — versión web.
      */
     public function marcarDificil(Request $request)
     {
@@ -184,17 +184,61 @@ class SoloExamController extends Controller
         $userId = Auth::id();
         if (!$userId) return response()->json(['error' => 'No autenticado'], 401);
 
+        return $this->procesarMarcarDificil($request, $userId);
+    }
+
+    /**
+     * API: Marcar pregunta como difícil — versión Android (sin auth:sanctum).
+     */
+    public function apiMarcarDificil(Request $request)
+    {
+        $request->validate([
+            'room_code'      => 'required|string',
+            'question_index' => 'required|integer|min:0',
+            'pregunta'       => 'required|string',
+            'respuesta'      => 'required|string',
+            'user_id'        => 'required|integer',
+        ]);
+
+        return $this->procesarMarcarDificil($request, $request->input('user_id'));
+    }
+
+    /**
+     * Lógica compartida para marcar una pregunta como difícil.
+     */
+    protected function procesarMarcarDificil(Request $request, int $userId): \Illuminate\Http\JsonResponse
+    {
         $set = StudyCardSet::firstOrCreate(
             ['user_id' => $userId, 'title' => 'Examen Individual - Difíciles'],
             ['status' => 'activo']
         );
 
-        $existingDifficult = StudyCardDifficult::where('user_id', $userId)
-            ->where('study_card_set_id', $set->id)
-            ->where('card_index', $request->question_index)->first();
+        // Verificar si ya existe una StudyCard con el mismo contenido en este set
+        $existingCard = StudyCard::where('study_card_set_id', $set->id)
+            ->where('front', $request->pregunta)
+            ->where('back', $request->respuesta)
+            ->first();
 
-        if ($existingDifficult) {
-            return response()->json(['success' => true, 'message' => 'Ya marcada como difícil']);
+        if ($existingCard) {
+            // La tarjeta ya existe; verificar si ya está marcada como difícil
+            $existingDifficult = StudyCardDifficult::where('user_id', $userId)
+                ->where('study_card_set_id', $set->id)
+                ->where('card_index', $existingCard->id)->first();
+
+            if ($existingDifficult) {
+                return response()->json(['success' => true, 'message' => 'Ya marcada como difícil']);
+            }
+
+            $existingCardIndex = StudyCard::where('study_card_set_id', $set->id)
+                ->orderBy('id')->pluck('id')->search($existingCard->id);
+
+            StudyCardDifficult::create([
+                'user_id'           => $userId,
+                'study_card_set_id' => $set->id,
+                'card_index'        => $existingCardIndex,
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Pregunta marcada como difícil para el ahorcado']);
         }
 
         $card = StudyCard::create([
@@ -203,10 +247,14 @@ class SoloExamController extends Controller
             'back'              => $request->respuesta,
         ]);
 
+        // card_index = posición de la tarjeta en el set (ordenado por id)
+        $cardIndex = StudyCard::where('study_card_set_id', $set->id)
+            ->orderBy('id')->pluck('id')->search($card->id);
+
         StudyCardDifficult::create([
             'user_id'           => $userId,
             'study_card_set_id' => $set->id,
-            'card_index'        => $request->question_index,
+            'card_index'        => $cardIndex,
         ]);
 
         return response()->json(['success' => true, 'message' => 'Pregunta marcada como difícil para el ahorcado']);
@@ -373,13 +421,30 @@ class SoloExamController extends Controller
 
     protected function obtenerContextoRAG(int $documentId, int $numQuestions): array
     {
+        $documento = \App\Models\Document::find($documentId);
+
+        // Obtener chunks de la tabla document_chunks
         $totalChunks = \App\Models\DocumentChunk::where('document_id', $documentId)->count();
+
+        // Si no hay chunks, intentar usar extracted_text del documento como fallback
         if ($totalChunks === 0) {
-            return ['batches' => [['context' => 'El documento está vacío.', 'questions' => $numQuestions]]];
+            $extractedText = trim($documento->extracted_text ?? '');
+
+            // Si extracted_text es genérico o está vacío, no hay contenido procesable
+            if (empty($extractedText) || $extractedText === 'Texto guardado en chunks' || $extractedText === 'Texto guardado en chunks desde App') {
+                return ['batches' => [['context' => 'El documento no tiene texto procesable. Asegúrate de que el PDF fue cargado correctamente.', 'questions' => $numQuestions]]];
+            }
+
+            // Usar extracted_text directamente: dividirlo en chunks al vuelo
+            $totalChunks = 0; // Forzar el camino de chunks
+            $chunks = $this->dividirTextoEnChunks($extractedText);
+            Log::info("[SoloExam] No hay chunks en BD para doc {$documentId}, usando extracted_text (" . mb_strlen($extractedText) . " chars, " . count($chunks) . " fragmentos)");
+        } else {
+            $chunks = \App\Models\DocumentChunk::where('document_id', $documentId)
+                ->orderBy('id', 'asc')->pluck('chunk_text')->toArray();
         }
 
-        $chunks = \App\Models\DocumentChunk::where('document_id', $documentId)
-            ->orderBy('id', 'asc')->pluck('chunk_text')->toArray();
+
         $maxCharsPorBatch = 7000;
 
         $textoCompleto = implode("\n\n", $chunks);
@@ -431,6 +496,36 @@ class SoloExamController extends Controller
         return "INSTRUCCIONES IMPORTANTES: Genera preguntas SOLO sobre el CONTENIDO TEMÁTICO del texto. "
             . "NUNCA preguntes sobre el archivo, documento, PDF o dónde está almacenado. "
             . "Evalúa CONOCIMIENTO REAL sobre los temas del texto.\n\n";
+    }
+
+    /**
+     * Divide texto largo en chunks con solapamiento (overlap) para procesamiento por lotes.
+     * Copiado del patrón usado en DocumentController::upload() y ChunkableMindMap.
+     */
+    protected function dividirTextoEnChunks(string $texto, int $maxCaracteres = 1500, int $palabrasSolapamiento = 40): array
+    {
+        $textoLimpio = preg_replace('/\s+/', ' ', $texto);
+        $palabrasArray = explode(' ', $textoLimpio);
+        $fragmentos = [];
+        $chunkActual = [];
+        $longitudActual = 0;
+
+        foreach ($palabrasArray as $palabra) {
+            $chunkActual[] = $palabra;
+            $longitudActual += mb_strlen($palabra) + 1;
+
+            if ($longitudActual >= $maxCaracteres) {
+                $fragmentos[] = implode(' ', $chunkActual);
+                $chunkActual = array_slice($chunkActual, -$palabrasSolapamiento);
+                $longitudActual = mb_strlen(implode(' ', $chunkActual));
+            }
+        }
+
+        if (!empty($chunkActual)) {
+            $fragmentos[] = implode(' ', $chunkActual);
+        }
+
+        return $fragmentos;
     }
 
     protected function limpiarSalasIndividualesExpiradas(): void

@@ -8,10 +8,13 @@ use App\Models\Document;
 use App\Models\DocumentChunk;
 use App\Models\ChatMessage;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Smalot\PdfParser\Parser;
+use App\Traits\ConnectsToLMStudio;
 
 class DocumentController extends Controller
 {
+    use ConnectsToLMStudio;
     /**
      * 📱 NUEVO MÉTODO: Recibe el PDF de Android, extrae el texto, 
      * lo divide en chunks con overlap y lo asocia al docente.
@@ -22,6 +25,8 @@ class DocumentController extends Controller
             'user_id' => 'required|integer',
             'file'    => 'required|mimes:pdf|max:10000',
         ]);
+
+        // La existencia del usuario ya se valida en el middleware ValidateUserId
 
         try {
             $file = $request->file('file');
@@ -78,6 +83,11 @@ class DocumentController extends Controller
                 'message' => '✅ PDF recibido, procesado y fragmentado con éxito en Laragon.'
             ], 200);
         } catch (\Exception $e) {
+            Log::error('[Subir PDF] Error al procesar: ' . $e->getMessage(), [
+                'user_id' => $request->input('user_id'),
+                'file' => $request->file('file')?->getClientOriginalName(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Error al procesar el archivo en el servidor: ' . $e->getMessage()
@@ -189,26 +199,19 @@ class DocumentController extends Controller
 
             $textoIA = "";
             try {
-                $urlN8n = 'http://127.0.0.1:5678/webhook/playdf-chat';
+                $systemPrompt = "Eres un asistente experto en análisis de documentos. Responde preguntas sobre el contenido del documento de forma clara y concisa. Si la información no está en el texto, indica que no puedes responderla basándote en el documento proporcionado.";
+                $userMessage = "Contexto del documento:\n\n{$contextoParaLaIA}\n\nPregunta: {$request->question}";
 
-                $response = Http::timeout(300)->post($urlN8n, [
-                    'model' => 'meta-llama-3-8b-instruct',
-                    'question' => $request->question,
-                    'context' => $contextoParaLaIA
-                ]);
+                $resultado = $this->llamarLMStudio($systemPrompt, $userMessage, 0.7, 1024);
 
-                if ($response->successful()) {
-                    $resultado = $response->json();
-                    $textoIA = $resultado['answer'] ?? ($resultado['choices'][0]['message']['content'] ?? ($resultado['response'] ?? null));
-
-                    if (!$textoIA) {
-                        $textoIA = "⚠️ Error en formato JSON de n8n desde el móvil.";
-                    }
+                if ($resultado) {
+                    $textoIA = $resultado['content'];
                 } else {
-                    $textoIA = "⚠️ n8n respondió con un error: " . $response->status();
+                    $textoIA = "⚠️ No se pudo conectar con el motor de IA. Intenta más tarde.";
                 }
             } catch (\Exception $e) {
-                $textoIA = "🔌 Error al conectar con n8n: " . $e->getMessage();
+                Log::error('[Chat API] Error al llamar LM Studio: ' . $e->getMessage());
+                $textoIA = "🔌 Error de comunicación con la IA: " . $e->getMessage();
             }
 
             ChatMessage::create([

@@ -9,9 +9,11 @@ use App\Models\StudentResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Traits\ConnectsToLMStudio;
 
 class QuizController extends Controller
 {
+    use ConnectsToLMStudio;
     // 1. Mostrar la vista para configurar una nueva sala
     public function configurar()
     {
@@ -187,38 +189,29 @@ class QuizController extends Controller
             }
         }
 
-        // 🔴 CAP DURO DE SEGURIDAD para contexto que se envía a n8n
+        // 🔴 CAP DURO DE SEGURIDAD para contexto
         if (mb_strlen($textoPdf) > 5000) {
             $charsBefore = mb_strlen($textoPdf);
             $textoPdf = mb_substr($textoPdf, 0, 5000);
             Log::warning("apiGenerateQuestions contexto recortado de {$charsBefore} a 5000 chars para sala {$code}");
         }
 
-        $n8nWebhookUrl = 'http://127.0.0.1:5678/webhook/playdf-examen-sala';
-
         try {
             $room->update(['status' => 'generando']);
 
-            $response = Http::timeout(300)->post($n8nWebhookUrl, [
-                'code'          => $code,
-                'pdf_name'      => $room->pdf_name,
-                'num_questions' => $numQuestions + 5,
-                'difficulty'    => $difficulty,
-                'context'       => $textoPdf,
-                'batch_index'   => 0,
-                'total_batches' => 1
-            ]);
+            $systemPrompt = $this->getSystemPromptExamen($difficulty);
+            $userMessage = "Genera EXACTAMENTE " . ($numQuestions + 5) . " preguntas diferentes basándote EXCLUSIVAMENTE en el siguiente texto:\n\n\"\"\"\n{$textoPdf}\n\"\"\"";
 
-            if ($response->successful()) {
-                $data           = $response->json();
+            $resultado = $this->llamarLMStudio($systemPrompt, $userMessage, 0.6, 2048);
+
+            if ($resultado) {
+                $content = $resultado['content'];
                 $questionsArray = null;
 
-                if (isset($data['questions'])) {
-                    $questionsArray = is_string($data['questions'])
-                        ? json_decode($data['questions'], true)
-                        : $data['questions'];
-                } elseif (isset($data['choices'][0]['message']['content'])) {
-                    $questionsArray = json_decode($data['choices'][0]['message']['content'], true);
+                if (preg_match('/\[.*\]/s', $content, $matches)) {
+                    $questionsArray = json_decode($matches[0], true);
+                } else {
+                    $questionsArray = json_decode($content, true);
                 }
 
                 if (is_array($questionsArray)) {
@@ -234,84 +227,16 @@ class QuizController extends Controller
 
                     return response()->json(['success' => true, 'status' => 'espera']);
                 }
-
-                return response()->json(['success' => true, 'status' => 'generando']);
             }
 
-            return response()->json(['error' => 'n8n devolvió código de error: ' . $response->status()], 500);
+            return response()->json(['success' => true, 'status' => 'generando']);
         } catch (\Exception $e) {
-            Log::error("Error en motor de IA n8n: " . $e->getMessage());
+            Log::error("Error en motor de IA: " . $e->getMessage());
             return response()->json(['error' => 'Error de conexión con IA.', 'details' => $e->getMessage()], 500);
         }
     }
 
-    // 8. Webhook de regreso (n8n callback - soporta batches)
-    public function apiWebhookN8n(Request $request)
-    {
-        $code         = $request->input('code');
-        $questionsRaw = $request->input('questions');
-        $batchIndex   = $request->input('batch_index');
-        $totalBatches = $request->input('total_batches');
-
-        $room = Room::where('code', $code)->first();
-
-        if (!$room) {
-            return response()->json(['error' => 'Sala no encontrada'], 404);
-        }
-
-        // Parsear preguntas desde el JSON
-        if (is_string($questionsRaw)) {
-            if (preg_match('/\[.*\]/s', $questionsRaw, $matches)) {
-                $parsedQuestions = json_decode($matches[0], true);
-            } else {
-                $parsedQuestions = json_decode($questionsRaw, true);
-            }
-        } else {
-            $parsedQuestions = $questionsRaw;
-        }
-
-        if (!$parsedQuestions || !is_array($parsedQuestions)) {
-            return response()->json(['error' => 'Formato de preguntas inválido'], 400);
-        }
-
-        // MODO MULTI-BATCH: acumular preguntas
-        if ($batchIndex !== null && $totalBatches !== null && $totalBatches > 1) {
-            $existingQuestions = $room->questions ?? [];
-            if (!is_array($existingQuestions)) {
-                $existingQuestions = [];
-            }
-
-            // Acumular nuevas preguntas
-            $allQuestions = array_merge($existingQuestions, $parsedQuestions);
-
-            // Si es el último batch, sanitizar y marcar como listo
-            if ((int) $batchIndex >= (int) $totalBatches - 1) {
-                $allQuestions = $this->sanitizarPreguntas($allQuestions, $room->num_questions ?? 10);
-                $room->update([
-                    'questions' => $allQuestions,
-                    'status'    => 'espera'
-                ]);
-                Log::info("n8n multi-batch COMPLETO para sala {$code} (batch {$batchIndex}/{$totalBatches})");
-            } else {
-                $room->update([
-                    'questions' => $allQuestions,
-                    'status'    => 'generando'
-                ]);
-                Log::info("n8n multi-batch PARCIAL para sala {$code} (batch {$batchIndex}/{$totalBatches})");
-            }
-        } else {
-            // MODO SINGLE-BATCH: comportamiento original
-            $parsedQuestions = $this->sanitizarPreguntas($parsedQuestions, $room->num_questions ?? 10);
-            $room->update([
-                'questions' => $parsedQuestions,
-                'status'    => 'espera'
-            ]);
-        }
-
-        return response()->json(['success' => true, 'message' => 'Preguntas guardadas con éxito']);
-    }
-
-    // 9. Iniciar Sala
+    // 8. Iniciar Sala
     public function apiStartRoom($code)
     {
         $room = Room::where('code', $code)->firstOrFail();
@@ -505,88 +430,6 @@ class QuizController extends Controller
             . "    \"correcta\": 0\n"
             . "  }\n"
             . "]";
-    }
-
-    /**
-     * Llama a LM Studio DIRECTAMENTE (sin pasar por n8n).
-     *
-     * @deprecated Ahora se usa el Job GenerateQuestionsBatch (app/Jobs)
-     *             para procesamiento asíncrono vía Laravel Queue.
-     *             Este método se deja por compatibilidad pero ya no se usa.
-     *
-     * @return array|null Array de preguntas parseadas, o null si falló.
-     */
-    protected function llamarLMStudioDirecto(
-        string $contexto,
-        int $numQuestions,
-        string $difficulty,
-        string $code,
-        int $batchIndex,
-        int $totalBatches
-    ): ?array {
-        $lmStudioUrl = 'http://26.231.46.210:1234/v1/chat/completions';
-        $apiKey = 'Bearer sk-lm-CZRjBleo:wOFAZjS49eyR47dut6z5';
-
-        $systemPrompt = $this->getSystemPromptExamen($difficulty);
-
-        $payload = [
-            'model' => 'meta-llama-3-8b-instruct',
-            'messages' => [
-                [
-                    'role' => 'system',
-                    'content' => $systemPrompt
-                ],
-                [
-                    'role' => 'user',
-                    'content' => "Genera EXACTAMENTE {$numQuestions} preguntas diferentes basándote EXCLUSIVAMENTE en el siguiente texto:\n\n\"\"\"\n{$contexto}\n\"\"\""
-                ]
-            ],
-            'temperature' => 0.6,
-        ];
-
-        try {
-            Log::info("LM Studio directo: sala {$code}, batch {$batchIndex}/{$totalBatches}, solicitando {$numQuestions} preguntas");
-
-            $response = Http::withHeaders([
-                'Authorization' => $apiKey,
-                'Content-Type' => 'application/json',
-            ])->timeout(300)->post($lmStudioUrl, $payload);
-
-            if (!$response->successful()) {
-                Log::error("LM Studio directo falló (HTTP {$response->status()}): para sala {$code} batch {$batchIndex}");
-                return null;
-            }
-
-            $data = $response->json();
-
-            // Extraer contenido de la respuesta
-            $content = $data['choices'][0]['message']['content'] ?? null;
-
-            if (!$content) {
-                Log::error("LM Studio directo: respuesta sin contenido para sala {$code} batch {$batchIndex}");
-                return null;
-            }
-
-            // Parsear JSON del contenido
-            $questions = null;
-            if (preg_match('/\[.*\]/s', $content, $matches)) {
-                $questions = json_decode($matches[0], true);
-            } else {
-                $questions = json_decode($content, true);
-            }
-
-            if (!is_array($questions)) {
-                Log::error("LM Studio directo: JSON inválido en sala {$code} batch {$batchIndex}. Respuesta: " . substr($content, 0, 200));
-                return null;
-            }
-
-            Log::info("LM Studio directo EXITOSO: sala {$code}, batch {$batchIndex}/{$totalBatches}, generadas " . count($questions) . " preguntas");
-            return $questions;
-
-        } catch (\Exception $e) {
-            Log::error("LM Studio directo EXCEPCIÓN: sala {$code} batch {$batchIndex}: " . $e->getMessage());
-            return null;
-        }
     }
 
     /*

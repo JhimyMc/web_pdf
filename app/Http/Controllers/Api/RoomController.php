@@ -18,7 +18,7 @@ class RoomController extends Controller
         // Validamos lo que llega de la App (Retrofit)
         $request->validate([
             'pdf_name' => 'nullable|string',
-            'questions' => 'nullable|string', // Por ahora lo recibimos, aunque usaremos n8n luego
+            'questions' => 'nullable|string',
         ]);
 
         // Generar código único de 5 caracteres en mayúsculas
@@ -32,20 +32,8 @@ class RoomController extends Controller
             'status' => 'generando',
         ]);
 
-        // ----- CONEXIÓN CON n8n (Fase 3) -----
-        // Aquí le enviamos el texto extraído a n8n. 
-        // Descomenta y cambia la URL cuando tu flujo de n8n esté listo.
-        /*
-        $webhookUrl = 'https://TU_URL_DE_N8N/webhook/generar-examen';
-        try {
-            Http::timeout(3)->post($webhookUrl, [
-                'room_code' => $code,
-                'text' => $request->input('questions', '') // El texto del PDF
-            ]);
-        } catch (\Exception $e) {
-            Log::error("Error al contactar a n8n: " . $e->getMessage());
-        }
-        */
+        // La generación de preguntas ahora se maneja por separado
+        // vía LM Studio directo (GenerateQuestionsBatch job)
 
         return response()->json([
             'message' => 'Sala creada exitosamente',
@@ -53,29 +41,7 @@ class RoomController extends Controller
         ], 201);
     }
 
-    // 2. Webhook que recibe las preguntas desde n8n
-    public function updateQuestions(Request $request)
-    {
-        $request->validate([
-            'room_code' => 'required|string',
-            'questions' => 'required|array'
-        ]);
-
-        $room = Room::where('code', $request->room_code)->first();
-
-        if (!$room) {
-            return response()->json(['error' => 'Sala no encontrada'], 404);
-        }
-
-        $room->update([
-            'questions' => $request->questions,
-            'status' => 'espera' // ¡Listo para que entren los alumnos!
-        ]);
-
-        return response()->json(['message' => 'Preguntas generadas por IA guardadas correctamente']);
-    }
-
-    // 3. Monitoreo (Android App y Web)
+    // 2. Monitoreo (Android App y Web)
     public function getStatus($code)
     {
         $room = Room::where('code', $code)->first();

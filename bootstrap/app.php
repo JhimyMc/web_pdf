@@ -12,7 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'validate.user_id' => \App\Http\Middleware\ValidateUserId::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

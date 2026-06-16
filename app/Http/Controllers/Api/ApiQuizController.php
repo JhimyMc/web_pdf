@@ -117,9 +117,7 @@ class ApiQuizController extends QuizController
             ]);
 
             if ($totalBatches === 1) {
-                // 🟢 1 SOLO BATCH → n8n síncrono (rápido, siempre funciona)
-                $n8nWebhookUrl = 'http://127.0.0.1:5678/webhook/playdf-examen-sala';
-
+                // 🟢 1 SOLO BATCH → LM Studio síncrono (directo)
                 $contextoBatch = $batches[0]['context'];
                 if (mb_strlen($contextoBatch) > 7000) {
                     $contextoBatch = mb_substr($contextoBatch, 0, 7000);
@@ -128,32 +126,43 @@ class ApiQuizController extends QuizController
                 $pregSolicitadas = $batches[0]['questions'] + min(3, $batches[0]['questions']);
 
                 try {
-                    $response = Http::timeout(300)->post($n8nWebhookUrl, [
-                        'code'          => $code,
-                        'pdf_name'      => $room->pdf_name,
-                        'num_questions' => $pregSolicitadas,
-                        'difficulty'    => $request->difficulty,
-                        'context'       => $contextoBatch,
-                        'batch_index'   => 0,
-                        'total_batches' => 1
-                    ]);
+                    $systemPrompt = $this->getSystemPromptExamen($request->difficulty);
+                    $userMessage = "Genera EXACTAMENTE {$pregSolicitadas} preguntas diferentes basándote EXCLUSIVAMENTE en el siguiente texto:\n\n\"\"\"\n{$contextoBatch}\n\"\"\"";
 
-                    if ($response->successful()) {
-                        $room->update([
-                            'total_batches'    => 1,
-                            'batches_completed'=> 1,
-                        ]);
-                        return response()->json(['success' => true, 'code' => $code], 201);
+                    $resultado = $this->llamarLMStudio($systemPrompt, $userMessage, 0.6, 2048);
+
+                    if ($resultado) {
+                        $content = $resultado['content'];
+                        $questionsArray = null;
+
+                        if (preg_match('/\[.*\]/s', $content, $matches)) {
+                            $questionsArray = json_decode($matches[0], true);
+                        } else {
+                            $questionsArray = json_decode($content, true);
+                        }
+
+                        if (is_array($questionsArray)) {
+                            $questionsArray = $this->sanitizarPreguntas($questionsArray, $request->num_questions);
+                            if (!empty($questionsArray)) {
+                                $room->update([
+                                    'questions'          => $questionsArray,
+                                    'total_batches'      => 1,
+                                    'batches_completed'  => 1,
+                                    'status'             => 'espera',
+                                ]);
+                                return response()->json(['success' => true, 'code' => $code], 201);
+                            }
+                        }
                     }
 
-                    Log::warning("n8n single-batch falló HTTP " . $response->status() . " para sala {$code}");
+                    Log::warning("LM Studio single-batch falló o devolvió preguntas inválidas para sala {$code}");
                     $room->update(['status' => 'configurando']);
                     return response()->json(['success' => false, 'error' => 'Error de conexión con la IA.'], 500);
 
                 } catch (\Exception $e) {
-                    Log::error("n8n single-batch error: " . $e->getMessage());
+                    Log::error("LM Studio single-batch error: " . $e->getMessage());
                     $room->update(['status' => 'configurando']);
-                    return response()->json(['success' => false, 'error' => 'Error de conexión con n8n.'], 500);
+                    return response()->json(['success' => false, 'error' => 'Error de conexión con la IA.'], 500);
                 }
             }
 
@@ -249,8 +258,7 @@ class ApiQuizController extends QuizController
             ]);
 
             if ($totalBatches === 1) {
-                // 🟢 1 SOLO BATCH → n8n síncrono
-                $n8nWebhookUrl = 'http://127.0.0.1:5678/webhook/playdf-examen-sala';
+                // 🟢 1 SOLO BATCH → LM Studio síncrono (directo)
                 $contextoBatch = $batches[0]['context'];
                 if (mb_strlen($contextoBatch) > 7000) {
                     $contextoBatch = mb_substr($contextoBatch, 0, 7000);
@@ -258,17 +266,12 @@ class ApiQuizController extends QuizController
                 $pregSolicitadas = $batches[0]['questions'] + min(3, $batches[0]['questions']);
 
                 try {
-                    $response = Http::timeout(300)->post($n8nWebhookUrl, [
-                        'code'          => $code,
-                        'pdf_name'      => $request->pdf_name,
-                        'num_questions' => $pregSolicitadas,
-                        'difficulty'    => $request->difficulty,
-                        'context'       => $contextoBatch,
-                        'batch_index'   => 0,
-                        'total_batches' => 1
-                    ]);
+                    $systemPrompt = $this->getSystemPromptExamen($request->difficulty);
+                    $userMessage = "Genera EXACTAMENTE {$pregSolicitadas} preguntas diferentes basándote EXCLUSIVAMENTE en el siguiente texto:\n\n\"\"\"\n{$contextoBatch}\n\"\"\"";
 
-                    if ($response->successful()) {
+                    $resultado = $this->llamarLMStudio($systemPrompt, $userMessage, 0.6, 2048);
+
+                    if ($resultado) {
                         $room->update([
                             'total_batches'    => 1,
                             'batches_completed'=> 1,
@@ -279,7 +282,7 @@ class ApiQuizController extends QuizController
                     $room->update(['status' => 'configurando']);
                     return response()->json(['success' => false, 'error' => 'Error de conexión con la IA.'], 500);
                 } catch (\Exception $e) {
-                    Log::error("App n8n single-batch error: " . $e->getMessage());
+                    Log::error("App LM Studio single-batch error: " . $e->getMessage());
                     $room->update(['status' => 'configurando']);
                     return response()->json(['success' => false, 'error' => 'Error de conexión.'], 500);
                 }

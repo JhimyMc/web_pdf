@@ -37,6 +37,8 @@ class GamificationController extends Controller
     {
         $request->validate(['user_id' => 'required|integer']);
 
+        // La existencia del usuario ya se valida en el middleware ValidateUserId
+
         $gamification = UserGamification::firstOrCreate(
             ['user_id' => $request->user_id],
             ['xp' => 0, 'level' => 1, 'current_streak' => 0, 'longest_streak' => 0]

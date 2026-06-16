@@ -27,7 +27,7 @@ class HangmanController extends Controller
                 ->get()
                 ->map(function ($diff) {
                     $set = $diff->studyCardSet;
-                    $card = $set?->cards?->get($diff->card_index);
+                    $card = $set?->cards?->values()?->get($diff->card_index);
                     return $card ? [
                         'card_id'     => $card->id,
                         'set_id'      => $set->id,
@@ -94,7 +94,7 @@ class HangmanController extends Controller
 
         // Obtener la tarjeta
         $set = StudyCardSet::where('id', $request->set_id)->with('cards')->firstOrFail();
-        $card = $set->cards->get($request->card_index);
+        $card = $set->cards->values()->get($request->card_index);
 
         if (!$card) {
             return response()->json(['success' => false, 'message' => 'Tarjeta no encontrada'], 404);
@@ -242,7 +242,7 @@ class HangmanController extends Controller
             ->get()
             ->map(function ($diff) {
                 $set = $diff->studyCardSet;
-                $card = $set?->cards?->get($diff->card_index);
+                $card = $set?->cards?->values()?->get($diff->card_index);
                 return $card ? [
                     'card_id'     => $card->id,
                     'set_id'      => $set->id,
@@ -287,7 +287,7 @@ class HangmanController extends Controller
         }
 
         $set = StudyCardSet::where('id', $request->set_id)->with('cards')->firstOrFail();
-        $card = $set->cards->get($request->card_index);
+        $card = $set->cards->values()->get($request->card_index);
 
         if (!$card) {
             return response()->json(['success' => false, 'message' => 'Tarjeta no encontrada'], 404);

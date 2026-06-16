@@ -11,12 +11,12 @@ use App\Jobs\GenerateMindMapChunkJob;
 use App\Jobs\MergeMindMapJob;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Bus;
-use App\Traits\ChunkableMindMap;
+use Illuminate\Support\Facades\Bus;use App\Traits\ChunkableMindMap;
+use App\Traits\ConnectsToLMStudio;
 
 class ApiMindMapController extends Controller
 {
-    use ChunkableMindMap;
+    use ChunkableMindMap, ConnectsToLMStudio;
     /**
      * Generar mapa mental desde Android.
      * 
@@ -61,41 +61,20 @@ class ApiMindMapController extends Controller
 
             $longitudTexto = mb_strlen(trim($contextoTexto));
 
-            // ─── PDF PEQUEÑO: procesar directamente con n8n (sincrónico) ───
+            // ─── PDF PEQUEÑO: procesar directamente con LM Studio (sincrónico) ───
             if ($longitudTexto <= 4000) {
-                Log::info("[MindMap API] PDF pequeño ({$longitudTexto} chars) → procesando vía n8n");
+                Log::info("[MindMap API] PDF pequeño ({$longitudTexto} chars) → procesando vía LM Studio directo");
 
-                $response = Http::timeout(300)->post('http://localhost:5678/webhook/playdf-mapa-mental', [
-                    'model'    => 'meta-llama-3-8b-instruct',
-                    'context'  => $contextoTexto,
-                    'question' => 'Analiza el texto y genera un mapa mental jerárquico con conceptos descriptivos (no palabras sueltas). Cada título debe explicar el concepto en 15-80 caracteres. Extrae 3-6 nodos principales con 2-4 subconceptos cada uno. Máximo 3 niveles. Devuelve SOLO el JSON.',
-                ]);
+                $systemPrompt = "Eres un experto creando mapas mentales educativos. Analiza el texto y genera un mapa mental jerárquico con conceptos descriptivos (no palabras sueltas). Cada título debe explicar el concepto en 15-80 caracteres. Extrae 3-6 nodos principales con 2-4 subconceptos cada uno. Máximo 3 niveles.\n\n"
+                    . "Devuelve SOLO un JSON válido con esta estructura:\n"
+                    . "{\"titulo\": \"Título del mapa\", \"nodos\": [{\"nombre\": \"Nodo\", \"color\": \"#hex\", \"hijos\": [{\"nombre\": \"Subnodo\", \"color\": \"#hex\"}]}]}";
 
-                if (!$response->successful()) {
-                    return response()->json(['success' => false, 'message' => 'Error al conectar con la IA local.'], 500);
-                }
+                $userMessage = "Texto del documento:\n\n{$contextoTexto}";
 
-                $jsonData = $response->json();
-
-                // Decodificar JSON — maneja múltiples formatos de respuesta de n8n
-                $rawAnswer = $jsonData['answer'] ?? $jsonData['output'] ?? $jsonData['response'] ?? json_encode($jsonData);
-
-                // Limpiar markdown code blocks y texto conversacional
-                $rawAnswer = preg_replace('/```json\s*/i', '', $rawAnswer);
-                $rawAnswer = preg_replace('/```\s*/', '', $rawAnswer);
-                $rawAnswer = trim($rawAnswer);
-
-                // Buscar el JSON envuelto en texto
-                $start = strpos($rawAnswer, '{');
-                $end = strrpos($rawAnswer, '}');
-                if ($start !== false && $end !== false && $end > $start) {
-                    $mapData = json_decode(substr($rawAnswer, $start, $end - $start + 1), true);
-                } else {
-                    $mapData = json_decode($rawAnswer, true);
-                }
+                $mapData = $this->llamarLMStudioJSON($systemPrompt, $userMessage, 0.6, 2048);
 
                 if (!is_array($mapData) || empty($mapData)) {
-                    Log::error('[MindMap API] JSON inválido desde n8n: ' . substr($rawAnswer, 0, 300));
+                    Log::error('[MindMap API] JSON inválido desde LM Studio para PDF pequeño');
                     return response()->json(['success' => false, 'message' => 'La IA devolvió datos vacíos. Intenta con otro documento.'], 500);
                 }
 

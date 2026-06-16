@@ -11,9 +11,12 @@ use App\Models\DocumentChunk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use App\Traits\ConnectsToLMStudio;
 
 class StudyCardController extends Controller
 {
+    use ConnectsToLMStudio;
     /**
      * Mostrar la vista principal con los sets de tarjetas del usuario.
      */
@@ -226,12 +229,12 @@ class StudyCardController extends Controller
             }
 
             // 🔄 INTENTO 1: Contexto completo seleccionado
-            $resultadoIA = $this->llamarN8nTarjetas($contextoTexto);
+            $resultadoIA = $this->llamarLMStudioTarjetas($contextoTexto);
 
             // 🔄 INTENTO 2: Si falla, intentar con menos contexto
             if ($resultadoIA === null && $totalChunks > 6) {
                 $contextoReducido = mb_substr($contextoTexto, 0, 2000);
-                $resultadoIA = $this->llamarN8nTarjetas($contextoReducido);
+                $resultadoIA = $this->llamarLMStudioTarjetas($contextoReducido);
             }
 
             if ($resultadoIA === null) {
@@ -320,10 +323,10 @@ class StudyCardController extends Controller
     }
 
     /**
-     * Llamar a n8n para generar tarjetas de estudio.
+     * Llamar a LM Studio para generar tarjetas de estudio.
      * Retorna el array de datos decodificado o null si falla.
      */
-    private function llamarN8nTarjetas(string $contexto): ?array
+    private function llamarLMStudioTarjetas(string $contexto): ?array
     {
         $maxChars = mb_strlen($contexto);
         $intentos = 0;
@@ -333,44 +336,25 @@ class StudyCardController extends Controller
             $intentos++;
             $textoActual = mb_substr($contexto, 0, $maxChars);
 
-            try {
-                $response = Http::timeout(300)->post('http://localhost:5678/webhook/playdf-tarjetas-estudio', [
-                    'model'    => 'meta-llama-3-8b-instruct',
-                    'context'  => $textoActual,
-                    'question' => 'Genera una lista de tarjetas de estudio con preguntas y respuestas.',
-                ]);
+            $systemPrompt = "Eres un experto creando tarjetas de estudio (flashcards). Genera tarjetas con PREGUNTA (front) y RESPUESTA (back) basándote EXCLUSIVAMENTE en el texto proporcionado.\n\n"
+                . "REGLAS:\n"
+                . "1. Devuelve SOLO un array JSON válido. NADA de texto antes o después.\n"
+                . "2. Cada tarjeta tiene 'front' (pregunta) y 'back' (respuesta).\n"
+                . "3. Genera entre 8 y 15 tarjetas variadas.\n"
+                . "4. Preguntas sobre CONCEPTOS del texto, NO sobre el archivo o documento.\n"
+                . "5. Respuestas claras y concisas (1-3 oraciones).\n\n"
+                . "FORMATO: [{\"front\": \"¿Pregunta?\", \"back\": \"Respuesta\"}]";
 
-                if (!$response->successful()) {
-                    $maxChars = (int) ($maxChars * 0.5);
-                    continue;
-                }
+            $userMessage = "Texto del documento:\n\n{$textoActual}";
 
-                $jsonData = $response->json();
+            $cardsData = $this->llamarLMStudioJSON($systemPrompt, $userMessage, 0.6, 2048);
 
-                // Decodificar respuesta de n8n
-                $rawAnswer = $jsonData['answer'] ?? null;
-                if ($rawAnswer) {
-                    $rawAnswer = preg_replace('/```json\s*|```\s*/', '', $rawAnswer);
-                    $rawAnswer = preg_replace('/^\s*\n/m', '', $rawAnswer);
-                    $cardsData = json_decode(trim($rawAnswer), true);
-                } else {
-                    $cardsData = $jsonData;
-                }
-
-                // Si es string, intentar decodificar de nuevo
-                if (is_string($cardsData)) {
-                    $cardsData = json_decode($cardsData, true);
-                }
-
-                if (is_array($cardsData)) {
-                    return $cardsData;
-                }
-
-                // JSON inválido: reducir contexto y reintentar
-                $maxChars = (int) ($maxChars * 0.5);
-            } catch (\Exception $e) {
-                $maxChars = (int) ($maxChars * 0.5);
+            if (is_array($cardsData)) {
+                return $cardsData;
             }
+
+            // JSON inválido: reducir contexto y reintentar
+            $maxChars = (int) ($maxChars * 0.5);
         }
 
         return null;
