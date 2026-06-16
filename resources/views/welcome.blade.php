@@ -2,6 +2,8 @@
 <html lang="es">
 
 <head>
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#4A90E2">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PlayDF - Inteligencia Artificial en PDF</title>
@@ -403,7 +405,21 @@
                 });
             }
         });
+        
     </script>
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+                console.log('SW registrado correctamente');
+            })
+            .catch(error => {
+                console.log('Error al registrar SW', error);
+            });
+        });
+    }
+</script>
 </body>
 
 </html>
