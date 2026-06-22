@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* ==========================================================\
-   VARIABLES CSS CENTRALIZADAS (ROJO Y NEGRO)
+   VARIABLES CSS CENTRALIZADAS — MODO OSCURO (DEFAULT)
    ========================================================== */
 :root {
     --color-fondo: #000000;
@@ -19,6 +19,475 @@
     --color-gris-oscuro: #4b5563;
     --color-racha: #f97316;
     --color-nivel: #ffeb13;
+    --color-sombras: rgba(0, 0, 0, 0.35);
+    --color-fondo-overlay: rgba(0, 0, 0, 0.85);
+    --transition-theme: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ==========================================================
+   MODO CLARO
+   ========================================================== */
+html.light-mode {
+    --color-fondo: #f5f5f5;
+    --color-texto: #1a1a1a;
+    --color-primario: #dc2626;
+    --color-panel: #ffffff;
+    --color-borde: #e5e7eb;
+    --color-borde-oscuro: #e5e7eb;
+    --color-borde-input: #d1d5db;
+    --color-fondo-input: #f3f4f6;
+    --color-gris-claro: #4b5563;
+    --color-gris-medio: #6b7280;
+    --color-gris-oscuro: #9ca3af;
+    --color-racha: #ea580c;
+    --color-nivel: #ca8a04;
+    --color-sombras: rgba(0, 0, 0, 0.1);
+    --color-fondo-overlay: rgba(255, 255, 255, 0.85);
+}
+
+/* Aplicar transiciones de tema */
+html.light-mode body,
+html.light-mode .cabecera-principal,
+html.light-mode .panel-lateral,
+html.light-mode .menu-movil-contenedor,
+html.light-mode .footer-principal,
+html.light-mode .barra-busqueda,
+html.light-mode .chat-contenedor-ia,
+html.light-mode .boton-herramienta-ia,
+html.light-mode .boton-accion-principal,
+html.light-mode .item-documento,
+html.light-mode .zona-arrastre {
+    transition: var(--transition-theme);
+}
+
+/* Texto del logo en modo claro */
+html.light-mode .text-gray-800 {
+    color: #1a1a1a !important;
+}
+
+/* Markdown body en modo claro */
+html.light-mode .markdown-body h3 {
+    color: #1a1a1a;
+}
+
+/* Overlay del drawer en modo claro */
+html.light-mode .overlay-menu-movil {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* ==========================================================
+   MODO CLARO — Overrides completos para Tailwind utilities
+   ========================================================== */
+
+/* --- Fondos de Tailwind --- */
+html.light-mode .bg-slate-900,
+html.light-mode .bg-slate-950,
+html.light-mode .bg-black {
+    background-color: #ffffff !important;
+}
+html.light-mode .bg-slate-800 {
+    background-color: #f1f5f9 !important;
+}
+
+/* Fondos con opacidad */
+html.light-mode [class*="bg-slate-950"][class*="/50"],
+html.light-mode [class*="bg-slate-950"][class*="/80"],
+html.light-mode [class*="bg-slate-950"][class*="/90"] {
+    background-color: rgba(241,245,249,0.9) !important;
+}
+html.light-mode [class*="bg-slate-900"][class*="/50"],
+html.light-mode [class*="bg-slate-900"][class*="/60"],
+html.light-mode [class*="bg-slate-900"][class*="/80"] {
+    background-color: rgba(241,245,249,0.7) !important;
+}
+html.light-mode [class*="bg-black"][class*="/"] {
+    background-color: rgba(255,255,255,0.85) !important;
+}
+
+/* Valores arbitrarios de Tailwind */
+html.light-mode [class*="bg-[#111111"]],
+html.light-mode [class*="bg-[#161616"]],
+html.light-mode [class*="bg-[#1E1E1E"]],
+html.light-mode [class*="bg-[#0f0f0f"]],
+html.light-mode [class*="bg-[#1a1a2e"]],
+html.light-mode [class*="bg-[#0F0F23"]],
+html.light-mode [class*="bg-[#2D2D2D"]],
+html.light-mode [class*="bg-[#0A0A0A"]],
+html.light-mode [class*="bg-[#020617"]],
+html.light-mode [class*="bg-[#0F172A"]],
+html.light-mode [class*="bg-[#14532D"]],
+html.light-mode [class*="bg-[#16213E"]],
+html.light-mode [class*="bg-[#1E293B"]],
+html.light-mode [class*="bg-[#18181B"]],
+html.light-mode [class*="bg-[#09090B"]],
+html.light-mode [class*="bg-[#27272A"]],
+html.light-mode [class*="bg-[#3F3F46"]],
+html.light-mode [class*="bg-[#52525B"]],
+html.light-mode [class*="bg-[#71717A"]],
+html.light-mode [class*="bg-[#A1A1AA"]],
+html.light-mode [class*="bg-[#D4D4D8"]],
+html.light-mode [class*="bg-[#E4E4E7"]],
+html.light-mode [class*="bg-[#F4F4F5"]],
+html.light-mode [class*="bg-[#FAFAFA"]] {
+    background-color: #ffffff !important;
+}
+
+/* bg-white/5 y bg-white/10 (auth pages - botón Google) */
+html.light-mode .bg-white\/5 {
+    background-color: rgba(0,0,0,0.03) !important;
+}
+html.light-mode .bg-white\/10 {
+    background-color: rgba(0,0,0,0.06) !important;
+}
+
+/* bg-playdf-card (auth pages) */
+html.light-mode .bg-playdf-card {
+    background-color: #ffffff !important;
+}
+
+/* --- Texto Tailwind --- */
+html.light-mode .text-white {
+    color: #1e293b !important;
+}
+/* Re-aplicar texto blanco en botones con fondo de color */
+html.light-mode .bg-red-600.text-white,
+html.light-mode .bg-red-500.text-white,
+html.light-mode .bg-blue-600.text-white,
+html.light-mode .bg-blue-500.text-white,
+html.light-mode .bg-emerald-600.text-white,
+html.light-mode .bg-emerald-500.text-white,
+html.light-mode .bg-amber-600.text-white,
+html.light-mode .bg-amber-500.text-white,
+html.light-mode .bg-purple-600.text-white,
+html.light-mode .bg-violet-600.text-white,
+html.light-mode .bg-pink-500.text-white,
+html.light-mode .bg-indigo-600.text-white {
+    color: white !important;
+}
+/* Re-aplicar texto blanco en elementos con bg-red-600 que contengan .text-white */
+html.light-mode [class*="bg-red-600"] .text-white,
+html.light-mode [class*="bg-blue-600"] .text-white,
+html.light-mode [class*="bg-emerald-600"] .text-white,
+html.light-mode [class*="bg-amber-600"] .text-white,
+html.light-mode [class*="bg-purple-600"] .text-white,
+html.light-mode [class*="bg-indigo-600"] .text-white {
+    color: white !important;
+}
+html.light-mode .text-slate-100 {
+    color: #334155 !important;
+}
+html.light-mode .text-slate-200 {
+    color: #475569 !important;
+}
+html.light-mode .text-slate-300 {
+    color: #64748b !important;
+}
+html.light-mode .text-slate-400 {
+    color: #475569 !important;
+}
+html.light-mode .text-slate-500 {
+    color: #64748b !important;
+}
+html.light-mode .text-slate-600 {
+    color: #94a3b8 !important;
+}
+
+/* Zinc colors (mapa mental modal) */
+html.light-mode .text-zinc-200 {
+    color: #3f3f46 !important;
+}
+html.light-mode .text-zinc-300 {
+    color: #52525b !important;
+}
+html.light-mode .text-zinc-400 {
+    color: #71717a !important;
+}
+html.light-mode .text-zinc-500 {
+    color: #52525b !important;
+}
+
+/* Gray colors (auth pages, components) */
+html.light-mode .text-gray-400 {
+    color: #6b7280 !important;
+}
+html.light-mode .text-gray-500 {
+    color: #6b7280 !important;
+}
+html.light-mode .bg-gray-800 {
+    background-color: #1f2937 !important;
+}
+
+/* Colores de acento más oscuros en light mode */
+html.light-mode .text-emerald-400 { color: #059669 !important; }
+html.light-mode .text-emerald-500 { color: #047857 !important; }
+html.light-mode .text-blue-400 { color: #2563eb !important; }
+html.light-mode .text-blue-500 { color: #1d4ed8 !important; }
+html.light-mode .text-amber-400 { color: #b45309 !important; }
+html.light-mode .text-amber-500 { color: #92400e !important; }
+html.light-mode .text-red-400 { color: #dc2626 !important; }
+html.light-mode .text-red-500 { color: #b91c1c !important; }
+html.light-mode .text-purple-400 { color: #7c3aed !important; }
+html.light-mode .text-pink-400 { color: #db2777 !important; }
+html.light-mode .text-violet-400 { color: #6d28d9 !important; }
+html.light-mode .text-gray-800 { color: #1a1a1a !important; }
+
+/* --- Bordes Tailwind --- */
+html.light-mode .border-slate-800 {
+    border-color: #e2e8f0 !important;
+}
+html.light-mode .border-slate-700 {
+    border-color: #cbd5e1 !important;
+}
+html.light-mode .border-slate-600 {
+    border-color: #94a3b8 !important;
+}
+html.light-mode .border-gray-600 {
+    border-color: #d1d5db !important;
+}
+html.light-mode [class*="divide-slate-800"] > :not([hidden]) ~ :not([hidden]) {
+    border-color: #e2e8f0 !important;
+}
+
+/* Bordes zinc (mapa mental modal) */
+html.light-mode .border-zinc-800 {
+    border-color: #e4e4e7 !important;
+}
+html.light-mode .border-zinc-700 {
+    border-color: #d4d4d8 !important;
+}
+html.light-mode .border-zinc-600 {
+    border-color: #a1a1aa !important;
+}
+
+/* --- Hover states --- */
+html.light-mode .hover\:text-white:hover {
+    color: #1e293b !important;
+}
+/* Mantener texto blanco en botones con fondo de color en hover */
+html.light-mode .bg-red-500.hover\:text-white:hover,
+html.light-mode .bg-red-600.hover\:text-white:hover,
+html.light-mode .bg-blue-500.hover\:text-white:hover,
+html.light-mode .bg-blue-600.hover\:text-white:hover,
+html.light-mode .bg-emerald-500.hover\:text-white:hover,
+html.light-mode .bg-emerald-600.hover\:text-white:hover,
+html.light-mode .bg-amber-500.hover\:text-white:hover,
+html.light-mode .bg-purple-600.hover\:text-white:hover,
+html.light-mode .bg-violet-600.hover\:text-white:hover,
+html.light-mode .bg-pink-500.hover\:text-white:hover,
+html.light-mode .bg-indigo-600.hover\:text-white:hover {
+    color: white !important;
+}
+html.light-mode .hover\:bg-slate-700:hover {
+    background-color: #cbd5e1 !important;
+}
+html.light-mode .hover\:bg-slate-800:hover {
+    background-color: #e2e8f0 !important;
+}
+html.light-mode .hover\:bg-red-500:hover {
+    background-color: #ef4444 !important;
+}
+html.light-mode .hover\:bg-red-600:hover {
+    background-color: #dc2626 !important;
+}
+html.light-mode .hover\:bg-blue-500:hover {
+    background-color: #3b82f6 !important;
+}
+html.light-mode .hover\:bg-emerald-500:hover {
+    background-color: #10b981 !important;
+}
+
+/* --- Sombras más suaves en light mode --- */
+html.light-mode .shadow-2xl {
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04) !important;
+}
+html.light-mode .shadow-lg {
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -2px rgba(0,0,0,0.04) !important;
+}
+html.light-mode .shadow-md {
+    box-shadow: 0 2px 4px -1px rgba(0,0,0,0.06) !important;
+}
+
+/* --- Custom component classes --- */
+html.light-mode .tarjeta-menu {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+}
+html.light-mode .tarjeta-configuracion {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+}
+
+/* select custom (sala-configurar, solo-exam) */
+html.light-mode .custom-select {
+    background-color: #f8fafc !important;
+    color: #334155 !important;
+}
+
+/* Mapa mental canvas wrapper */
+html.light-mode .mm-canvas-wrapper {
+    background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 8px 48px rgba(0,0,0,0.06) !important;
+}
+
+/* Mapa mental edit panel */
+html.light-mode .mm-edit-panel {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.1) !important;
+}
+html.light-mode .mm-edit-input {
+    background: #f3f4f6 !important;
+    border-color: #d1d5db !important;
+    color: #1e293b !important;
+}
+
+/* Mapa mental title and subtitle */
+html.light-mode .mm-titulo-mapa {
+    color: #1e293b !important;
+}
+html.light-mode .mm-cargando-titulo {
+    color: #1e293b !important;
+}
+html.light-mode .mm-titulo-vacio {
+    color: #1e293b !important;
+}
+html.light-mode .mm-modal-input {
+    background: #f3f4f6 !important;
+    border-color: #d1d5db !important;
+    color: #1e293b !important;
+}
+
+/* Mapa mental modal overlay */
+html.light-mode .mm-modal-overlay {
+    background: rgba(0,0,0,0.3) !important;
+}
+
+/* Auth pages - Google button visible in light mode */
+html.light-mode [class*="border-red-800"] {
+    border-color: rgba(153, 27, 27, 0.3) !important;
+}
+
+/* Auth pages body and card */
+html.light-mode .bg-playdf-dark {
+    background-color: #f8fafc !important;
+}
+html.light-mode .border-gray-800 {
+    border-color: #e2e8f0 !important;
+}
+html.light-mode .text-gray-300 {
+    color: #374151 !important;
+}
+
+/* Modo examen - fix remaining white-on-white */
+html.light-mode .bg-slate-950\/50 {
+    background-color: rgba(241,245,249,0.5) !important;
+}
+
+/* --- Floating toggle button for views without header --- */
+.theme-toggle-floating {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--color-borde-input);
+    background-color: var(--color-panel);
+    color: var(--color-gris-claro);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    font-size: 1.1rem;
+}
+.theme-toggle-floating:hover {
+    color: var(--color-primario);
+    border-color: var(--color-primario);
+    background-color: rgba(239, 68, 68, 0.08);
+    transform: scale(1.05);
+}
+.theme-toggle-floating .icon-sun {
+    display: none;
+}
+.theme-toggle-floating .icon-moon {
+    display: block;
+}
+html.light-mode .theme-toggle-floating .icon-sun {
+    display: block;
+}
+html.light-mode .theme-toggle-floating .icon-moon {
+    display: none;
+}
+
+/* Toast del mapa mental */
+html.light-mode .mm-toast {
+    background: #ffffff;
+    color: #1a1a1a;
+    border: 1px solid #e5e7eb;
+}
+
+/* Modal del mapa mental */
+html.light-mode #mm-modal-overlay > div {
+    background: #ffffff !important;
+    border-color: #e5e7eb !important;
+}
+
+html.light-mode #mm-modal-overlay > div h2,
+html.light-mode #mm-modal-overlay > div p,
+html.light-mode #mm-modal-overlay > div label {
+    color: #1a1a1a !important;
+}
+
+html.light-mode #mm-modal-overlay > div input,
+html.light-mode #mm-modal-overlay > div select {
+    background: #f3f4f6 !important;
+    border-color: #d1d5db !important;
+    color: #1a1a1a !important;
+}
+
+/* ==========================================================
+   BOTÓN DE TOGGLE DEL TEMA
+   ========================================================== */
+.theme-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--color-borde-input);
+    background-color: var(--color-fondo-input);
+    color: var(--color-gris-claro);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-size: 1rem;
+}
+
+.theme-toggle-btn:hover {
+    color: var(--color-primario);
+    border-color: var(--color-primario);
+    background-color: rgba(239, 68, 68, 0.08);
+}
+
+/* Iconos del toggle */
+.theme-toggle-btn .icon-sun {
+    display: none;
+}
+
+.theme-toggle-btn .icon-moon {
+    display: block;
+}
+
+html.light-mode .theme-toggle-btn .icon-sun {
+    display: block;
+}
+
+html.light-mode .theme-toggle-btn .icon-moon {
+    display: none;
 }
 
 /* Base resets */

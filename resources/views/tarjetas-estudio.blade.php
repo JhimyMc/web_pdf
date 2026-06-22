@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
+    <script>(function(){var t=localStorage.getItem('playdf-theme');if(t==='light')document.documentElement.classList.add('light-mode');else if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.classList.add('light-mode');})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tarjetas de Estudio — PlayDF</title>
@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    @vite(['resources/css/app.css', 'resources/css/welcome.css', 'resources/css/tarjetas-estudio.css', 'resources/js/app.js', 'resources/js/tarjetas-estudio.js'])
+    @vite(['resources/css/app.css', 'resources/css/welcome.css', 'resources/css/tarjetas-estudio.css', 'resources/js/app.js', 'resources/js/tarjetas-estudio.js', 'resources/js/dark-toggle.js'])
 
     <script>
         window.isLoggedIn = @json(Auth::check());
@@ -42,6 +42,10 @@
         </div>
 
         <div class="flex items-center gap-3 md:gap-4">
+            <button onclick="toggleTheme()" class="theme-toggle-btn" title="Cambiar tema">
+                <i class="fa-solid fa-moon icon-moon"></i>
+                <i class="fa-solid fa-sun icon-sun"></i>
+            </button>
             @auth
                 <span class="text-xs md:text-sm usuario-identificado max-w-[120px] md:max-w-none truncate">
                     <i class="fa-solid fa-user mr-1 md:mr-2"></i>{{ Auth::user()->name }}
@@ -260,8 +264,7 @@
                     class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
                     <i class="fa-solid fa-list-check text-emerald-400"></i> Crear Cuestionario
                 </a>                    <a href="{{ route('tarjetas-estudio.index') }}"
-                        class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5"
-                        style="color: #ffffff; border-color: rgba(236,72,153,0.4);">
+                        class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
                         <i class="fa-solid fa-layer-group text-pink-400"></i> Tarjetas de Estudio
                     </a>
                     @auth

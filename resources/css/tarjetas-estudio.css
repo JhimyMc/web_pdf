@@ -17,6 +17,73 @@
     --color-texto:        #f4f4f5;
 }
 
+html.light-mode {
+    --color-fondo:        #f5f5f5;
+    --color-panel:        #ffffff;
+    --color-primario:     #dc2626;
+    --color-borde-oscuro: #e5e7eb;
+    --color-borde-input:  #d1d5db;
+    --color-fondo-input:  #f3f4f6;
+    --color-gris-claro:   #4b5563;
+    --color-gris-medio:   #6b7280;
+    --color-gris-oscuro:  #9ca3af;
+    --color-texto:        #1a1a1a;
+}
+
+/* Hardcoded white text overrides for light mode */
+html.light-mode .te-titulo-vacio,
+html.light-mode .te-encabezado-titulo,
+html.light-mode .te-cards-titulo,
+html.light-mode .te-cargando-titulo,
+html.light-mode .te-modal-titulo,
+html.light-mode .te-set-titulo,
+html.light-mode .te-flip-text,
+html.light-mode .te-progress-text,
+html.light-mode .te-toast {
+    color: #1e293b !important;
+}
+
+/* Light mode flip card backgrounds */
+html.light-mode .te-flip-front {
+    background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 1px 0 rgba(0,0,0,0.05) inset;
+}
+html.light-mode .te-flip-back {
+    background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 0 40px rgba(236,72,153,0.06);
+}
+
+/* Light mode modal overlay */
+html.light-mode .te-modal-overlay {
+    background: rgba(0,0,0,0.4);
+}
+
+/* Light mode upload zone */
+html.light-mode .te-zona-subida {
+    background: rgba(241,245,249,0.5);
+}
+html.light-mode .te-zona-subida:hover {
+    background: rgba(241,245,249,0.8);
+}
+
+/* Light mode select option text */
+html.light-mode .te-modal-select option {
+    color: #1e293b;
+}
+
+/* Light mode hover states */
+html.light-mode .te-btn-secundario:hover,
+html.light-mode .te-btn-cancelar:hover,
+html.light-mode .te-btn-volver:hover,
+html.light-mode .te-nav-btn:hover {
+    color: #1e293b;
+}
+
+/* Light mode breadcrumb hover */
+html.light-mode .te-flip-hint {
+    color: #94a3b8;
+}
+
 /* ── Layout general ─────────────────────────────────────────── */
 .te-cuerpo {
     background-color: var(--color-fondo);

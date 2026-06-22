@@ -7,7 +7,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        .theme-toggle-floating { position: fixed; bottom: 20px; right: 20px; z-index: 100; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border); background-color: var(--surface); color: var(--text-sub); cursor: pointer; transition: all 0.25s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-size: 1.1rem; }
+        .theme-toggle-floating:hover { color: var(--red); border-color: var(--red); transform: scale(1.05); }
+        html.light-mode .theme-toggle-floating .icon-sun { display: block; } html.light-mode .theme-toggle-floating .icon-moon { display: none; }
+        .theme-toggle-floating .icon-sun { display: none; } .theme-toggle-floating .icon-moon { display: block; }
         :root { --bg: #0a0a0a; --surface: #1a1a2e; --surface2: #16213e; --border: #2d2d44; --text: #e2e8f0; --text-sub: #94a3b8; --red: #ef4444; --green: #10b981; --amber: #f59e0b; --blue: #3b82f6; --purple: #8b5cf6; }
+        html.light-mode { --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --border: #e2e8f0; --text: #1e293b; --text-sub: #64748b; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
         .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
@@ -350,5 +355,31 @@ function resetGame() {
     gameOver = false;
 }
 </script>
+    <button onclick="toggleTheme()" class="theme-toggle-floating" title="Cambiar tema">
+        <i class="fa-solid fa-moon icon-moon"></i>
+        <i class="fa-solid fa-sun icon-sun"></i>
+    </button>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const html = document.documentElement;
+        const STORAGE_KEY = 'playdf-theme';
+        function getInitialTheme() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved === 'light' || saved === 'dark') return saved;
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) return 'light';
+            return 'dark';
+        }
+        function applyTheme(theme) {
+            if (theme === 'light') html.classList.add('light-mode');
+            else html.classList.remove('light-mode');
+            localStorage.setItem(STORAGE_KEY, theme);
+        }
+        applyTheme(getInitialTheme());
+        window.toggleTheme = function() {
+            const isLight = html.classList.contains('light-mode');
+            applyTheme(isLight ? 'dark' : 'light');
+        };
+    });
+    </script>
 </body>
 </html>

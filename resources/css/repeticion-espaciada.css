@@ -21,6 +21,64 @@
     --srs-color-gris-oscuro:  #52525b;
     --srs-color-texto:        #f4f4f5;
 }
+html.light-mode {
+    --srs-color-fondo:        #f5f5f5;
+    --srs-color-panel:        #ffffff;
+    --srs-color-primario:     #d97706;
+    --srs-color-borde-oscuro: #e5e7eb;
+    --srs-color-borde-input:  #d1d5db;
+    --srs-color-fondo-input:  #f3f4f6;
+    --srs-color-gris-claro:   #4b5563;
+    --srs-color-gris-medio:   #6b7280;
+    --srs-color-gris-oscuro:  #9ca3af;
+    --srs-color-texto:        #1a1a1a;
+}
+/* Fix hardcoded colors in light mode */
+html.light-mode .srs-titulo-vacio,
+html.light-mode .srs-encabezado-titulo,
+html.light-mode .srs-completado-titulo,
+html.light-mode .srs-revision-titulo,
+html.light-mode .srs-set-titulo,
+html.light-mode .srs-flip-text,
+html.light-mode .srs-cargando-titulo {
+    color: #1a1a1a !important;
+}
+html.light-mode .srs-toast {
+    background: #ffffff;
+    color: #1a1a1a;
+    border-color: #e5e7eb;
+}
+html.light-mode .srs-set-item:hover {
+    color: #1a1a1a !important;
+}
+
+/* Hardcoded #ffffff text overrides */
+html.light-mode .srs-titulo-vacio,
+html.light-mode .srs-encabezado-titulo,
+html.light-mode .srs-revision-titulo,
+html.light-mode .srs-completado-titulo,
+html.light-mode .srs-set-titulo,
+html.light-mode .srs-flip-text,
+html.light-mode .srs-cargando-titulo,
+html.light-mode .srs-toast {
+    color: #1e293b !important;
+}
+
+/* Light mode hover states */
+html.light-mode .srs-btn-volver:hover {
+    color: #1e293b;
+}
+
+/* Light mode modal overlay */
+html.light-mode .srs-modal-overlay {
+    background: rgba(0,0,0,0.4);
+}
+html.light-mode .boton-eliminar {
+    color: #9ca3af;
+}
+html.light-mode .boton-eliminar:hover {
+    color: #dc2626;
+}
 
 /* ── Layout general ─────────────────────────────────────────── */
 .srs-cuerpo {
@@ -459,6 +517,17 @@
     border-color: rgba(245,158,11,0.2);
     box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 40px rgba(245,158,11,0.06);
     transform: rotateY(180deg);
+}
+
+/* Light mode flashcard backgrounds */
+html.light-mode .srs-flip-front {
+    background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 1px 0 rgba(0,0,0,0.05) inset;
+}
+html.light-mode .srs-flip-back {
+    background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+    border-color: rgba(245,158,11,0.3);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 0 40px rgba(245,158,11,0.06);
 }
 
 .srs-flip-label {

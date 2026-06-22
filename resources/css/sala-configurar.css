@@ -3,6 +3,10 @@
     /* Sutil gradiente para no ser totalmente negro */
     background-image: radial-gradient(circle at center, #0f0f0f 0%, #000000 100%);
 }
+html.light-mode .cuerpo-aplicacion {
+    background-color: var(--color-fondo);
+    background-image: radial-gradient(circle at center, #f1f5f9 0%, #f8fafc 100%);
+}
 
 .tarjeta-configuracion {
     background-color: var(--color-panel);

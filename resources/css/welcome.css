@@ -12,7 +12,7 @@
 }
 
 .boton-menu-movil {
-    color: #ffffff;
+    color: var(--color-texto);
     background: transparent;
     border: none;
 }
@@ -47,6 +47,9 @@
 }
 .enlace-autenticacion:hover {
     color: #ffffff;
+}
+html.light-mode .enlace-autenticacion:hover {
+    color: #1e293b;
 }
 
 .boton-registrarse {
@@ -83,6 +86,13 @@
 .boton-accion-principal:hover {
     background-color: #1a1a1a;
 }
+html.light-mode .boton-accion-principal {
+    color: #1e293b;
+}
+html.light-mode .boton-accion-principal:hover {
+    background-color: #e2e8f0;
+    color: #1e293b;
+}
 
 .boton-deshabilitado {
     background-color: rgba(17, 17, 17, 0.4);
@@ -101,6 +111,9 @@
     background-color: var(--color-panel);
     color: #ffffff;
 }
+html.light-mode .boton-herramienta-ia:hover {
+    color: #1e293b;
+}
 .boton-herramienta-ia i.fa-graduation-cap {
     color: var(--color-primario);
 }
@@ -108,7 +121,7 @@
 /* Estilo Destacado para Cargar Documento desde Móvil */
 .boton-cargar-movil-rojo {
     background-color: var(--color-primario);
-    color: #ffffff;
+    color: #ffffff !important;
     border: 1px solid rgba(239, 68, 68, 0.4);
     transition: background-color 0.2s, transform 0.1s;
 }
@@ -162,6 +175,7 @@
 }
 .boton-subir-archivos:hover {
     background-color: #dc2626;
+    color: #ffffff;
 }
 
 .pantalla-carga-ia {
@@ -296,10 +310,14 @@
     box-shadow: 5px 0 25px rgba(0, 0, 0, 0.5);
     transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
+    visibility: hidden;
+    pointer-events: none;
 }
 
 .menu-movil-contenedor.activo {
     left: 0;
+    visibility: visible;
+    pointer-events: auto;
 }
 
 .rotate-180 {

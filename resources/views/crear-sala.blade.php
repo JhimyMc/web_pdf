@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
+    <script>(function(){var t=localStorage.getItem('playdf-theme');if(t==='light')document.documentElement.classList.add('light-mode');else if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.classList.add('light-mode');})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PlayDF - Panel de Control del Docente</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    @vite(['resources/css/crear-sala.css', 'resources/js/crear-sala.js'])
+    @vite(['resources/css/app.css', 'resources/css/crear-sala.css', 'resources/js/crear-sala.js', 'resources/js/dark-toggle.js'])
 </head>
 
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col justify-between">
@@ -98,6 +98,10 @@
     <footer class="w-full bg-slate-950 py-4 text-center border-t border-slate-800 text-xs text-slate-500">
         &copy; 2026 PlayDF.
     </footer>
+    <button onclick="toggleTheme()" class="theme-toggle-floating" title="Cambiar tema">
+        <i class="fa-solid fa-moon icon-moon"></i>
+        <i class="fa-solid fa-sun icon-sun"></i>
+    </button>
 </body>
 
 </html>

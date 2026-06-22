@@ -10,7 +10,8 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/dark-toggle.js'])
     </head>
     <body class="font-sans text-gray-300 antialiased bg-playdf-dark">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
@@ -23,5 +24,9 @@
                 {{ $slot }}
             </div>
         </div>
+        <button onclick="toggleTheme()" class="theme-toggle-floating" title="Cambiar tema">
+            <i class="fa-solid fa-moon icon-moon"></i>
+            <i class="fa-solid fa-sun icon-sun"></i>
+        </button>
     </body>
 </html>

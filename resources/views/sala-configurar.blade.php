@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
+    <script>(function(){var t=localStorage.getItem('playdf-theme');if(t==='light')document.documentElement.classList.add('light-mode');else if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.classList.add('light-mode');})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configurar Sala - PlayDF</title>
@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    @vite(['resources/css/app.css', 'resources/css/sala-configurar.css', 'resources/js/sala-configurar.js'])
+    @vite(['resources/css/app.css', 'resources/css/sala-configurar.css', 'resources/js/sala-configurar.js', 'resources/js/dark-toggle.js'])
 </head>
 
 <body class="cuerpo-aplicacion font-sans min-h-screen flex items-center justify-center p-4 relative">
@@ -151,6 +151,10 @@
             </button>
         </form>
     </div>
+    <button onclick="toggleTheme()" class="theme-toggle-floating" title="Cambiar tema">
+        <i class="fa-solid fa-moon icon-moon"></i>
+        <i class="fa-solid fa-sun icon-sun"></i>
+    </button>
 </body>
 
 </html>

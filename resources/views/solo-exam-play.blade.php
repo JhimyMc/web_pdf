@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
+    <script>(function(){var t=localStorage.getItem('playdf-theme');if(t==='light')document.documentElement.classList.add('light-mode');else if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.classList.add('light-mode');})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PlayDF - Examen Individual</title>
@@ -13,7 +13,7 @@
     <meta name="user-name" content="{{ $nombre }}">
     <meta name="is-solo" content="true">
 
-    @vite(['resources/css/app.css', 'resources/css/solo-exam.css', 'resources/js/solo-exam-play.js'])
+    @vite(['resources/css/app.css', 'resources/css/solo-exam.css', 'resources/js/solo-exam-play.js', 'resources/js/dark-toggle.js'])
 </head>
 
 <body class="bg-black font-sans min-h-screen text-white flex flex-col relative overflow-hidden">
@@ -135,6 +135,10 @@
         </a>
     </div>
 
+    <button onclick="toggleTheme()" class="theme-toggle-floating" title="Cambiar tema">
+        <i class="fa-solid fa-moon icon-moon"></i>
+        <i class="fa-solid fa-sun icon-sun"></i>
+    </button>
 </body>
 
 </html>

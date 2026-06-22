@@ -7,6 +7,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
+                'resources/js/dark-toggle.js',
                 'resources/css/crear-sala.css',  
                 'resources/js/crear-sala.js',   
                 'resources/css/modo-examen.css', 

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
+    <script>(function(){var t=localStorage.getItem('playdf-theme');if(t==='light')document.documentElement.classList.add('light-mode');else if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.classList.add('light-mode');})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sala en Vivo - PlayDF</title>
@@ -11,7 +11,7 @@
     <meta name="room-code" content="{{ $room->code }}">
     <meta name="room-status" content="{{ $room->status }}">
 
-    @vite(['resources/css/app.css', 'resources/css/sala-dashboard.css', 'resources/js/sala-dashboard.js'])
+    @vite(['resources/css/app.css', 'resources/css/sala-dashboard.css', 'resources/js/sala-dashboard.js', 'resources/js/dark-toggle.js'])
 </head>
 
 <body class="bg-slate-950 font-sans min-h-screen text-white p-4 md:p-8 relative">
@@ -120,6 +120,10 @@
         </div>
 
     </div>
+    <button onclick="toggleTheme()" class="theme-toggle-floating" title="Cambiar tema">
+        <i class="fa-solid fa-moon icon-moon"></i>
+        <i class="fa-solid fa-sun icon-sun"></i>
+    </button>
 </body>
 
 </html>

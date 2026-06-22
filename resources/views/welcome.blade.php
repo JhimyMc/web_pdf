@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
+    <script>(function(){var t=localStorage.getItem('playdf-theme');if(t==='light')document.documentElement.classList.add('light-mode');else if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.classList.add('light-mode');})();</script>
+    <meta charset="UTF-8">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <meta name="theme-color" content="#4A90E2">
     <meta charset="UTF-8">
@@ -12,7 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    @vite(['resources/css/app.css', 'resources/css/welcome.css', 'resources/js/app.js', 'resources/js/welcome.js'])
+    @vite(['resources/css/app.css', 'resources/css/welcome.css', 'resources/js/app.js', 'resources/js/welcome.js', 'resources/js/dark-toggle.js'])
 
     <script>
         window.isLoggedIn = @json(Auth::check());
@@ -39,6 +40,10 @@
         </div>
 
         <div class="flex items-center gap-3 md:gap-4">
+            <button onclick="toggleTheme()" class="theme-toggle-btn" title="Cambiar tema">
+                <i class="fa-solid fa-moon icon-moon"></i>
+                <i class="fa-solid fa-sun icon-sun"></i>
+            </button>
             @auth
                 <span class="text-xs md:text-sm usuario-identificado max-w-[120px] md:max-w-none truncate">
                     <i class="fa-solid fa-user mr-1 md:mr-2"></i>{{ Auth::user()->name }}
@@ -281,6 +286,16 @@
                     <i class="fa-solid fa-puzzle-piece text-violet-400"></i> Ahorcado
                 </a>
                 @endauth
+            </div>
+
+            <div class="divisor-linea my-4"></div>
+
+            <div class="flex items-center justify-between px-2 mb-2">
+                <span class="seccion-subtitulo text-[11px] font-bold uppercase tracking-wider">Tema</span>
+                <button onclick="toggleTheme()" class="theme-toggle-btn" title="Cambiar tema">
+                    <i class="fa-solid fa-moon icon-moon"></i>
+                    <i class="fa-solid fa-sun icon-sun"></i>
+                </button>
             </div>
 
             <div class="divisor-linea my-4"></div>

@@ -9,6 +9,11 @@
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--color-borde-oscuro);
 }
+html.light-mode .cabecera-principal {
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-borde-oscuro);
+}
 
 .contenedor-principal {
     min-height: calc(100vh - 120px);

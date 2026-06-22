@@ -25,3 +25,14 @@
 ::-webkit-scrollbar-thumb:hover {
     background: #475569;
 }
+
+/* Light mode scrollbar */
+html.light-mode ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+}
+html.light-mode ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+html.light-mode ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}

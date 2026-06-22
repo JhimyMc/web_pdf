@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
+    <script>(function(){var t=localStorage.getItem('playdf-theme');if(t==='light')document.documentElement.classList.add('light-mode');else if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.classList.add('light-mode');})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte Examen Individual - PlayDF</title>
@@ -11,7 +11,7 @@
     <meta name="room-code" content="{{ $room->code }}">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    @vite(['resources/css/app.css', 'resources/css/sala-reporte.css'])
+    @vite(['resources/css/app.css', 'resources/css/sala-reporte.css', 'resources/js/dark-toggle.js'])
 </head>
 
 <body class="cuerpo-aplicacion font-sans min-h-screen text-white p-4 md:p-8">
@@ -173,6 +173,10 @@
             }
         });
     </script>
+    <button onclick="toggleTheme()" class="theme-toggle-floating" title="Cambiar tema">
+        <i class="fa-solid fa-moon icon-moon"></i>
+        <i class="fa-solid fa-sun icon-sun"></i>
+    </button>
 </body>
 
 </html>

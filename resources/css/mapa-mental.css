@@ -17,6 +17,38 @@
     --color-gris-oscuro:  #52525b;
     --color-texto:        #f4f4f5;
 }
+html.light-mode {
+    --color-fondo:        #f5f5f5;
+    --color-panel:        #ffffff;
+    --color-primario:     #dc2626;
+    --color-borde-oscuro: #e5e7eb;
+    --color-borde-input:  #d1d5db;
+    --color-fondo-input:  #f3f4f6;
+    --color-gris-claro:   #4b5563;
+    --color-gris-medio:   #6b7280;
+    --color-gris-oscuro:  #9ca3af;
+    --color-texto:        #1a1a1a;
+}
+/* Fix hardcoded colors in light mode */
+html.light-mode .mm-titulo-vacio,
+html.light-mode .mm-titulo-mapa,
+html.light-mode .mm-cargando-titulo,
+html.light-mode .mm-modal-titulo {
+    color: #1a1a1a !important;
+}
+html.light-mode .mm-btn-secundario:hover {
+    color: #1e293b;
+    border-color: #94a3b8;
+}
+html.light-mode .mm-btn-cancelar:hover {
+    color: #1e293b;
+    border-color: #d1d5db;
+}
+html.light-mode .mm-toast {
+    background: #ffffff;
+    color: #1a1a1a;
+    border-color: #e5e7eb;
+}
 
 /* ── Layout general ─────────────────────────────────────────── */
 .mm-cuerpo {

@@ -1,8 +1,8 @@
 {{-- C:\laragon\www\web-pdf\resources\views\mapa-mental.blade.php --}}
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
+    <script>(function(){var t=localStorage.getItem('playdf-theme');if(t==='light')document.documentElement.classList.add('light-mode');else if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.classList.add('light-mode');})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mapa Mental — PlayDF</title>
@@ -11,7 +11,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://d3js.org/d3.v7.min.js"></script>
 
-    @vite(['resources/css/app.css', 'resources/css/welcome.css', 'resources/css/mapa-mental.css', 'resources/js/app.js', 'resources/js/mapa-mental.js'])
+    @vite(['resources/css/app.css', 'resources/css/welcome.css', 'resources/css/mapa-mental.css', 'resources/js/app.js', 'resources/js/mapa-mental.js', 'resources/js/dark-toggle.js'])
 
     <script>
         window.isLoggedIn = @json(Auth::check());
@@ -57,6 +57,10 @@
 
         {{-- Auth / Usuario --}}
         <div class="flex items-center gap-3 md:gap-4">
+            <button onclick="toggleTheme()" class="theme-toggle-btn" title="Cambiar tema">
+                <i class="fa-solid fa-moon icon-moon"></i>
+                <i class="fa-solid fa-sun icon-sun"></i>
+            </button>
             @auth
                 <span class="text-xs md:text-sm usuario-identificado max-w-[120px] md:max-w-none truncate">
                     <i class="fa-solid fa-user mr-1 md:mr-2"></i>{{ Auth::user()->name }}
@@ -166,7 +170,9 @@
             </div>
 
             {{-- Canvas SVG del mapa --}}
-            <div class="mm-canvas-wrapper" style="min-height: 520px;">
+                <div id="mm-canvas-svg-container"
+                    class="mm-canvas-wrapper"
+                    style="min-height: 520px;">
                 {{-- Controles de zoom --}}
                 <div class="mm-zoom-controls">
                     <button id="btn-zoom-in" class="mm-zoom-btn" title="Acercar">
@@ -184,10 +190,7 @@
                 <svg id="mm-canvas-svg" viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg"
                     style="width:100%; min-height:520px; display:block; background: transparent;">
                 </svg>
-            </div>
-        </div>
-
-    </main>
+                </div>
 
     {{-- ══════════════════════════════════════════════════════
          MODAL — Escribir tema para generar
@@ -294,8 +297,7 @@
                     <i class="fa-solid fa-file-lines text-blue-400"></i> Chat con PDF
                 </a>
                 <a href="/mapa-mental"
-                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5"
-                    style="color: #ffffff; border-color: rgba(168,85,247,0.4);">
+                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
                     <i class="fa-solid fa-sitemap text-purple-400"></i> Mapa Mental
                 </a>
                 <a href="/docente/crear-sala"
