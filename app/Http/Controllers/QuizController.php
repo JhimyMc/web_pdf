@@ -91,6 +91,7 @@ class QuizController extends Controller
                 'student_name'       => $name,
                 'score'              => $respuestasReales->where('is_correct', true)->count() * 1,
                 'is_flagged'         => $items->contains('is_flagged', true),
+                'is_kicked'          => $items->contains('is_kicked', true),
                 'answered_questions' => $respuestasReales->count()
             ];
         })->values();
@@ -255,6 +256,27 @@ class QuizController extends Controller
         return response()->json(['success' => true]);
     }
 
+    // 10b. Expulsar alumno de la sala
+    public function apiKickStudent(Request $request, $code)
+    {
+        $request->validate([
+            'student_name' => 'required|string',
+        ]);
+
+        $room = Room::where('code', $code)->where('user_id', Auth::id())->firstOrFail();
+
+        // Solo se puede expulsar si la sala está en espera o en vivo
+        if (!in_array($room->status, ['espera', 'en_vivo'])) {
+            return response()->json(['error' => 'No se puede expulsar alumnos en una sala con estado: ' . $room->status], 422);
+        }
+
+        StudentResponse::where('room_code', $code)
+            ->where('student_name', $request->student_name)
+            ->update(['is_kicked' => true]);
+
+        return response()->json(['success' => true]);
+    }
+
     // 11. Ver reporte detallado de la sala (docente)
     public function reporte($code)
     {
@@ -380,12 +402,31 @@ class QuizController extends Controller
     }
 
     /**
-     * GET /sala/api/check-active-room
-     * Devuelve información si el usuario tiene una sala activa.
+     * GET /sala/api/check-active-room (web, usa Auth::id())
      */
     public function apiCheckActiveRoom()
     {
-        $room = Room::where('user_id', Auth::id())
+        return $this->buscarSalaActiva(Auth::id());
+    }
+
+    /**
+     * GET /api/rooms/check-active (Android, usa user_id query param)
+     */
+    public function apiCheckActiveRoomApp(Request $request)
+    {
+        $userId = $request->query('user_id');
+        if (!$userId) {
+            return response()->json(['active' => false]);
+        }
+        return $this->buscarSalaActiva($userId);
+    }
+
+    /**
+     * Lógica compartida: busca si un usuario tiene una sala activa.
+     */
+    protected function buscarSalaActiva(int $userId)
+    {
+        $room = Room::where('user_id', $userId)
             ->whereIn('status', ['configurando', 'generando', 'espera', 'en_vivo'])
             ->first();
 
@@ -394,11 +435,11 @@ class QuizController extends Controller
         }
 
         return response()->json([
-            'active'    => true,
-            'code'      => $room->code,
-            'status'    => $room->status,
-            'pdf_name'  => $room->pdf_name,
-            'created_at' => $room->created_at->format('d/m/Y H:i'),
+            'active'                => true,
+            'code'                  => $room->code,
+            'status'                => $room->status,
+            'pdf_name'              => $room->pdf_name,
+            'created_at'            => $room->created_at->format('d/m/Y H:i'),
             'minutos_transcurridos' => $room->created_at->diffInMinutes(now()),
         ]);
     }

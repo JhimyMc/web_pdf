@@ -106,6 +106,8 @@
                             <th class="px-4 py-3 font-semibold text-center w-24">Nota</th>
                             <th class="px-4 py-3 font-semibold text-center w-16"><i
                                     class="fa-solid fa-flag text-amber-500" title="Dudas/Revisiones"></i></th>
+                            <th class="px-4 py-3 font-semibold text-center w-16"><i
+                                    class="fa-solid fa-user-slash text-red-500" title="Expulsar"></i></th>
                         </tr>
                     </thead>
                     <tbody id="tabla-estudiantes-body" class="divide-y divide-slate-800/50">

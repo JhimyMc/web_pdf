@@ -59,6 +59,7 @@ Route::middleware('validate.user_id')->group(function () {
     Route::get('/rooms/history',               [ApiQuizController::class, 'apiHistorialApp']);
     Route::get('/rooms/{code}/reporte',        [ApiQuizController::class, 'apiReporteApp']);
     Route::delete('/rooms/{code}',             [QuizController::class, 'apiDeleteRoom']);
+    Route::get('/rooms/check-active',       [QuizController::class, 'apiCheckActiveRoomApp']);
 
     // MAPAS MENTALES
     Route::get('/mapa-mental/mis-mapas', [\App\Http\Controllers\Api\ApiMindMapController::class, 'apiObtenerMisMapas']);

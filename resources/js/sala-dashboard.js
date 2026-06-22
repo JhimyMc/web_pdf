@@ -164,10 +164,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderizarTabla() {
         const filtro = filtroInput?.value.toLowerCase() || "";
-        const filtrados = estudiantesData.filter(e => e.student_name.toLowerCase().includes(filtro))
-                                         .sort((a, b) => b.score - a.score);
+        // Excluir alumnos expulsados de la tabla
+        const activos = estudiantesData.filter(e => !e.is_kicked);
+        const filtrados = activos.filter(e => e.student_name.toLowerCase().includes(filtro))
+                                 .sort((a, b) => b.score - a.score);
         
-        if (contadorAlumnos) contadorAlumnos.innerText = estudiantesData.length;
+        if (contadorAlumnos) contadorAlumnos.innerText = activos.length;
         if (!tablaBody) return;
 
         tablaBody.innerHTML = '';
@@ -191,7 +193,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td class="px-4 py-3 text-center text-slate-400 text-xs">${est.answered_questions} respondidas</td>
                 <td class="px-4 py-3 text-center font-bold text-emerald-400">${est.score} pts</td>
                 <td class="px-4 py-3 text-center">${flagHTML}</td>
+                <td class="px-4 py-3 text-center">
+                    ${est.is_kicked
+                        ? `<span class="text-red-400 text-xs font-bold"><i class="fa-solid fa-user-slash"></i> Expulsado</span>`
+                        : `<button class="kick-btn text-slate-500 hover:text-red-500 hover:bg-red-500/10 p-1.5 rounded-lg transition-colors" data-name="${est.student_name}" title="Expulsar a ${est.student_name}">
+                            <i class="fa-solid fa-user-slash text-xs"></i>
+                           </button>`
+                    }
+                </td>
             `;
+
+            // Attach kick event
+            const kickBtn = tr.querySelector('.kick-btn');
+            if (kickBtn) {
+                kickBtn.addEventListener('click', async () => {
+                    const studentName = kickBtn.getAttribute('data-name');
+                    if (!confirm(`¿Expulsar a ${studentName}? No podrá seguir respondiendo.`)) return;
+                    
+                    try {
+                        const res = await fetch(`/sala/api/rooms/${roomCode}/kick`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken
+                            },
+                            body: JSON.stringify({ student_name: studentName })
+                        });
+                        if (res.ok) {
+                            // Mark locally until next poll refreshes
+                            est.is_kicked = true;
+                            renderizarTabla();
+                        }
+                    } catch (e) {
+                        console.error('Error expulsando alumno:', e);
+                    }
+                });
+            }
             tablaBody.appendChild(tr);
         });
     }

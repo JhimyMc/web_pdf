@@ -55,6 +55,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/sala/api/rooms/{code}/generate', [QuizController::class, 'apiGenerateQuestions']);
     Route::post('/sala/api/rooms/{code}/start',    [QuizController::class, 'apiStartRoom']);
     Route::post('/sala/api/rooms/{code}/end',      [QuizController::class, 'apiEndRoom']);
+    Route::post('/sala/api/rooms/{code}/kick',     [QuizController::class, 'apiKickStudent']);
     Route::delete('/sala/api/rooms/{code}',        [QuizController::class, 'apiDeleteRoom']);
     Route::get('/sala/api/check-active-room',    [QuizController::class, 'apiCheckActiveRoom']);
 

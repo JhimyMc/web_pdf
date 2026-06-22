@@ -70,11 +70,28 @@ class DocumentController extends Controller
             }
 
             // Guardar fragmentos en BD
+            $chunksCreados = [];
             foreach ($fragmentos as $fragmento) {
-                DocumentChunk::create([
+                $chunksCreados[] = DocumentChunk::create([
                     'document_id' => $documento->id,
                     'chunk_text' => $fragmento
                 ]);
+            }
+
+            // 🧠 BÚSQUEDA SEMÁNTICA: Generar embeddings para cada chunk
+            try {
+                $textsToEmbed = array_map(fn($chunk) => $chunk->chunk_text, $chunksCreados);
+                $embeddings = $this->generateEmbeddingsBatch($textsToEmbed);
+
+                foreach ($chunksCreados as $i => $chunk) {
+                    if (isset($embeddings[$i]) && is_array($embeddings[$i])) {
+                        $chunk->update(['embedding' => $embeddings[$i]]);
+                    }
+                }
+                Log::info("[Upload] Embeddings generados para " . count($chunksCreados) . " chunks del documento {$documento->id}");
+            } catch (\Exception $e) {
+                Log::warning("[Upload] No se pudieron generar embeddings (el modelo de embeddings puede no estar cargado): " . $e->getMessage());
+                // Los chunks se guardan sin embedding — la búsqueda degradará a LIKE automáticamente
             }
 
             return response()->json([
@@ -149,27 +166,36 @@ class DocumentController extends Controller
                 $chunksRelevantes = $chunksInicio->merge($chunksMedio)->merge($chunksFin);
             }
         } else {
-            // 🔍 Búsqueda normal por palabras clave (Para preguntas específicas)
-            $palabras = array_filter(explode(' ', $request->question), function ($w) {
-                return mb_strlen($w) > 3; // Ignorar preposiciones cortas
-            });
+            // 🧠 BÚSQUEDA SEMÁNTICA: Usar embeddings + cosine similarity
+            $chunksConEmbedding = DocumentChunk::where('document_id', $doc->id)
+                ->whereNotNull('embedding')
+                ->count();
 
-            $query = DocumentChunk::where('document_id', $doc->id);
-
-            if (!empty($palabras)) {
-                $query->where(function ($q) use ($palabras) {
-                    foreach ($palabras as $palabra) {
-                        $q->orWhere('chunk_text', 'LIKE', '%' . $palabra . '%');
-                    }
+            if ($chunksConEmbedding > 0) {
+                // Hay embeddings disponibles → búsqueda semántica
+                $chunksRelevantes = $this->searchSemanticChunks($doc->id, $request->question, 8, 0.15);
+            } else {
+                // Sin embeddings → fallback a búsqueda por palabras clave
+                Log::info('[Chat] No hay embeddings para documento ' . $doc->id . ', usando búsqueda LIKE como fallback');
+                $palabras = array_filter(explode(' ', $request->question), function ($w) {
+                    return mb_strlen($w) > 3;
                 });
-            }
 
-            // Tomamos los 8 fragmentos que más coinciden con la pregunta
-            $chunksRelevantes = $query->limit(8)->get();
+                $query = DocumentChunk::where('document_id', $doc->id);
 
-            // Si la IA no encuentra palabras clave, le pasamos los primeros fragmentos para que no se quede ciega
-            if ($chunksRelevantes->isEmpty()) {
-                $chunksRelevantes = DocumentChunk::where('document_id', $doc->id)->orderBy('id', 'asc')->limit(6)->get();
+                if (!empty($palabras)) {
+                    $query->where(function ($q) use ($palabras) {
+                        foreach ($palabras as $palabra) {
+                            $q->orWhere('chunk_text', 'LIKE', '%' . $palabra . '%');
+                        }
+                    });
+                }
+
+                $chunksRelevantes = $query->limit(8)->get();
+
+                if ($chunksRelevantes->isEmpty()) {
+                    $chunksRelevantes = DocumentChunk::where('document_id', $doc->id)->orderBy('id', 'asc')->limit(6)->get();
+                }
             }
         }
 

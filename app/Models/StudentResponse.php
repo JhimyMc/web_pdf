@@ -16,15 +16,15 @@ class StudentResponse extends Model
         'selected_option',
         'is_correct',
         'is_flagged',
+        'is_kicked',
     ];
 
-    // Le decimos a Laravel que estos campos son booleanos (true/false)
     protected $casts = [
         'is_correct' => 'boolean',
         'is_flagged' => 'boolean',
+        'is_kicked' => 'boolean',
     ];
 
-    // Relación: Una respuesta pertenece a una sala
     public function room()
     {
         return $this->belongsTo(Room::class, 'room_code', 'code');

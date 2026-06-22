@@ -85,6 +85,21 @@
             al Menú</a>
     </div>
 
+    {{-- Overlay de seguridad: aparece si el alumno sale de fullscreen o cambia de pestaña --}}
+    <div id="overlay-seguridad" class="hidden fixed inset-0 bg-slate-950/95 z-[100] flex-col items-center justify-center p-6 backdrop-blur-sm">
+        <div class="text-center max-w-md">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-500/10 mb-6">
+                <i class="fa-solid fa-eye-slash text-4xl text-red-500"></i>
+            </div>
+            <h2 class="text-2xl font-black text-white mb-3">Examen en pausa</h2>
+            <p class="text-slate-400 mb-8">Debes mantener la ventana del examen en primer plano para continuar. Vuelve a la pestaña del examen.</p>
+            <button id="btn-reanudar-examen"
+                class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-95">
+                <i class="fa-solid fa-arrow-right-to-bracket mr-2"></i> Volver al Examen
+            </button>
+        </div>
+    </div>
+
     <button onclick="toggleTheme()" class="theme-toggle-floating" title="Cambiar tema">
         <i class="fa-solid fa-moon icon-moon"></i>
         <i class="fa-solid fa-sun icon-sun"></i>

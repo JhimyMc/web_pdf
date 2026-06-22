@@ -24,6 +24,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (data.status === 'en_vivo') {
+                    // Check if this student has been kicked
+                    const myStudent = (data.students || []).find(s => s.student_name === userName);
+                    if (myStudent && myStudent.is_kicked) {
+                        clearInterval(intervaloEspera);
+                        mostrarExpulsado();
+                        return;
+                    }
                     clearInterval(intervaloEspera);
                     questions = data.questions || [];
                     empezarExamen();
@@ -47,6 +54,67 @@ document.addEventListener('DOMContentLoaded', () => {
         pantallaEspera.classList.add('hidden');
         pantallaQuiz.classList.remove('hidden');
         mostrarPregunta();
+
+        // Intentar entrar en fullscreen al iniciar el examen
+        solicitarFullscreen();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // FULLSCREEN + PREVENCIÓN DE CAMBIO DE PESTAÑA
+    // ═══════════════════════════════════════════════════════════
+    let examenActivo = false;
+    const overlaySeguridad = document.getElementById('overlay-seguridad');
+
+    function solicitarFullscreen() {
+        examenActivo = true;
+        const el = document.documentElement;
+        const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+        if (req) {
+            req.call(el).catch(() => {}); // Silenciar si el navegador lo bloquea
+        }
+    }
+
+    // Detectar salida de fullscreen
+    document.addEventListener('fullscreenchange', () => {
+        if (examenActivo && !document.fullscreenElement) {
+            mostrarOverlaySeguridad();
+        }
+    });
+    document.addEventListener('webkitfullscreenchange', () => {
+        if (examenActivo && !document.webkitFullscreenElement) {
+            mostrarOverlaySeguridad();
+        }
+    });
+
+    // Detectar cambio de pestaña / visibilidad
+    document.addEventListener('visibilitychange', () => {
+        if (examenActivo && document.hidden) {
+            mostrarOverlaySeguridad();
+        }
+    });
+
+    // Detectar cambio de ventana (minimizar, cambiar de app)
+    window.addEventListener('blur', () => {
+        if (examenActivo) {
+            mostrarOverlaySeguridad();
+        }
+    });
+
+    function mostrarOverlaySeguridad() {
+        if (overlaySeguridad) {
+            overlaySeguridad.classList.remove('hidden');
+            overlaySeguridad.classList.add('flex');
+        }
+    }
+
+    // Botón para reanudar (volver al examen)
+    const btnReanudar = document.getElementById('btn-reanudar-examen');
+    if (btnReanudar) {
+        btnReanudar.addEventListener('click', () => {
+            overlaySeguridad.classList.add('hidden');
+            overlaySeguridad.classList.remove('flex');
+            solicitarFullscreen();
+        });
     }
 
     function mostrarPregunta() {
@@ -151,6 +219,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnEnviar.innerHTML = 'Siguiente Pregunta <i class="fa-solid fa-arrow-right"></i>';
             }
         });
+    }
+
+    function mostrarExpulsado() {
+        examenActivo = false;
+        pantallaEspera.classList.add('hidden');
+        pantallaQuiz.classList.add('hidden');
+        pantallaResultado.classList.add('hidden');
+        // Ocultar overlay de seguridad si está visible
+        if (overlaySeguridad) {
+            overlaySeguridad.classList.add('hidden');
+            overlaySeguridad.classList.remove('flex');
+        }
+        // Salir de fullscreen si está activo
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(() => {});
+        }
+        
+        // Show kicked screen
+        const kickedDiv = document.createElement('div');
+        kickedDiv.id = 'pantalla-expulsado';
+        kickedDiv.className = 'flex-1 flex flex-col items-center justify-center p-6 z-10 text-center';
+        kickedDiv.innerHTML = `
+            <i class="fa-solid fa-user-slash text-6xl text-red-500 mb-6"></i>
+            <h2 class="text-3xl font-black text-white mb-4">Has sido expulsado</h2>
+            <p class="text-slate-400 mb-8 max-w-sm">El creador de la sala te ha removido del examen. No puedes seguir respondiendo.</p>
+            <a href="/modo-examen" class="text-blue-400 hover:text-blue-300 font-medium transition-colors border border-blue-500/30 px-6 py-2 rounded-lg">Volver al Menú</a>
+        `;
+        document.body.appendChild(kickedDiv);
     }
 
     function mostrarResultados() {
