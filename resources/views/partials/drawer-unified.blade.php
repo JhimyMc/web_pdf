@@ -1,34 +1,38 @@
 <div id="fondo-oscuro-menu" class="overlay-menu-movil"></div>
 <aside id="menu-movil-drawer" class="menu-movil-contenedor flex flex-col justify-between">
     <div>
-        <div class="drawer-header-banner p-5 pb-4" style="background: var(--color-primario);">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-lg font-bold text-white">PlayDF</span>
+            <div class="drawer-header-banner p-5 pb-4" style="background: var(--color-primario);">
+            @auth
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
+                        style="background: rgba(255,255,255,0.2);">
+                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-sm font-semibold text-white truncate">{{ Auth::user()->name }}</p>
+                        <p class="text-[11px] text-white/70 truncate">{{ Auth::user()->email }}</p>
+                    </div>
+                </div>
                 <button id="btn-cerrar-menu-movil" class="text-white/70 hover:text-white p-1 text-lg">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            @auth
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
-                    style="background: rgba(255,255,255,0.2);">
-                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                </div>
-                <div class="min-w-0">
-                    <p class="text-sm font-semibold text-white truncate">{{ Auth::user()->name }}</p>
-                    <p class="text-[11px] text-white/70 truncate">{{ Auth::user()->email }}</p>
-                </div>
-            </div>
             @else
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white"
-                    style="background: rgba(255,255,255,0.2);">
-                    <i class="fa-solid fa-user"></i>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white"
+                        style="background: rgba(255,255,255,0.2);">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-white">Invitado</p>
+                        <p class="text-[11px] text-white/70">Inicia sesion para mas funciones</p>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-sm font-semibold text-white">Invitado</p>
-                    <p class="text-[11px] text-white/70">Inicia sesion para mas funciones</p>
-                </div>
+                <button id="btn-cerrar-menu-movil" class="text-white/70 hover:text-white p-1 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
             @endauth
         </div>

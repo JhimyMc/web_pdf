@@ -8,11 +8,11 @@
             <a href="{{ route('dashboard') }}" class="flex-shrink-0 flex items-center">
                 <x-application-logo class="block h-8 md:h-10 w-auto fill-current text-gray-800" />
             </a>
+        </div>
 
-            <div class="hidden sm:flex items-center gap-2 ml-2 md:ml-6 racha-nivel-contenedor px-3 py-1 rounded-full text-xs flex-shrink-0">
-                <span class="text-amber-400"><i class="fa-solid fa-fire"></i> Racha: <span id="header-streak">-</span></span>
-                <span class="text-blue-400"><i class="fa-solid fa-star"></i> Nivel <span id="header-level">-</span></span>
-            </div>
+        <div class="flex items-center gap-1.5 sm:gap-2 racha-nivel-contenedor px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs flex-shrink-0 mx-auto">
+            <span class="text-amber-400"><i class="fa-solid fa-fire"></i> Racha: <span id="header-streak">-</span></span>
+            <span class="text-blue-400"><i class="fa-solid fa-star"></i> Nivel <span id="header-level">-</span></span>
         </div>
 
         <div class="flex items-center gap-2 md:gap-4 flex-shrink-0">

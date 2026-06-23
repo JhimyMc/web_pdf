@@ -77,7 +77,7 @@
             </div>
         </aside>
 
-        <section class="col-span-1 md:col-span-2 flex flex-col h-[65vh] md:h-[80vh]">
+        <section class="col-span-1 md:col-span-2 flex flex-col md:h-[80vh]">
 
             <!-- Selector de PDFs (solo mobile) -->
             <div class="md:hidden mb-2">
@@ -113,52 +113,40 @@
                 </button>
             </div>
 
-            <!-- Zona de contenido principal -->
-            <div class="flex-1 min-h-0 relative rounded-2xl overflow-hidden flex flex-col">
-                <!-- Drop zone (mobile: en flujo normal, desktop: absoluto) -->
-                <div id="zona-drop"
-                    class="zona-arrastre md:absolute md:inset-0 border-2 border-dashed rounded-2xl p-6 md:p-8 flex flex-col items-center justify-center transition-all cursor-pointer z-10 flex-1 md:flex-none">
-                    <div class="insignia-pdf font-black text-xl px-4 py-2 rounded-xl mb-3">PDF</div>
+            <!-- Drop zone (solo se ve cuando NO hay chat activo) -->
+            <div id="zona-drop"
+                class="zona-arrastre border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer mb-3">
+                <div class="insignia-pdf font-black text-xl px-4 py-2 rounded-xl mb-3">PDF</div>
+                <p class="text-sm font-semibold texto-blanco text-center">Selecciona tu PDF aquí</p>
+                <p class="text-xs texto-atenuado mt-1 text-center">Toca el botón para abrir un documento</p>
+                <button id="btn-seleccionar-centro"
+                    class="nav-boton-subir mt-4 boton-subir-archivos text-white font-bold text-xs py-2 px-5 rounded-xl shadow-lg transition-colors">
+                    Seleccionar Archivos
+                </button>
+            </div>
 
-                    <p class="text-sm font-semibold texto-blanco text-center hidden md:block">Arrastra tus archivos aquí
-                    </p>
-                    <p class="text-sm font-semibold texto-blanco text-center block md:hidden">Selecciona tu PDF aquí</p>
-
-                    <p class="text-xs texto-atenuado mt-1 text-center hidden md:block">Sube un PDF para activar la
-                        Inteligencia Artificial</p>
-                    <p class="text-xs texto-atenuado mt-1 text-center block md:hidden">Toca el botón para abrir un
-                        documento</p>
-
-                    <button id="btn-seleccionar-centro"
-                        class="nav-boton-subir mt-4 boton-subir-archivos text-white font-bold text-xs py-2 px-5 rounded-xl shadow-lg transition-colors">
-                        Seleccionar Archivos
-                    </button>
+            <!-- Pantalla de carga (overlay) -->
+            <div id="pantalla-carga"
+                class="pantalla-carga-ia fixed inset-0 p-8 hidden flex-col items-center justify-center text-center z-50 backdrop-blur-sm">
+                <div class="relative w-20 h-20 mb-4">
+                    <div class="anillo-espera-base absolute inset-0 rounded-full border-4"></div>
+                    <div class="anillo-espera-activo absolute inset-0 rounded-full border-4 animate-spin"></div>
+                    <i class="fa-solid fa-brain text-2xl absolute inset-0 flex items-center justify-center"></i>
                 </div>
+                <p class="text-sm font-bold texto-blanco animate-pulse">Analizando y guardando tu PDF...</p>
+                <p class="text-xs texto-atenuado mt-1 max-w-xs mx-auto">Extrayendo texto para que la IA responda sin demoras</p>
+            </div>
 
-                <!-- Pantalla de carga -->
-                <div id="pantalla-carga"
-                    class="pantalla-carga-ia absolute inset-0 rounded-2xl p-8 hidden flex-col items-center justify-center text-center z-20 backdrop-blur-sm">
-                    <div class="relative w-20 h-20 mb-4">
-                        <div class="anillo-espera-base absolute inset-0 rounded-full border-4"></div>
-                        <div class="anillo-espera-activo absolute inset-0 rounded-full border-4 animate-spin"></div>
-                        <i class="fa-solid fa-brain text-2xl absolute inset-0 flex items-center justify-center"></i>
-                    </div>
-                    <p class="text-sm font-bold texto-blanco animate-pulse">Analizando y guardando tu PDF...</p>
-                    <p class="text-xs texto-atenuado mt-1 max-w-xs mx-auto">Extrayendo texto para que la IA responda sin
-                        demoras</p>
-                </div>
-
-                <!-- Chat -->
-                <div id="contenedor-chat"
-                    class="chat-contenedor-ia md:absolute md:inset-0 rounded-2xl p-4 hidden flex-col z-20 flex-1 md:flex-none">
-                    <div id="historial-chat" class="w-full flex-1 min-h-0 overflow-y-auto space-y-3 pr-1 pb-2">
-                    </div>
+            <!-- Chat (solo se ve cuando HAY chat activo, reemplaza la drop zone) -->
+            <div id="contenedor-chat"
+                class="chat-contenedor-ia rounded-2xl p-4 hidden flex-col h-[50vh] md:h-auto md:absolute md:inset-0 md:z-20">
+                <div id="historial-chat" class="w-full flex-1 min-h-0 overflow-y-auto space-y-3 pr-1 pb-2">
                 </div>
             </div>
 
             <!-- Barra de búsqueda -->
             <div id="wrapper-busqueda"
-                class="barra-busqueda w-full relative flex items-center rounded-2xl px-4 py-3 mt-3 transition-all z-10">
+                class="barra-busqueda w-full relative flex items-center rounded-2xl px-4 py-3 transition-all z-10">
                 <i class="fa-solid fa-wand-magic-sparkles mr-3 icono-magia"></i>
                 <input type="text" id="input-pregunta"
                     class="w-full bg-transparent focus:outline-none text-sm cursor-not-allowed"
