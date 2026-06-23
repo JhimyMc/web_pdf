@@ -18,6 +18,7 @@ export default defineConfig({
                 'resources/js/sala-dashboard.js',
                 'resources/css/mapa-mental.css',
                 'resources/js/mapa-mental.js',
+                'resources/css/ahorcado.css',
             ],
             refresh: true,
         }),

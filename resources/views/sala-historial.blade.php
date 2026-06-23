@@ -4,6 +4,11 @@
     <script>(function(){var t=localStorage.getItem('playdf-theme');if(t==='light')document.documentElement.classList.add('light-mode');else if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.classList.add('light-mode');})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/icon-192x192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/icon-512x512.png') }}">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#4A90E2">
+    <meta name="description" content="Historial de tus salas de estudio — PlayDF">
     <title>Historial de Salas - PlayDF</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -16,11 +21,16 @@
 
     <header class="cabecera-principal px-4 md:px-6 py-4 flex items-center justify-between shadow-md sticky top-0 z-40">
         <div class="flex items-center gap-3">
-            <a href="/modo-examen"
-                class="text-slate-400 hover:text-red-500 transition-colors flex items-center gap-2 text-sm font-medium">
-                <i class="fa-solid fa-arrow-left"></i> Volver
-            </a>
+            <button id="btn-abrir-menu-movil" class="boton-menu-movil md:hidden text-xl p-1 mr-1" title="Abrir menú">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
             @include('partials.logo')
+
+            <div class="hidden sm:flex items-center gap-3 ml-2 md:ml-6 racha-nivel-contenedor px-3 py-1 rounded-full text-xs">
+                <span class="text-amber-400"><i class="fa-solid fa-fire"></i> Racha: <span id="header-streak">-</span></span>
+                <span class="text-blue-400"><i class="fa-solid fa-star"></i> Nivel <span id="header-level">-</span></span>
+            </div>
         </div>
         <div class="flex items-center gap-3">
             <button onclick="toggleTheme()" class="theme-toggle-btn" title="Cambiar tema">
@@ -35,9 +45,24 @@
                     @csrf
                     <button type="submit" class="boton-salir text-xs hover:underline">Salir</button>
                 </form>
+            @else
+                <a href="{{ route('login') }}" class="text-xs md:text-sm enlace-autenticacion">Entrar</a>
+                <a href="{{ route('register') }}" class="boton-registrarse text-white text-[11px] md:text-xs font-bold px-2.5 md:px-3 py-2 rounded-lg transition-colors">Registrarse</a>
             @endauth
         </div>
     </header>
+
+    <div class="px-4 md:px-8 pt-4 pb-1">
+        <div class="flex items-center gap-2 text-xs" style="color: var(--color-gris-oscuro)">
+            <a href="/" class="hover:text-white transition-colors flex items-center gap-1.5">
+                <i class="fa-solid fa-house text-[10px]"></i> PlayDF
+            </a>
+            <i class="fa-solid fa-chevron-right text-[9px]"></i>
+            <span style="color: var(--color-gris-claro)">
+                <i class="fa-solid fa-clock-rotate-left text-amber-500 mr-1"></i>Historial de Salas
+            </span>
+        </div>
+    </div>
 
     <main class="contenedor-principal flex-grow w-full max-w-7xl mx-auto p-4 md:p-8">
         <div class="mb-8">

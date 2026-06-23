@@ -3,9 +3,12 @@
     <head>
         <link rel="manifest" href="{{ asset('manifest.json') }}">
         <meta name="theme-color" content="#4A90E2">
+        <meta name="description" content="PlayDF — Herramientas de estudio interactivas con IA">
 
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/icon-192x192.png') }}">
+        <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/icon-512x512.png') }}">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'Laravel') }}</title>

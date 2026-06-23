@@ -4,6 +4,11 @@
     <script>(function(){var t=localStorage.getItem('playdf-theme');if(t==='light')document.documentElement.classList.add('light-mode');else if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.classList.add('light-mode');})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/icon-192x192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/icon-512x512.png') }}">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#4A90E2">
+    <meta name="description" content="Menú de exámenes con IA — PlayDF">
     <title>PlayDF - Menú de Exámenes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -17,12 +22,67 @@
     </script>
 </head>
 
-<body class="cuerpo-aplicacion font-sans min-h-screen flex flex-col items-center justify-center p-4">
+<body class="cuerpo-aplicacion font-sans min-h-screen flex flex-col">
 
-    <a href="/"
-        class="absolute top-6 left-6 text-slate-400 hover:text-red-500 transition-colors flex items-center gap-2 font-medium">
-        <i class="fa-solid fa-arrow-left"></i> Volver a Inicio
-    </a>
+    <header class="cabecera-principal px-4 md:px-6 py-4 flex flex-row items-center justify-between shadow-md sticky top-0 z-40">
+        <div class="flex items-center gap-3">
+            <button id="btn-abrir-menu-movil" class="boton-menu-movil md:hidden text-xl p-1 mr-1" title="Abrir menú">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            @include('partials.logo')
+
+            <div class="hidden sm:flex items-center gap-3 ml-2 md:ml-6 racha-nivel-contenedor px-3 py-1 rounded-full text-xs">
+                <span class="text-amber-400"><i class="fa-solid fa-fire"></i> Racha: <span id="header-streak">-</span></span>
+                <span class="text-blue-400"><i class="fa-solid fa-star"></i> Nivel <span id="header-level">-</span></span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 md:gap-4">
+            <button onclick="toggleTheme()" class="theme-toggle-btn" title="Cambiar tema">
+                <i class="fa-solid fa-moon icon-moon"></i>
+                <i class="fa-solid fa-sun icon-sun"></i>
+            </button>
+            @auth
+                <div class="relative" id="user-spinner">
+                    <button id="user-spinner-btn" class="flex items-center gap-2 text-xs md:text-sm usuario-identificado px-3 py-1.5 rounded-xl hover:bg-white/10 transition-colors">
+                        <i class="fa-solid fa-user"></i>
+                        <span class="max-w-[100px] md:max-w-none truncate">{{ Auth::user()->name }}</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200" id="spinner-arrow"></i>
+                    </button>
+                    <div id="user-dropdown" class="hidden absolute right-0 top-full mt-2 w-52 rounded-xl shadow-2xl overflow-hidden z-50" style="background: var(--modal-bg); border: 1px solid var(--modal-border);">
+                        <div class="px-4 py-3" style="border-bottom: 1px solid var(--modal-border);">
+                            <p class="text-xs" style="color: var(--modal-subtext);">Conectado como</p>
+                            <p class="text-sm font-semibold truncate" style="color: var(--modal-text);">{{ Auth::user()->name }}</p>
+                        </div>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="w-full text-left px-4 py-2.5 text-xs text-red-400 transition-colors flex items-center gap-2.5">
+                                <i class="fa-solid fa-right-from-bracket"></i> Salir
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            @else
+                <a href="{{ route('login') }}" class="text-xs md:text-sm enlace-autenticacion">Entrar</a>
+                <a href="{{ route('register') }}" class="boton-registrarse text-white text-[11px] md:text-xs font-bold px-2.5 md:px-3 py-2 rounded-lg transition-colors">Registrarse</a>
+            @endauth
+        </div>
+    </header>
+
+    <div class="px-4 md:px-8 pt-4 pb-1">
+        <div class="flex items-center gap-2 text-xs" style="color: var(--color-gris-oscuro)">
+            <a href="/" class="hover:text-white transition-colors flex items-center gap-1.5">
+                <i class="fa-solid fa-house text-[10px]"></i> PlayDF
+            </a>
+            <i class="fa-solid fa-chevron-right text-[9px]"></i>
+            <span style="color: var(--color-gris-claro)">
+                <i class="fa-solid fa-graduation-cap text-red-500 mr-1"></i>Modo Examen
+            </span>
+        </div>
+    </div>
+
+    <main class="flex-1 flex flex-col items-center justify-center p-4">
 
     <div class="max-w-4xl w-full">
         <div class="text-center mb-10">
@@ -105,10 +165,31 @@
 
         </div>
     </div>
-    <button onclick="toggleTheme()" class="theme-toggle-floating" title="Cambiar tema">
-        <i class="fa-solid fa-moon icon-moon"></i>
-        <i class="fa-solid fa-sun icon-sun"></i>
-    </button>
+    </main>
+
+    @include('partials.footer')
+
+    <script>
+    (function() {
+        var spinnerBtn = document.getElementById('user-spinner-btn');
+        var dropdown = document.getElementById('user-dropdown');
+        var arrow = document.getElementById('spinner-arrow');
+        if (spinnerBtn && dropdown) {
+            spinnerBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var isOpen = !dropdown.classList.contains('hidden');
+                dropdown.classList.toggle('hidden');
+                arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+            });
+            document.addEventListener('click', function(e) {
+                if (!dropdown.contains(e.target) && e.target !== spinnerBtn) {
+                    dropdown.classList.add('hidden');
+                    arrow.style.transform = '';
+                }
+            });
+        }
+    })();
+    </script>
 </body>
 
 </html>

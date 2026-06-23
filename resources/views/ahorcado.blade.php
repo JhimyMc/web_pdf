@@ -1,100 +1,82 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es">
 <head>
+    <script>(function(){var t=localStorage.getItem('playdf-theme');if(t==='light')document.documentElement.classList.add('light-mode');else if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.classList.add('light-mode');})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/icon-192x192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/icon-512x512.png') }}">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#4A90E2">
+    <meta name="description" content="Juego de ahorcado educativo — PlayDF">
     <title>Ahorcado - PlayDF</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        .theme-toggle-floating { position: fixed; bottom: 20px; right: 20px; z-index: 100; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border); background-color: var(--surface); color: var(--text-sub); cursor: pointer; transition: all 0.25s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-size: 1.1rem; }
-        .theme-toggle-floating:hover { color: var(--red); border-color: var(--red); transform: scale(1.05); }
-        html.light-mode .theme-toggle-floating .icon-sun { display: block; } html.light-mode .theme-toggle-floating .icon-moon { display: none; }
-        .theme-toggle-floating .icon-sun { display: none; } .theme-toggle-floating .icon-moon { display: block; }
-        :root { --bg: #0a0a0a; --surface: #1a1a2e; --surface2: #16213e; --border: #2d2d44; --text: #e2e8f0; --text-sub: #94a3b8; --red: #ef4444; --green: #10b981; --amber: #f59e0b; --blue: #3b82f6; --purple: #8b5cf6; }
-        html.light-mode { --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --border: #e2e8f0; --text: #1e293b; --text-sub: #64748b; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-        .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
-        .header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
-        .header h1 { font-size: 24px; font-weight: 800; }
-        .header h1 span { color: var(--red); }
-        .back-btn { color: var(--text-sub); text-decoration: none; font-size: 24px; cursor: pointer; }
-        .back-btn:hover { color: var(--text); }
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-sub); }
-        .empty-state svg { width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.3; }
-        .empty-state h3 { color: var(--text); margin-bottom: 8px; }
-
-        .game-area { display: none; }
-        .game-area.active { display: block; }
-
-        .card-select { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
-        .card-select h3 { font-size: 16px; margin-bottom: 12px; }
-        .card-list { display: grid; gap: 8px; max-height: 300px; overflow-y: auto; }
-        .card-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; }
-        .card-item:hover { border-color: var(--purple); background: rgba(139,92,246,0.08); }
-        .card-item .front { font-weight: 600; font-size: 13px; flex: 1; }
-        .card-item .set-name { color: var(--text-sub); font-size: 11px; }
-        .card-item .play-icon { color: var(--purple); }
-
-        .hangman-board { text-align: center; margin-bottom: 24px; }
-        .hangman-svg { max-width: 200px; width: 100%; margin: 0 auto 16px; }
-        .hangman-svg .gallows { stroke: var(--border); stroke-width: 3; fill: none; stroke-linecap: round; }
-        .hangman-svg .body-part { stroke: var(--red); stroke-width: 3; fill: none; stroke-linecap: round; opacity: 0; transition: opacity 0.4s ease; }
-        .hangman-svg .body-part.visible { opacity: 1; }
-        .hangman-svg .head { stroke: var(--red); stroke-width: 3; fill: none; opacity: 0; transition: opacity 0.4s ease; }
-        .hangman-svg .head.visible { opacity: 1; }
-        .hangman-svg .face { stroke: var(--red); stroke-width: 2; fill: none; opacity: 0; transition: opacity 0.4s ease; }
-        .hangman-svg .face.visible { opacity: 1; }
-        .hangman-svg .gallows-accent { stroke: var(--purple); stroke-width: 2; fill: none; opacity: 0.3; }
-
-        .phrase-display { font-size: 28px; font-weight: 800; letter-spacing: 4px; margin: 20px 0; min-height: 40px; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
-        .phrase-char { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 44px; border-bottom: 3px solid var(--border); font-size: 20px; transition: all 0.3s; }
-        .phrase-char.revealed { border-bottom-color: var(--green); color: var(--green); }
-        .phrase-char.space { width: 20px; border-bottom: none; }
-
-        .attempts-bar { display: flex; justify-content: center; gap: 8px; margin: 16px 0; }
-        .attempt-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--border); transition: background 0.3s; }
-        .attempt-dot.wrong { background: var(--red); }
-
-        .keyboard { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 20px 0; }
-        .key { width: 38px; height: 42px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
-        .key:hover:not(:disabled) { border-color: var(--purple); background: rgba(139,92,246,0.15); transform: scale(1.05); }
-        .key:disabled { opacity: 0.25; cursor: not-allowed; }
-        .key.correct { background: rgba(16,185,129,0.2); border-color: var(--green); color: var(--green); }
-        .key.wrong { background: rgba(239,68,68,0.15); border-color: var(--red); color: var(--red); }
-
-        .game-result { text-align: center; padding: 24px; border-radius: 16px; margin: 20px 0; }
-        .game-result.won { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); }
-        .game-result.lost { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); }
-        .game-result h2 { font-size: 20px; margin-bottom: 8px; }
-        .game-result p { color: var(--text-sub); margin-bottom: 16px; }
-        .game-result .xp-badge { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); border-radius: 10px; color: var(--amber); font-weight: 700; }
-
-        .recent-games { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-top: 24px; }
-        .recent-games h3 { font-size: 14px; margin-bottom: 12px; color: var(--text-sub); }
-        .game-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
-        .game-row:last-child { border-bottom: none; }
-        .game-row .result-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-        .game-row .result-icon.won { background: rgba(16,185,129,0.15); color: var(--green); }
-        .game-row .result-icon.lost { background: rgba(239,68,68,0.15); color: var(--red); }
-        .game-row .phrase { flex: 1; font-size: 13px; }
-        .game-row .xp { font-size: 12px; color: var(--amber); font-weight: 600; }
-        .game-row .time { font-size: 11px; color: var(--text-sub); }
-
-        .btn-primary { background: var(--purple); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 14px; transition: all 0.2s; }
-        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 13px; }
-        .btn-secondary:hover { border-color: var(--text-sub); }
-    </style>
+    @vite(['resources/css/app.css', 'resources/css/ahorcado.css', 'resources/js/app.js', 'resources/js/dark-toggle.js'])
 </head>
-<body>
-<div class="container">
-    <div class="header">
-        <a href="/" class="back-btn">&larr;</a>
-        <h1><span>Ahorcado</span> PlayDF</h1>
+<body class="cuerpo-aplicacion font-sans min-h-screen flex flex-col">
+
+    <header class="cabecera-principal px-4 md:px-6 py-4 flex flex-row items-center justify-between shadow-md sticky top-0 z-40">
+        <div class="flex items-center gap-3">
+            <button id="btn-abrir-menu-movil" class="boton-menu-movil md:hidden text-xl p-1 mr-1" title="Abrir menú">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            @include('partials.logo')
+
+            <div class="hidden sm:flex items-center gap-3 ml-2 md:ml-6 racha-nivel-contenedor px-3 py-1 rounded-full text-xs">
+                <span class="text-amber-400"><i class="fa-solid fa-fire"></i> Racha: <span id="header-streak">-</span></span>
+                <span class="text-blue-400"><i class="fa-solid fa-star"></i> Nivel <span id="header-level">-</span></span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 md:gap-4">
+            <button onclick="toggleTheme()" class="theme-toggle-btn" title="Cambiar tema">
+                <i class="fa-solid fa-moon icon-moon"></i>
+                <i class="fa-solid fa-sun icon-sun"></i>
+            </button>
+            @auth
+                <div class="relative" id="user-spinner">
+                    <button id="user-spinner-btn" class="flex items-center gap-2 text-xs md:text-sm usuario-identificado px-3 py-1.5 rounded-xl hover:bg-white/10 transition-colors">
+                        <i class="fa-solid fa-user"></i>
+                        <span class="max-w-[100px] md:max-w-none truncate">{{ Auth::user()->name }}</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200" id="spinner-arrow"></i>
+                    </button>
+                    <div id="user-dropdown" class="hidden absolute right-0 top-full mt-2 w-52 rounded-xl shadow-2xl overflow-hidden z-50" style="background: var(--modal-bg); border: 1px solid var(--modal-border);">
+                        <div class="px-4 py-3" style="border-bottom: 1px solid var(--modal-border);">
+                            <p class="text-xs" style="color: var(--modal-subtext);">Conectado como</p>
+                            <p class="text-sm font-semibold truncate" style="color: var(--modal-text);">{{ Auth::user()->name }}</p>
+                        </div>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="w-full text-left px-4 py-2.5 text-xs text-red-400 transition-colors flex items-center gap-2.5">
+                                <i class="fa-solid fa-right-from-bracket"></i> Salir
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            @else
+                <a href="{{ route('login') }}" class="text-xs md:text-sm enlace-autenticacion">Entrar</a>
+                <a href="{{ route('register') }}" class="boton-registrarse text-white text-[11px] md:text-xs font-bold px-2.5 md:px-3 py-2 rounded-lg transition-colors">Registrarse</a>
+            @endauth
+        </div>
+    </header>
+
+    <div class="px-4 md:px-8 pt-4 pb-1">
+        <div class="flex items-center gap-2 text-xs" style="color: var(--text-sub)">
+            <a href="/" class="hover:text-white transition-colors flex items-center gap-1.5">
+                <i class="fa-solid fa-house text-[10px]"></i> PlayDF
+            </a>
+            <i class="fa-solid fa-chevron-right text-[9px]"></i>
+            <span style="color: var(--text)">
+                <i class="fa-solid fa-puzzle-piece text-purple-400 mr-1"></i>Ahorcado
+            </span>
+        </div>
     </div>
+
+    <div class="container flex-1">
 
     @if($difficultCards->isEmpty())
         <div class="empty-state">
@@ -355,10 +337,6 @@ function resetGame() {
     gameOver = false;
 }
 </script>
-    <button onclick="toggleTheme()" class="theme-toggle-floating" title="Cambiar tema">
-        <i class="fa-solid fa-moon icon-moon"></i>
-        <i class="fa-solid fa-sun icon-sun"></i>
-    </button>
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const html = document.documentElement;
@@ -380,6 +358,28 @@ function resetGame() {
             applyTheme(isLight ? 'dark' : 'light');
         };
     });
+    </script>
+
+    <script>
+    (function() {
+        var spinnerBtn = document.getElementById('user-spinner-btn');
+        var dropdown = document.getElementById('user-dropdown');
+        var arrow = document.getElementById('spinner-arrow');
+        if (spinnerBtn && dropdown) {
+            spinnerBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var isOpen = !dropdown.classList.contains('hidden');
+                dropdown.classList.toggle('hidden');
+                arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+            });
+            document.addEventListener('click', function(e) {
+                if (!dropdown.contains(e.target) && e.target !== spinnerBtn) {
+                    dropdown.classList.add('hidden');
+                    arrow.style.transform = '';
+                }
+            });
+        }
+    })();
     </script>
 </body>
 </html>
