@@ -1,6 +1,6 @@
-const CACHE_NAME = 'playdf-cache-v2';
-const STATIC_CACHE = 'playdf-static-v2';
-const PAGES_CACHE = 'playdf-pages-v1';
+const CACHE_NAME = 'playdf-cache-v3';
+const STATIC_CACHE = 'playdf-static-v3';
+const PAGES_CACHE = 'playdf-pages-v2';
 
 const STATIC_ASSETS = [
   '/images/icon-192x192.png',

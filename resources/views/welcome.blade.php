@@ -7,8 +7,10 @@
     <meta name="theme-color" content="#4A90E2">
     <meta name="description" content="PlayDF — Herramientas de estudio interactivas con Inteligencia Artificial">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/icon-192x192.png') }}">
     <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/icon-512x512.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/icon-192x192.png') }}">
     <title>PlayDF - Inteligencia Artificial en PDF</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
