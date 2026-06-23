@@ -401,6 +401,16 @@ class QuizController extends Controller
             ]);
     }
 
+    protected function cancelarSalasActivasForUser(int $userId): void
+    {
+        Room::where('user_id', $userId)
+            ->whereIn('status', ['configurando', 'generando', 'espera', 'en_vivo'])
+            ->update([
+                'status'      => 'finalizado',
+                'finished_at' => now(),
+            ]);
+    }
+
     /**
      * GET /sala/api/check-active-room (web, usa Auth::id())
      */
@@ -415,6 +425,7 @@ class QuizController extends Controller
     public function apiCheckActiveRoomApp(Request $request)
     {
         $userId = $request->query('user_id');
+        \Log::info("apiCheckActiveRoomApp called, user_id from query: " . var_export($userId, true));
         if (!$userId) {
             return response()->json(['active' => false]);
         }
@@ -426,14 +437,21 @@ class QuizController extends Controller
      */
     protected function buscarSalaActiva(int $userId)
     {
+        \Log::info("buscarSalaActiva called with userId: {$userId}");
+
         $room = Room::where('user_id', $userId)
             ->whereIn('status', ['configurando', 'generando', 'espera', 'en_vivo'])
             ->first();
 
+        \Log::info("buscarSalaActiva found room: " . ($room ? $room->code . ' status=' . $room->status : 'NONE'));
+
         if (!$room) {
+            $allRooms = Room::where('user_id', $userId)->orderBy('created_at', 'desc')->limit(3)->get(['code', 'status', 'user_id', 'created_at']);
+            \Log::info("buscarSalaActiva all rooms for user {$userId}: " . json_encode($allRooms->toArray()));
             return response()->json(['active' => false]);
         }
 
+        \Illuminate\Support\Facades\Log::info("buscarSalaActiva: FOUND room {$room->code} status={$room->status}");
         return response()->json([
             'active'                => true,
             'code'                  => $room->code,

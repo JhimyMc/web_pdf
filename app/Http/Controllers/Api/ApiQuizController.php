@@ -97,6 +97,10 @@ class ApiQuizController extends QuizController
                 return response()->json(['success' => false, 'error' => 'Documento no encontrado.'], 404);
             }
 
+            $userId = $request->input('user_id') ?? $documento->user_id;
+            \Illuminate\Support\Facades\Log::info("apiCrearSalaDesdeDocumento: userId={$userId} type=" . gettype($userId) . " doc_user_id={$documento->user_id}");
+            $this->cancelarSalasActivasForUser($userId);
+
             $code = strtoupper(substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), 0, 5));
 
             // Obtener batches de contexto
@@ -105,7 +109,7 @@ class ApiQuizController extends QuizController
             $totalBatches = count($batches);
 
             $room = Room::create([
-                'user_id'          => $documento->user_id,
+                'user_id'          => $userId,
                 'code'             => $code,
                 'pdf_name'         => $documento->name ?? 'Documento_PDF',
                 'num_questions'    => $request->num_questions,
@@ -219,6 +223,8 @@ class ApiQuizController extends QuizController
             if (!$userId) {
                 return response()->json(['success' => false, 'error' => 'Usuario no autenticado.'], 401);
             }
+
+            $this->cancelarSalasActivasForUser($userId);
 
             // Dividir texto en fragmentos para los batches
             $textoLimpio = preg_replace('/\s+/', ' ', $request->pdf_text);
