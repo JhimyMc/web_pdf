@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('pdf-file-input');
+    const fileInputMovil = document.getElementById('pdf-file-input-movil');
     const btnCargarDoc = document.getElementById('btn-cargar-doc');
-    const btnCargarPdfMovil = document.getElementById('btn-cargar-pdf-movil'); // 📱 Captura de móvil
+    const btnCargarPdfMovil = document.getElementById('btn-cargar-pdf-movil');
     const btnSeleccionarCentro = document.getElementById('btn-seleccionar-centro');
     const zonaDrop = document.getElementById('zona-drop');
     const pantallaCarga = document.getElementById('pantalla-carga');
@@ -71,6 +72,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if(fileInput) {
         fileInput.addEventListener('change', function() {
+            if (this.files.length > 0 && verificarAutenticacion()) {
+                subirYProcesarPDF(this.files[0]);
+            }
+        });
+    }
+
+    if(fileInputMovil) {
+        fileInputMovil.addEventListener('change', function() {
             if (this.files.length > 0 && verificarAutenticacion()) {
                 subirYProcesarPDF(this.files[0]);
             }

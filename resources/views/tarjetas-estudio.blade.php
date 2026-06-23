@@ -3,13 +3,13 @@
 <head>
     <script>(function(){var t=localStorage.getItem('playdf-theme');if(t==='light')document.documentElement.classList.add('light-mode');else if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.classList.add('light-mode');})();</script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/icon-192x192.png') }}">
     <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/icon-512x512.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/icon-192x192.png') }}">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#4A90E2">
+    <meta name="theme-color" content="#000000">
     <meta name="description" content="Tarjetas de estudio espaciadas con IA — PlayDF">
     <title>Tarjetas de Estudio — PlayDF</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -29,45 +29,7 @@
 
 <body class="te-cuerpo font-sans min-h-screen flex flex-col">
 
-    {{-- ══════════════════════════════════════════════════════
-         CABECERA — exactamente igual a welcome.blade.php
-    ══════════════════════════════════════════════════════ --}}
-    <header
-        class="cabecera-principal px-4 md:px-6 py-4 flex flex-row items-center justify-between shadow-md sticky top-0 z-40">
-        <div class="flex items-center gap-3">
-            <button id="btn-abrir-menu-movil" class="boton-menu-movil md:hidden text-xl p-1 mr-1" title="Abrir menú">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-
-            @include('partials.logo')
-
-            <div
-                class="hidden sm:flex items-center gap-3 ml-2 md:ml-6 racha-nivel-contenedor px-3 py-1 rounded-full text-xs">
-                <span class="text-amber-400">🔥 Racha: 5 Días</span>
-                <span class="text-blue-400">⭐ Nivel 12</span>
-            </div>
-        </div>
-
-        <div class="flex items-center gap-3 md:gap-4">
-            <button onclick="toggleTheme()" class="theme-toggle-btn" title="Cambiar tema">
-                <i class="fa-solid fa-moon icon-moon"></i>
-                <i class="fa-solid fa-sun icon-sun"></i>
-            </button>
-            @auth
-                <span class="text-xs md:text-sm usuario-identificado max-w-[120px] md:max-w-none truncate">
-                    <i class="fa-solid fa-user mr-1 md:mr-2"></i>{{ Auth::user()->name }}
-                </span>
-                <form method="POST" action="{{ route('logout') }}" class="inline">
-                    @csrf
-                    <button type="submit" class="boton-salir text-xs hover:underline">Salir</button>
-                </form>
-            @else
-                <a href="{{ route('login') }}" class="text-xs md:text-sm enlace-autenticacion">Entrar</a>
-                <a href="{{ route('register') }}"
-                    class="boton-registrarse text-white text-[11px] md:text-xs font-bold px-2.5 md:px-3 py-2 rounded-lg transition-colors">Registrarse</a>
-            @endauth
-        </div>
-    </header>
+    @include('partials.header-unified')
 
     {{-- ══════════════════════════════════════════════════════
          BREADCRUMB / NAVEGACIÓN
@@ -241,89 +203,12 @@
         <span id="te-toast-msg">Cambios guardados</span>
     </div>
 
-    {{-- ══════════════════════════════════════════════════════
-         MENÚ MÓVIL (drawer)
-    ══════════════════════════════════════════════════════ --}}
-    <div id="fondo-oscuro-menu" class="overlay-menu-movil hidden"></div>
-    <aside id="menu-movil-drawer" class="menu-movil-contenedor p-5 flex flex-col justify-between">
-        <div>
-            <div class="flex items-center justify-between mb-6">
-                <span class="text-lg font-bold text-white">Menú <span
-                        class="primario-resaltado">PlayDF</span></span>
-                <button id="btn-cerrar-menu-movil" class="text-slate-400 hover:text-white p-1 text-lg">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <div class="divisor-linea my-4"></div>
-
-            <h3 class="seccion-subtitulo text-[11px] font-bold uppercase tracking-wider mb-2">Herramientas IA</h3>
-            <div class="space-y-2">
-                <a href="/"
-                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
-                    <i class="fa-solid fa-file-lines text-blue-400"></i> Chat con PDF
-                </a>
-                <a href="{{ route('mapa-mental.index') }}"
-                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
-                    <i class="fa-solid fa-sitemap text-purple-400"></i> Mapa Mental
-                </a>
-                <a href="/docente/crear-sala"
-                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
-                    <i class="fa-solid fa-list-check text-emerald-400"></i> Crear Cuestionario
-                </a>                    <a href="{{ route('tarjetas-estudio.index') }}"
-                        class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
-                        <i class="fa-solid fa-layer-group text-pink-400"></i> Tarjetas de Estudio
-                    </a>
-                    @auth
-                    <a href="{{ route('ahorcado.index') }}"
-                        class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
-                        <i class="fa-solid fa-puzzle-piece text-violet-400"></i> Ahorcado
-                    </a>
-                    @endauth
-            </div>
-
-            <div class="divisor-linea my-4"></div>
-
-            <h3 class="seccion-subtitulo text-[11px] font-bold uppercase tracking-wider mb-2">Repaso</h3>
-            <div class="space-y-2">
-                <a href="{{ route('srs.index') }}"
-                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
-                    <i class="fa-solid fa-brain text-amber-500"></i> Repetición Espaciada (SRS)
-                </a>
-                <a href="/modo-examen"
-                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
-                    <i class="fa-solid fa-graduation-cap text-red-500"></i> Modo Examen
-                </a>
-            </div>
-        </div>
-    </aside>
+    @include('partials.drawer-unified')
 
     {{-- Footer --}}
     @include('partials.footer')
 
-    {{-- Script inline para el menú móvil --}}
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const btnAbrir = document.getElementById('btn-abrir-menu-movil');
-            const btnCerrar = document.getElementById('btn-cerrar-menu-movil');
-            const menuMovil = document.getElementById('menu-movil-drawer');
-            const fondoOscuro = document.getElementById('fondo-oscuro-menu');
-
-            function abrirMenu() {
-                menuMovil.classList.add('activo');
-                fondoOscuro.classList.add('activo');
-            }
-
-            function cerrarMenu() {
-                menuMovil.classList.remove('activo');
-                fondoOscuro.classList.remove('activo');
-            }
-
-            if (btnAbrir) btnAbrir.addEventListener('click', abrirMenu);
-            if (btnCerrar) btnCerrar.addEventListener('click', cerrarMenu);
-            if (fondoOscuro) fondoOscuro.addEventListener('click', cerrarMenu);
-        });
-    </script>
+    @include('partials.scripts-unified')
 
 </body>
 

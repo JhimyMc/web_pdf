@@ -3,10 +3,14 @@
 <head>
     <script>(function(){var t=localStorage.getItem('playdf-theme');if(t==='light')document.documentElement.classList.add('light-mode');else if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.classList.add('light-mode');})();</script>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PlayDF">
+    <meta name="mobile-web-app-capable" content="yes">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#4A90E2">
     <meta name="description" content="PlayDF — Herramientas de estudio interactivas con Inteligencia Artificial">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/icon-192x192.png') }}">
     <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/icon-512x512.png') }}">
@@ -27,58 +31,7 @@
 
 <body class="cuerpo-aplicacion font-sans min-h-screen flex flex-col justify-between">
 
-    <header
-        class="cabecera-principal px-4 md:px-6 py-4 flex flex-row items-center justify-between shadow-md sticky top-0 z-40">
-        <div class="flex items-center gap-3">
-            <button id="btn-abrir-menu-movil" class="boton-menu-movil md:hidden text-xl p-1 mr-1" title="Abrir menú">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-
-            @include('partials.logo')
-
-            <div
-                class="hidden sm:flex items-center gap-3 ml-2 md:ml-6 racha-nivel-contenedor px-3 py-1 rounded-full text-xs">
-                <span class="text-amber-400"><i class="fa-solid fa-fire"></i> Racha: <span id="header-streak">-</span></span>
-                <span class="text-blue-400"><i class="fa-solid fa-star"></i> Nivel <span id="header-level">-</span></span>
-            </div>
-        </div>
-
-        <div class="flex items-center gap-3 md:gap-4">
-            <button onclick="toggleTheme()" class="theme-toggle-btn" title="Cambiar tema">
-                <i class="fa-solid fa-moon icon-moon"></i>
-                <i class="fa-solid fa-sun icon-sun"></i>
-            </button>
-            @auth
-                <div class="relative" id="user-spinner">
-                    <button id="user-spinner-btn" class="flex items-center gap-2 text-xs md:text-sm usuario-identificado px-3 py-1.5 rounded-xl hover:bg-white/10 transition-colors">
-                        <i class="fa-solid fa-user"></i>
-                        <span class="max-w-[100px] md:max-w-none truncate">{{ Auth::user()->name }}</span>
-                        <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200" id="spinner-arrow"></i>
-                    </button>
-                    <div id="user-dropdown" class="hidden absolute right-0 top-full mt-2 w-52 rounded-xl shadow-2xl overflow-hidden z-50" style="background: var(--modal-bg); border: 1px solid var(--modal-border);">
-                        <div class="px-4 py-3" style="border-bottom: 1px solid var(--modal-border);">
-                            <p class="text-xs" style="color: var(--modal-subtext);">Conectado como</p>
-                            <p class="text-sm font-semibold truncate" style="color: var(--modal-text);">{{ Auth::user()->name }}</p>
-                        </div>
-                        <button id="btn-install-app" class="w-full text-left px-4 py-2.5 text-xs transition-colors flex items-center gap-2.5" style="color: #3b82f6;">
-                            <i class="fa-solid fa-download"></i> Instalar PlayDF
-                        </button>
-                        <div style="border-top: 1px solid var(--modal-border);"></div>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="w-full text-left px-4 py-2.5 text-xs text-red-400 transition-colors flex items-center gap-2.5">
-                                <i class="fa-solid fa-right-from-bracket"></i> Salir
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            @else
-                <a href="{{ route('login') }}" class="text-xs md:text-sm enlace-autenticacion">Entrar</a>
-                <a href="{{ route('register') }}"
-                    class="boton-registrarse text-white text-[11px] md:text-xs font-bold px-2.5 md:px-3 py-2 rounded-lg transition-colors">Registrarse</a>
-            @endauth
-        </div>
-    </header>
+    @include('partials.header-unified')
 
     <main
         class="contenedor-principal flex-grow w-full max-w-7xl mx-auto p-2 md:p-4 grid grid-cols-1 md:grid-cols-4 gap-4 relative">
@@ -124,13 +77,47 @@
             </div>
         </aside>
 
-        <section class="col-span-1 md:col-span-2 flex flex-col h-[calc(100vh-140px)] md:h-[80vh]">
+        <section class="col-span-1 md:col-span-2 flex flex-col h-[65vh] md:h-[80vh]">
 
-            <!-- Zona de contenido principal (flex-grow) -->
-            <div class="flex-1 min-h-0 relative rounded-2xl overflow-hidden">
-                <!-- Drop zone: overlay absoluto -->
+            <!-- Selector de PDFs (solo mobile) -->
+            <div class="md:hidden mb-2">
+                <input type="file" id="pdf-file-input-movil" accept=".pdf" class="hidden">
+                <button id="btn-toggle-pdf-movil"
+                    class="boton-accion-principal w-full text-xs font-bold py-2 px-4 rounded-xl flex items-center justify-between mb-1.5">
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-folder-open text-red-500"></i> Mis PDFs</span>
+                    <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300" id="icono-flecha-pdf-movil"></i>
+                </button>
+                <div id="seccion-pdf-movil" class="hidden space-y-1.5 max-h-[120px] overflow-y-auto mb-2 px-1">
+                    @if (count($documentos) == 0)
+                        <p class="text-[11px] text-center py-2" style="color: var(--color-gris-medio);">No hay archivos.</p>
+                    @else
+                        @foreach ($documentos as $doc)
+                            <div id="doc-item-movil-{{ $doc->id }}"
+                                class="item-documento flex items-center justify-between p-2 rounded-xl transition-colors">
+                                <button onclick="seleccionarDocumento({{ $doc->id }}, '{{ $doc->name }}')"
+                                    class="enlace-documento flex items-center gap-2 text-xs font-medium overflow-hidden text-ellipsis whitespace-nowrap text-left flex-1 mr-1">
+                                    <i class="fa-solid fa-file-pdf text-xs flex-shrink-0"></i>
+                                    <span class="truncate">{{ $doc->name }}</span>
+                                </button>
+                                <button onclick="eliminarDocumento(event, {{ $doc->id }})"
+                                    class="boton-eliminar p-1 px-2 rounded-lg">
+                                    <i class="fa-solid fa-trash-can text-[10px]"></i>
+                                </button>
+                            </div>
+                        @endforeach
+                    @endif
+                </div>
+                <button id="btn-cargar-pdf-movil-home"
+                    class="boton-cargar-movil-rojo w-full text-[11px] font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-md">
+                    <i class="fa-solid fa-cloud-arrow-up text-xs"></i> Subir nuevo PDF
+                </button>
+            </div>
+
+            <!-- Zona de contenido principal -->
+            <div class="flex-1 min-h-0 relative rounded-2xl overflow-hidden flex flex-col">
+                <!-- Drop zone (mobile: en flujo normal, desktop: absoluto) -->
                 <div id="zona-drop"
-                    class="zona-arrastre absolute inset-0 border-2 border-dashed rounded-2xl p-6 md:p-8 flex flex-col items-center justify-center transition-all cursor-pointer z-10">
+                    class="zona-arrastre md:absolute md:inset-0 border-2 border-dashed rounded-2xl p-6 md:p-8 flex flex-col items-center justify-center transition-all cursor-pointer z-10 flex-1 md:flex-none">
                     <div class="insignia-pdf font-black text-xl px-4 py-2 rounded-xl mb-3">PDF</div>
 
                     <p class="text-sm font-semibold texto-blanco text-center hidden md:block">Arrastra tus archivos aquí
@@ -148,7 +135,7 @@
                     </button>
                 </div>
 
-                <!-- Pantalla de carga: overlay absoluto -->
+                <!-- Pantalla de carga -->
                 <div id="pantalla-carga"
                     class="pantalla-carga-ia absolute inset-0 rounded-2xl p-8 hidden flex-col items-center justify-center text-center z-20 backdrop-blur-sm">
                     <div class="relative w-20 h-20 mb-4">
@@ -161,9 +148,9 @@
                         demoras</p>
                 </div>
 
-                <!-- Chat: flex child que respeta el espacio del search bar -->
+                <!-- Chat -->
                 <div id="contenedor-chat"
-                    class="chat-contenedor-ia absolute inset-0 rounded-2xl p-4 hidden flex-col z-0">
+                    class="chat-contenedor-ia md:absolute md:inset-0 rounded-2xl p-4 hidden flex-col z-20 flex-1 md:flex-none">
                     <div id="historial-chat" class="w-full flex-1 min-h-0 overflow-y-auto space-y-3 pr-1 pb-2">
                     </div>
                 </div>
@@ -180,152 +167,193 @@
                     <i class="fa-solid fa-paper-plane"></i>
                 </button>
             </div>
-        </section>
 
-        <aside class="hidden md:flex panel-lateral rounded-2xl p-4 flex-col space-y-4 h-[80vh]">
-            <div>
-                <h3 class="seccion-subtitulo text-xs font-bold uppercase tracking-wider mb-3">Sostenibilidad y Repaso
-                </h3>
-                <div class="space-y-2">
-                    <a href="{{ route('srs.index') }}"
-                        class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
-                        <i class="fa-solid fa-brain text-amber-500"></i> Repetición Espaciada (SRS)
-                    </a>
-                    <a href="/modo-examen"
-                        class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
-                        <i class="fa-solid fa-graduation-cap"></i> Modo Examen
-                    </a>
-                </div>
-            </div>
+            <!-- Botones móviles (solo visible en mobile, debajo del chat) -->
+            <div class="md:hidden mt-4 space-y-3">
+                <a href="/modo-examen"
+                    class="flex items-center justify-center gap-2 w-full py-3.5 px-4 rounded-2xl text-white font-extrabold text-sm transition-all"
+                    style="background: var(--color-primario); box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <div class="text-left">
+                        <div class="text-sm font-extrabold leading-tight">LANZAR MODO EXAMEN</div>
+                        <div class="text-[10px] font-medium opacity-80">Evalua a tus estudiantes</div>
+                    </div>
+                </a>
 
-            <div class="divisor-linea my-4"></div>
+                <a href="{{ route('solo-exam.configurar') }}"
+                    class="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-2xl text-white font-bold text-sm transition-all"
+                    style="background: #059669; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3);">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <div class="text-left">
+                        <div class="text-sm font-bold leading-tight">CREAR CUESTIONARIO</div>
+                        <div class="text-[10px] font-medium opacity-80">Genera quiz con IA</div>
+                    </div>
+                </a>
 
-            <div>
-                <h3 class="seccion-subtitulo text-xs font-bold uppercase tracking-wider mb-3">Herramientas IA</h3>
-                <div class="space-y-2">
+                <div class="grid grid-cols-2 gap-3">
                     <a href="{{ route('mapa-mental.index') }}"
-                        class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
-                        <i class="fa-solid fa-sitemap text-purple-400"></i> Generar Mapa Mental
+                        class="flex items-center gap-2.5 p-3 rounded-2xl transition-all"
+                        style="background: var(--color-fondo); border: 1px solid rgba(139, 92, 246, 0.35);">
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                            style="background: rgba(139, 92, 246, 0.12);">
+                            <i class="fa-solid fa-sitemap text-purple-400 text-sm"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-[11px] font-bold" style="color: var(--color-texto);">Mapa Mental</p>
+                            <p class="text-[9px]" style="color: var(--color-gris-medio);">Diagramas IA</p>
+                        </div>
                     </a>
-                    <a href="{{ route('solo-exam.configurar') }}"
-                        class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
-                        <i class="fa-solid fa-pen-to-square text-emerald-400"></i> Crear Cuestionario
-                    </a>
+
                     <a href="{{ route('tarjetas-estudio.index') }}"
-                        class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
-                        <i class="fa-solid fa-layer-group text-pink-400"></i> Tarjetas de Estudio
+                        class="flex items-center gap-2.5 p-3 rounded-2xl transition-all"
+                        style="background: var(--color-fondo); border: 1px solid rgba(236, 72, 153, 0.35);">
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                            style="background: rgba(236, 72, 153, 0.12);">
+                            <i class="fa-solid fa-layer-group text-pink-400 text-sm"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-[11px] font-bold" style="color: var(--color-texto);">Tarjetas</p>
+                            <p class="text-[9px]" style="color: var(--color-gris-medio);">Flashcards</p>
+                        </div>
                     </a>
+
+                    <a href="{{ route('srs.index') }}"
+                        class="flex items-center gap-2.5 p-3 rounded-2xl transition-all"
+                        style="background: var(--color-fondo); border: 1px solid rgba(245, 158, 11, 0.35);">
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                            style="background: rgba(245, 158, 11, 0.12);">
+                            <i class="fa-solid fa-brain text-amber-500 text-sm"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-[11px] font-bold" style="color: var(--color-texto);">Repeticion</p>
+                            <p class="text-[9px]" style="color: var(--color-gris-medio);">Sistema SM-2</p>
+                        </div>
+                    </a>
+
                     @auth
                     <a href="{{ route('ahorcado.index') }}"
-                        class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
-                        <i class="fa-solid fa-puzzle-piece text-violet-400"></i> Ahorcado
+                        class="flex items-center gap-2.5 p-3 rounded-2xl transition-all"
+                        style="background: var(--color-fondo); border: 1px solid rgba(139, 92, 246, 0.35);">
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                            style="background: rgba(139, 92, 246, 0.12);">
+                            <i class="fa-solid fa-puzzle-piece text-violet-400 text-sm"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-[11px] font-bold" style="color: var(--color-texto);">Ahorcado</p>
+                            <p class="text-[9px]" style="color: var(--color-gris-medio);">Vocabulario</p>
+                        </div>
                     </a>
                     @endauth
                 </div>
+            </div>
+        </section>
+
+        <aside class="hidden md:flex panel-lateral rounded-2xl p-3 flex-col h-[80vh] overflow-y-auto">
+            <div class="space-y-2">
+                <h3 class="seccion-subtitulo text-[10px] font-bold uppercase tracking-wider mb-1">Herramientas IA</h3>
+
+                <a href="{{ route('mapa-mental.index') }}"
+                    class="tool-card flex items-center gap-2.5 p-2.5 rounded-xl transition-all"
+                    style="background: var(--color-fondo); border: 1px solid rgba(139, 92, 246, 0.35);">
+                    <div class="tool-card-icon-box flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
+                        style="background: rgba(139, 92, 246, 0.12);">
+                        <i class="fa-solid fa-sitemap text-purple-400 text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[11px] font-bold" style="color: var(--color-texto);">Mapa Mental</p>
+                        <p class="text-[9px]" style="color: var(--color-gris-medio);">Diagramas con IA</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[9px] flex-shrink-0" style="color: var(--color-gris-oscuro);"></i>
+                </a>
+
+                <a href="{{ route('tarjetas-estudio.index') }}"
+                    class="tool-card flex items-center gap-2.5 p-2.5 rounded-xl transition-all"
+                    style="background: var(--color-fondo); border: 1px solid rgba(236, 72, 153, 0.35);">
+                    <div class="tool-card-icon-box flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
+                        style="background: rgba(236, 72, 153, 0.12);">
+                        <i class="fa-solid fa-layer-group text-pink-400 text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[11px] font-bold" style="color: var(--color-texto);">Tarjetas de Estudio</p>
+                        <p class="text-[9px]" style="color: var(--color-gris-medio);">Flashcards interactivas</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[9px] flex-shrink-0" style="color: var(--color-gris-oscuro);"></i>
+                </a>
+
+                <a href="{{ route('srs.index') }}"
+                    class="tool-card flex items-center gap-2.5 p-2.5 rounded-xl transition-all"
+                    style="background: var(--color-fondo); border: 1px solid rgba(245, 158, 11, 0.35);">
+                    <div class="tool-card-icon-box flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
+                        style="background: rgba(245, 158, 11, 0.12);">
+                        <i class="fa-solid fa-brain text-amber-500 text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[11px] font-bold" style="color: var(--color-texto);">Repeticion Espaciada</p>
+                        <p class="text-[9px]" style="color: var(--color-gris-medio);">Sistema SM-2</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[9px] flex-shrink-0" style="color: var(--color-gris-oscuro);"></i>
+                </a>
+
+                @auth
+                <a href="{{ route('ahorcado.index') }}"
+                    class="tool-card flex items-center gap-2.5 p-2.5 rounded-xl transition-all"
+                    style="background: var(--color-fondo); border: 1px solid rgba(139, 92, 246, 0.35);">
+                    <div class="tool-card-icon-box flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
+                        style="background: rgba(139, 92, 246, 0.12);">
+                        <i class="fa-solid fa-puzzle-piece text-violet-400 text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[11px] font-bold" style="color: var(--color-texto);">Ahorcado</p>
+                        <p class="text-[9px]" style="color: var(--color-gris-medio);">Vocabulario</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[9px] flex-shrink-0" style="color: var(--color-gris-oscuro);"></i>
+                </a>
+                @endauth
+
+                <a href="{{ route('sala.historial') }}"
+                    class="tool-card flex items-center gap-2.5 p-2.5 rounded-xl transition-all"
+                    style="background: var(--color-fondo); border: 1px solid rgba(245, 158, 11, 0.35);">
+                    <div class="tool-card-icon-box flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
+                        style="background: rgba(245, 158, 11, 0.12);">
+                        <i class="fa-solid fa-clock-rotate-left text-amber-500 text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[11px] font-bold" style="color: var(--color-texto);">Historial de Examenes</p>
+                        <p class="text-[9px]" style="color: var(--color-gris-medio);">Sesiones pasadas</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[9px] flex-shrink-0" style="color: var(--color-gris-oscuro);"></i>
+                </a>
+            </div>
+
+            <div class="divisor-linea my-2.5"></div>
+
+            <div class="space-y-2">
+                <a href="/modo-examen"
+                    class="tool-card-examen flex items-center justify-center gap-2 w-full py-3 px-3 rounded-xl text-white font-extrabold text-xs transition-all"
+                    style="background: var(--color-primario); box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <div class="text-left">
+                        <div class="text-xs font-extrabold leading-tight">LANZAR MODO EXAMEN</div>
+                        <div class="text-[9px] font-medium opacity-80">Evalua a tus estudiantes</div>
+                    </div>
+                </a>
+
+                <a href="{{ route('solo-exam.configurar') }}"
+                    class="tool-card-cuestionario flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-xl text-white font-bold text-xs transition-all"
+                    style="background: #059669; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3);">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <div class="text-left">
+                        <div class="text-xs font-bold leading-tight">CREAR CUESTIONARIO</div>
+                        <div class="text-[9px] font-medium opacity-80">Genera quiz con IA</div>
+                    </div>
+                </a>
             </div>
 
         </aside>
 
     </main>
 
-    <div id="fondo-oscuro-menu" class="overlay-menu-movil hidden"></div>
-    <aside id="menu-movil-drawer" class="menu-movil-contenedor p-5 flex flex-col justify-between">
-        <div>
-            <div class="flex items-center justify-between mb-6">
-                <span class="text-lg font-bold text-white">Menú <span
-                        class="text-primario-resaltado">PlayDF</span></span>
-                <button id="btn-cerrar-menu-movil" class="text-slate-400 hover:text-white p-1 text-lg">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <button id="btn-cargar-pdf-movil"
-                class="boton-cargar-movil-rojo w-full text-xs font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 mb-3 shadow-md">
-                <i class="fa-solid fa-cloud-arrow-up text-sm"></i> Cargar nuevo PDF
-            </button>
-
-            <button id="btn-toggle-pdfs-movil"
-                class="boton-accion-principal w-full text-xs font-bold py-2.5 px-4 rounded-xl flex items-center justify-between mb-4">
-                <span><i class="fa-solid fa-folder-open text-red-500 mr-2"></i> Mis PDFs Cargados</span>
-                <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300"
-                    id="icono-flecha-pdfs"></i>
-            </button>
-
-            <div id="seccion-pdfs-movil" class="hidden space-y-2 max-h-[180px] overflow-y-auto mb-4 px-1">
-                @if (count($documentos) == 0)
-                    <p class="text-[11px] text-slate-500 text-center py-2">No tienes archivos guardados.</p>
-                @else
-                    @foreach ($documentos as $doc)
-                        <div class="item-documento flex items-center justify-between p-2 rounded-xl">
-                            <button
-                                onclick="seleccionarDocumento({{ $doc->id }}, '{{ $doc->name }}'); cerrarMenuMovilId();"
-                                class="enlace-documento flex items-center gap-2 text-xs font-medium overflow-hidden text-ellipsis whitespace-nowrap text-left flex-1 mr-1">
-                                <i class="fa-solid fa-file-pdf text-xs flex-shrink-0"></i>
-                                <span class="truncate">{{ $doc->name }}</span>
-                            </button>
-                            <button onclick="eliminarDocumento(event, {{ $doc->id }})"
-                                class="boton-eliminar p-1 px-2 rounded-lg">
-                                <i class="fa-solid fa-trash-can text-[10px]"></i>
-                            </button>
-                        </div>
-                    @endforeach
-                @endif
-            </div>
-
-            <div class="divisor-linea my-4"></div>
-
-            <h3 class="seccion-subtitulo text-[11px] font-bold uppercase tracking-wider mb-2">Herramientas IA</h3>
-            <div class="space-y-2">
-                <a href="{{ route('mapa-mental.index') }}"
-                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5 transition-colors">
-                    <i class="fa-solid fa-sitemap text-purple-400"></i> Generar Mapa Mental
-                </a>
-                <a href="{{ route('solo-exam.configurar') }}"
-                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
-                    <i class="fa-solid fa-pen-to-square text-emerald-400"></i> Crear Cuestionario
-                </a>
-                <a href="{{ route('sala.historial') }}"
-                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
-                    <i class="fa-solid fa-clock-rotate-left text-amber-500"></i> Historial de Examenes
-                </a>
-                <a href="{{ route('tarjetas-estudio.index') }}"
-                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
-                    <i class="fa-solid fa-layer-group text-pink-400"></i> Tarjetas de Estudio
-                </a>
-                @auth
-                <a href="{{ route('ahorcado.index') }}"
-                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
-                    <i class="fa-solid fa-puzzle-piece text-violet-400"></i> Ahorcado
-                </a>
-                @endauth
-            </div>
-
-            <div class="divisor-linea my-4"></div>
-
-            <div class="flex items-center justify-between px-2 mb-2">
-                <span class="seccion-subtitulo text-[11px] font-bold uppercase tracking-wider">Tema</span>
-                <button onclick="toggleTheme()" class="theme-toggle-btn" title="Cambiar tema">
-                    <i class="fa-solid fa-moon icon-moon"></i>
-                    <i class="fa-solid fa-sun icon-sun"></i>
-                </button>
-            </div>
-
-            <div class="divisor-linea my-4"></div>
-
-            <h3 class="seccion-subtitulo text-[11px] font-bold uppercase tracking-wider mb-2">Repaso</h3>
-            <div class="space-y-2">
-                <a href="{{ route('srs.index') }}"
-                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
-                    <i class="fa-solid fa-brain text-amber-500"></i> Repetición Espaciada (SRS)
-                </a>
-                <a href="/modo-examen"
-                    class="boton-herramienta-ia text-left text-xs font-medium p-3 rounded-xl flex items-center gap-2.5">
-                    <i class="fa-solid fa-graduation-cap text-red-500"></i> Modo Examen
-                </a>
-            </div>
-        </div>
-    </aside>
-
+    @include('partials.drawer-unified')
     @include('partials.footer')
 
     <div id="pwa-install-banner" class="hidden fixed top-0 left-0 right-0 z-50 p-3 md:p-4">
@@ -404,121 +432,8 @@
         }
     </style>
 
+    @include('partials.scripts-unified')
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Cargar gamificación del header
-            @auth
-            fetch('/ajax/gamification/stats')
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success && data.gamification) {
-                        const g = data.gamification;
-                        document.getElementById('header-streak').textContent = g.current_streak + ' Días';
-                        document.getElementById('header-level').textContent = g.level;
-                    }
-                })
-                .catch(() => {});
-
-            // Cargar notificaciones pendientes
-            fetch('/ajax/notifications/pending')
-                .then(r => r.json())
-                .then(data => {
-                    if (data.notifications && data.notifications.length > 0 && !document.getElementById('srs-notifications-banner')) {
-                        const banner = document.createElement('div');
-                        banner.id = 'srs-notifications-banner';
-                        banner.className = 'fixed bottom-4 right-4 z-50 max-w-sm';
-
-                        function dismissBanner() {
-                            banner.style.transition = 'opacity 0.3s, transform 0.3s';
-                            banner.style.opacity = '0';
-                            banner.style.transform = 'translateY(10px)';
-                            setTimeout(() => banner.remove(), 300);
-                        }
-
-                        data.notifications.forEach((n, i) => {
-                            const card = document.createElement('div');
-                            card.className = 'mb-2 p-3 rounded-xl shadow-lg border flex items-center gap-3 cursor-pointer transition-all hover:scale-[1.02] relative';
-                            card.style.backgroundColor = n.color + '15';
-                            card.style.borderColor = n.color + '40';
-                            card.innerHTML = `
-                                <i class="fa-solid fa-${n.icon}" style="color:${n.color};font-size:1.2rem"></i>
-                                <div class="flex-1">
-                                    <div class="text-xs font-bold" style="color:${n.color}">${n.title}</div>
-                                    <div class="text-[11px] text-slate-400">${n.message}</div>
-                                </div>
-                                <button class="absolute top-1.5 right-1.5 text-slate-500 hover:text-white transition-colors p-1 text-[10px]" title="Cerrar">
-                                    <i class="fa-solid fa-xmark"></i>
-                                </button>
-                            `;
-                            // Click en la card (excepto la X) navega a la URL
-                            card.addEventListener('click', (e) => {
-                                if (!e.target.closest('button')) {
-                                    window.location.href = n.url;
-                                }
-                            });
-                            // Click en la X cierra solo esa notificación
-                            const closeBtn = card.querySelector('button');
-                            closeBtn.addEventListener('click', (e) => {
-                                e.stopPropagation();
-                                card.style.transition = 'opacity 0.2s, transform 0.2s';
-                                card.style.opacity = '0';
-                                card.style.transform = 'translateX(20px)';
-                                setTimeout(() => {
-                                    card.remove();
-                                    if (banner.children.length === 0) dismissBanner();
-                                }, 200);
-                            });
-                            banner.appendChild(card);
-                        });
-                        document.body.appendChild(banner);
-                    }
-                })
-                .catch(() => {});
-            @endauth
-
-            const btnAbrir = document.getElementById('btn-abrir-menu-movil');
-            const btnCerrar = document.getElementById('btn-cerrar-menu-movil');
-            const menuMovil = document.getElementById('menu-movil-drawer');
-            const fondoOscuro = document.getElementById('fondo-oscuro-menu');
-
-            const btnTogglePdfs = document.getElementById('btn-toggle-pdfs-movil');
-            const seccionPdfs = document.getElementById('seccion-pdfs-movil');
-            const iconoFlecha = document.getElementById('icono-flecha-pdfs');
-
-            function abrirMenu() {
-                menuMovil.classList.add('activo');
-                fondoOscuro.classList.add('activo');
-            }
-
-            function cerrarMenu() {
-                menuMovil.classList.remove('activo');
-                fondoOscuro.classList.remove('activo');
-            }
-
-            window.cerrarMenuMovilId = cerrarMenu;
-
-            if (btnAbrir) btnAbrir.addEventListener('click', abrirMenu);
-            if (btnCerrar) btnCerrar.addEventListener('click', cerrarMenu);
-            if (fondoOscuro) fondoOscuro.addEventListener('click', cerrarMenu);
-
-            if (btnTogglePdfs) {
-                btnTogglePdfs.addEventListener('click', () => {
-                    seccionPdfs.classList.toggle('hidden');
-                    iconoFlecha.classList.toggle('rotate-180');
-                });
-            }
-        });
-        
-    </script>
-    <script>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').then(function(reg) {
-            console.log('SW registrado, scope:', reg.scope);
-        }).catch(function(err) {
-            console.log('Error SW:', err);
-        });
-    }
-
     (function() {
         var deferredPrompt = null;
         var banner = document.getElementById('pwa-install-banner');
@@ -528,9 +443,6 @@
         var modal = document.getElementById('pwa-manual-modal');
         var modalClose = document.getElementById('pwa-modal-close');
         var modalOk = document.getElementById('pwa-modal-ok');
-        var spinnerBtn = document.getElementById('user-spinner-btn');
-        var dropdown = document.getElementById('user-dropdown');
-        var arrow = document.getElementById('spinner-arrow');
         var btnInstallApp = document.getElementById('btn-install-app');
 
         function showModal() { modal.style.display = 'flex'; }
@@ -551,12 +463,10 @@
         window.addEventListener('beforeinstallprompt', function(e) {
             e.preventDefault();
             deferredPrompt = e;
-            console.log('beforeinstallprompt capturado');
         });
 
         window.addEventListener('appinstalled', function() {
             deferredPrompt = null;
-            console.log('PWA instalada exitosamente');
         });
 
         btnInstall.addEventListener('click', tryInstall);
@@ -566,26 +476,34 @@
         modalOk.addEventListener('click', hideModal);
         modal.addEventListener('click', function(e) { if (e.target === modal) hideModal(); });
 
-        if (spinnerBtn && dropdown) {
-            spinnerBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                var isOpen = !dropdown.classList.contains('hidden');
-                dropdown.classList.toggle('hidden');
-                arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+        if (btnInstallApp) {
+            btnInstallApp.addEventListener('click', function() {
+                document.getElementById('user-dropdown').classList.add('hidden');
+                var arrow = document.getElementById('spinner-arrow');
+                if (arrow) arrow.style.transform = '';
+                tryInstall();
             });
-            document.addEventListener('click', function(e) {
-                if (!dropdown.contains(e.target) && e.target !== spinnerBtn) {
-                    dropdown.classList.add('hidden');
-                    arrow.style.transform = '';
-                }
+        }
+    })();
+    </script>
+    <script>
+    (function() {
+        var btnToggle = document.getElementById('btn-toggle-pdf-movil');
+        var seccion = document.getElementById('seccion-pdf-movil');
+        var flecha = document.getElementById('icono-flecha-pdf-movil');
+        var btnCargar = document.getElementById('btn-cargar-pdf-movil-home');
+        var fileInput = document.getElementById('pdf-file-input-movil');
+
+        if (btnToggle) {
+            btnToggle.addEventListener('click', function() {
+                seccion.classList.toggle('hidden');
+                flecha.classList.toggle('rotate-180');
             });
-            if (btnInstallApp) {
-                btnInstallApp.addEventListener('click', function() {
-                    dropdown.classList.add('hidden');
-                    arrow.style.transform = '';
-                    tryInstall();
-                });
-            }
+        }
+        if (btnCargar && fileInput) {
+            btnCargar.addEventListener('click', function() {
+                fileInput.click();
+            });
         }
     })();
     </script>

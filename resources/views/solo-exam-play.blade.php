@@ -3,13 +3,13 @@
 <head>
     <script>(function(){var t=localStorage.getItem('playdf-theme');if(t==='light')document.documentElement.classList.add('light-mode');else if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.classList.add('light-mode');})();</script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/icon-192x192.png') }}">
     <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/icon-512x512.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/icon-192x192.png') }}">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#4A90E2">
+    <meta name="theme-color" content="#000000">
     <meta name="description" content="Examen individual con IA — PlayDF">
     <title>PlayDF - Examen Individual</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,7 +23,7 @@
     @vite(['resources/css/app.css', 'resources/css/solo-exam.css', 'resources/js/solo-exam-play.js', 'resources/js/dark-toggle.js'])
 </head>
 
-<body class="bg-black font-sans min-h-screen text-white flex flex-col relative overflow-hidden">
+<body class="bg-black font-sans min-h-screen text-white flex flex-col relative overflow-y-auto">
 
     <!-- Fondo decorativo -->
     <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -32,7 +32,7 @@
     <!-- Pantalla de carga/generación -->
     <div id="pantalla-espera" class="flex-1 flex flex-col items-center justify-center p-6 z-10">
         <a href="/solo-exam/configurar"
-            class="absolute top-6 left-6 text-slate-400 hover:text-red-500 transition-colors flex items-center gap-2 font-medium">
+            class="absolute top-4 left-4 sm:top-6 sm:left-6 text-slate-400 hover:text-red-500 transition-colors flex items-center gap-2 font-medium text-xs sm:text-sm">
             <i class="fa-solid fa-arrow-left"></i> Volver
         </a>
 
@@ -60,7 +60,7 @@
     </div>
 
     <!-- Pantalla del examen -->
-    <div id="pantalla-quiz" class="hidden flex-1 flex flex-col max-w-4xl w-full mx-auto p-4 md:p-6 z-10">
+    <div id="pantalla-quiz" class="hidden flex-1 flex flex-col max-w-4xl w-full mx-auto p-4 md:p-6 z-10 overflow-y-auto">
         <!-- Barra superior -->
         <div class="flex justify-between items-center bg-slate-900 border border-slate-800 p-4 rounded-2xl mb-4 shadow-md">
             <div class="flex items-center gap-3">
@@ -90,7 +90,7 @@
         </div>
 
         <!-- Contenido de la pregunta -->
-        <div class="flex-1 flex flex-col justify-center">
+        <div class="flex-1 flex flex-col justify-start sm:justify-center">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 mb-8 shadow-lg">
                 <h2 id="texto-pregunta" class="text-xl md:text-2xl lg:text-3xl font-bold text-center leading-tight"></h2>
             </div>

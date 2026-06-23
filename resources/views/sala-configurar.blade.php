@@ -3,13 +3,13 @@
 <head>
     <script>(function(){var t=localStorage.getItem('playdf-theme');if(t==='light')document.documentElement.classList.add('light-mode');else if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.classList.add('light-mode');})();</script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/icon-192x192.png') }}">
     <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/icon-512x512.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/icon-192x192.png') }}">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#4A90E2">
+    <meta name="theme-color" content="#000000">
     <meta name="description" content="Configura tu sala de estudio — PlayDF">
     <title>Configurar Sala - PlayDF</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,7 +22,7 @@
 <body class="cuerpo-aplicacion font-sans min-h-screen flex items-center justify-center p-4 relative">
 
     <a href="/modo-examen"
-        class="absolute top-6 left-6 text-slate-400 hover:text-red-500 transition-colors flex items-center gap-2 font-medium z-20">
+        class="absolute top-4 left-4 sm:top-6 sm:left-6 text-slate-400 hover:text-red-500 transition-colors flex items-center gap-2 font-medium z-20 text-xs sm:text-sm">
         <i class="fa-solid fa-arrow-left"></i> Volver al Menú
     </a>
 
@@ -87,7 +87,7 @@
     @endif
 
     <div
-        class="tarjeta-configuracion max-w-xl w-full p-8 md:p-10 rounded-3xl border border-slate-800 relative overflow-hidden z-10">
+        class="tarjeta-configuracion max-w-xl w-full p-6 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl border border-slate-800 relative overflow-hidden z-10">
         <div class="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-red-600/10 rounded-full blur-3xl"></div>
 
         <div class="text-center mb-8 relative z-10">

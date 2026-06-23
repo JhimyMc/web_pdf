@@ -3,13 +3,13 @@
 <head>
     <script>(function(){var t=localStorage.getItem('playdf-theme');if(t==='light')document.documentElement.classList.add('light-mode');else if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.classList.add('light-mode');})();</script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/icon-192x192.png') }}">
     <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/icon-512x512.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/icon-192x192.png') }}">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#4A90E2">
+    <meta name="theme-color" content="#000000">
     <meta name="description" content="Dashboard de sala de estudio en vivo — PlayDF">
     <title>Sala en Vivo - PlayDF</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -24,14 +24,14 @@
 <body class="bg-slate-950 font-sans min-h-screen text-white p-4 md:p-8 relative">
 
     <button id="btn-cancelar-sala" data-status="{{ $room->status }}"
-        class="absolute top-6 left-6 text-slate-400 hover:text-red-500 transition-colors flex items-center gap-2 font-medium z-20">
+        class="sticky top-0 left-0 text-slate-400 hover:text-red-500 transition-colors flex items-center gap-2 font-medium z-20 mb-4">
         <i class="fa-solid fa-arrow-left"></i>
-        <span id="btn-volver-texto">
+        <span id="btn-volver-texto" class="text-xs sm:text-sm">
             {{ $room->status === 'finalizado' ? 'Volver' : 'Cancelar Sala y Volver' }}
         </span>
     </button>
 
-    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mt-12">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
 
         <div class="lg:col-span-1 space-y-6">
 
@@ -88,22 +88,22 @@
             </div>
         </div>
 
-        <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col h-[80vh]">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold flex items-center gap-2">
+        <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 flex flex-col h-[60vh] sm:h-[80vh]">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
+                <h2 class="text-lg sm:text-xl font-bold flex items-center gap-2">
                     <i class="fa-solid fa-users text-red-500"></i> Participantes
                     <span id="contador-alumnos"
-                        class="bg-slate-800 text-slate-300 text-xs py-1 px-2 rounded-lg ml-2">0</span>
+                        class="bg-slate-800 text-slate-300 text-xs py-1 px-2 rounded-lg">0</span>
                 </h2>
-                <div class="relative">
-                    <i
-                        class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-                    <input type="text" id="filtro-alumnos" placeholder="Buscar alumno..."
-                        class="bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white outline-none focus:border-red-500 w-48">
+                <div class="relative w-full sm:w-auto">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                    <input type="text" id="filtro-alumnos" placeholder="Buscar..."
+                        class="bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white outline-none focus:border-red-500 w-full sm:w-48">
                 </div>
             </div>
 
-            <div class="flex-1 overflow-y-auto pr-2 rounded-xl border border-slate-800/50">
+            <div class="flex-1 overflow-auto pr-2 rounded-xl border border-slate-800/50">
+                <div class="min-w-[480px]">
                 <table class="w-full text-left text-sm">
                     <thead class="bg-slate-950/50 text-slate-400 text-xs uppercase sticky top-0 backdrop-blur-sm z-10">
                         <tr>
@@ -125,6 +125,7 @@
                         </tr>
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
 

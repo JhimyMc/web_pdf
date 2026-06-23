@@ -1,11 +1,10 @@
-const CACHE_NAME = 'playdf-cache-v3';
-const STATIC_CACHE = 'playdf-static-v3';
-const PAGES_CACHE = 'playdf-pages-v2';
+const CACHE_NAME = 'playdf-cache-v5';
+const STATIC_CACHE = 'playdf-static-v5';
+const PAGES_CACHE = 'playdf-pages-v5';
 
 const STATIC_ASSETS = [
   '/images/icon-192x192.png',
   '/images/icon-512x512.png',
-  '/images/logo-playdf.png',
   '/favicon.ico'
 ];
 
@@ -38,11 +37,11 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       caches.open(STATIC_CACHE).then(cache =>
         cache.match(request).then(cached => {
-          if (cached) return cached;
-          return fetch(request).then(response => {
+          const fetchPromise = fetch(request).then(response => {
             if (response.ok) cache.put(request, response.clone());
             return response;
-          });
+          }).catch(() => cached);
+          return cached || fetchPromise;
         })
       )
     );

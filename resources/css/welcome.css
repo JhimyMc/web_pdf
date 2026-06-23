@@ -197,12 +197,47 @@ html.light-mode .boton-herramienta-ia:hover {
 .chat-contenedor-ia {
     background-color: var(--color-panel);
     border: 1px solid var(--color-borde-oscuro);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
 }
 
 #historial-chat {
     scrollbar-width: thin;
     scrollbar-color: var(--color-borde-input) transparent;
     overscroll-behavior: contain;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+@media (max-width: 767px) {
+    #historial-chat .markdown-body {
+        font-size: 0.8rem;
+        line-height: 1.5;
+    }
+    #historial-chat .bg-blue-600 {
+        font-size: 0.8rem;
+    }
+}
+
+.markdown-body {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+.markdown-body p {
+    margin-bottom: 0.5rem;
+    max-width: 100%;
+}
+.markdown-body ol,
+.markdown-body ul {
+    padding-left: 1.25rem;
+    max-width: 100%;
+}
+.markdown-body li {
+    margin-bottom: 0.25rem;
 }
 
 /* Animación fade-in para mensajes del chat */
@@ -276,50 +311,6 @@ html.light-mode .boton-herramienta-ia:hover {
 .texto-blanco { color: var(--color-texto); }
 .texto-atenuado { color: var(--color-gris-medio); }
 
-/* ==========================================================\
-   🚨 SISTEMA RESPONSIVE DEL MENÚ LATERAL MÓVIL (DRAWER)
-   ========================================================== */
-.overlay-menu-movil {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
-    z-index: 45;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-.overlay-menu-movil.activo {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.menu-movil-contenedor {
-    position: fixed;
-    top: 0;
-    left: -280px;
-    width: 280px;
-    height: 100vh;
-    background-color: var(--color-panel);
-    border-right: 1px solid var(--color-borde-oscuro);
-    z-index: 50;
-    box-shadow: 5px 0 25px rgba(0, 0, 0, 0.5);
-    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow-y: auto;
-    visibility: hidden;
-    pointer-events: none;
-}
-
-.menu-movil-contenedor.activo {
-    left: 0;
-    visibility: visible;
-    pointer-events: auto;
-}
-
 .rotate-180 {
     transform: rotate(180deg);
 }
@@ -327,17 +318,14 @@ html.light-mode .boton-herramienta-ia:hover {
 /* ==========================================================\
    PARSER MARKDOWN INTERNO DE LAS RESPUESTAS DE LA IA
    ========================================================== */
-.markdown-body p {
-    margin-bottom: 0.5rem;
-}
 .markdown-body ul {
     list-style-type: disc;
-    margin-left: 1.5rem;
+    margin-left: 1.25rem;
     margin-bottom: 0.5rem;
 }
 .markdown-body ol {
     list-style-type: decimal;
-    margin-left: 1.5rem;
+    margin-left: 1.25rem;
     margin-bottom: 0.5rem;
 }
 .markdown-body strong {
@@ -349,4 +337,44 @@ html.light-mode .boton-herramienta-ia:hover {
     color: #ffffff;
     margin-top: 1rem;
     margin-bottom: 0.5rem;
+}
+
+/* ==========================================================
+   TOOL CARDS — Estilo rico con icono, titulo, subtitulo y flecha
+   ========================================================== */
+.tool-card {
+    text-decoration: none;
+    transition: transform 0.2s, background-color 0.2s;
+}
+.tool-card:hover {
+    transform: translateX(4px);
+    background-color: var(--color-panel) !important;
+}
+html.light-mode .tool-card:hover {
+    background-color: #f1f5f9 !important;
+}
+.tool-card-icon-box {
+    transition: transform 0.2s;
+}
+.tool-card:hover .tool-card-icon-box {
+    transform: scale(1.05);
+}
+
+.tool-card-examen,
+.tool-card-cuestionario {
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.tool-card-examen:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4) !important;
+}
+.tool-card-cuestionario:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4) !important;
+}
+
+/* Drawer header banner */
+.drawer-header-banner {
+    margin: 0;
 }

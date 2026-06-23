@@ -3,13 +3,13 @@
 <head>
     <script>(function(){var t=localStorage.getItem('playdf-theme');if(t==='light')document.documentElement.classList.add('light-mode');else if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.classList.add('light-mode');})();</script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/icon-192x192.png') }}">
     <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/icon-512x512.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/icon-192x192.png') }}">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#4A90E2">
+    <meta name="theme-color" content="#000000">
     <meta name="description" content="Crea cuestionarios con IA — PlayDF">
     <title>PlayDF - Crear Cuestionario</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -26,38 +26,7 @@
 
 <body class="cuerpo-aplicacion font-sans min-h-screen flex flex-col">
 
-    <header class="cabecera-principal px-4 md:px-6 py-4 flex items-center justify-between shadow-md sticky top-0 z-40">
-        <div class="flex items-center gap-3">
-            <button id="btn-abrir-menu-movil" class="boton-menu-movil md:hidden text-xl p-1 mr-1" title="Abrir menú">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-
-            @include('partials.logo')
-
-            <div class="hidden sm:flex items-center gap-3 ml-2 md:ml-6 racha-nivel-contenedor px-3 py-1 rounded-full text-xs">
-                <span class="text-amber-400"><i class="fa-solid fa-fire"></i> Racha: <span id="header-streak">-</span></span>
-                <span class="text-blue-400"><i class="fa-solid fa-star"></i> Nivel <span id="header-level">-</span></span>
-            </div>
-        </div>
-        <div class="flex items-center gap-3">
-            <button onclick="toggleTheme()" class="theme-toggle-btn" title="Cambiar tema">
-                <i class="fa-solid fa-moon icon-moon"></i>
-                <i class="fa-solid fa-sun icon-sun"></i>
-            </button>
-            @auth
-                <span class="text-xs md:text-sm usuario-identificado max-w-[120px] md:max-w-none truncate">
-                    <i class="fa-solid fa-user mr-1 md:mr-2"></i>{{ Auth::user()->name }}
-                </span>
-                <form method="POST" action="{{ route('logout') }}" class="inline">
-                    @csrf
-                    <button type="submit" class="boton-salir text-xs hover:underline">Salir</button>
-                </form>
-            @else
-                <a href="{{ route('login') }}" class="text-xs md:text-sm enlace-autenticacion">Entrar</a>
-                <a href="{{ route('register') }}" class="boton-registrarse text-white text-[11px] md:text-xs font-bold px-2.5 md:px-3 py-2 rounded-lg transition-colors">Registrarse</a>
-            @endauth
-        </div>
-    </header>
+    @include('partials.header-unified')
 
     <div class="px-4 md:px-8 pt-4 pb-1">
         <div class="flex items-center gap-2 text-xs" style="color: var(--color-gris-oscuro)">
@@ -141,7 +110,9 @@
         </div>
     </main>
 
+    @include('partials.drawer-unified')
     @include('partials.footer')
+    @include('partials.scripts-unified')
 </body>
 
 </html>

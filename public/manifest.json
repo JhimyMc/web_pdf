@@ -6,10 +6,13 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4A90E2",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "orientation": "any",
   "categories": ["education", "productivity"],
+  "dir": "ltr",
+  "lang": "es",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/images/icon-192x192.png",
