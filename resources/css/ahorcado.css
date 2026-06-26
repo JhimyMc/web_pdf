@@ -1,3 +1,26 @@
+:root {
+    --border: #1f2937;
+    --red: #ef4444;
+    --green: #10b981;
+    --purple: #8b5cf6;
+    --surface: #0a0a0a;
+    --bg: #111111;
+    --text: #ffffff;
+    --text-sub: #9ca3af;
+    --amber: #f59e0b;
+}
+html.light-mode {
+    --border: #e5e7eb;
+    --red: #dc2626;
+    --green: #059669;
+    --purple: #7c3aed;
+    --surface: #ffffff;
+    --bg: #f8fafc;
+    --text: #1a1a1a;
+    --text-sub: #6b7280;
+    --amber: #b45309;
+}
+
 .empty-state { text-align: center; padding: 60px 20px; color: var(--text-sub); }
 .empty-state svg { width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.3; }
 .empty-state h3 { color: var(--text); margin-bottom: 8px; }

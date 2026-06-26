@@ -52,7 +52,7 @@
                             <div class="front">{{ Str::limit($card['front'], 80) }}</div>
                             <div class="set-name">{{ $card['set_title'] }}</div>
                         </div>
-                        <div class="play-icon">&#9654;</div>
+                        <div class="play-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
                     </div>
                 @endforeach
             </div>
@@ -229,12 +229,11 @@ function renderPhrase() {
 }
 
 function updateDrawing() {
-    // Mostrar partes del cuerpo según errores
-    for (let i = 0; i < wrongGuesses && i < hangmanParts.length; i++) {
+    const total = gameOver && wrongGuesses >= maxAttempts ? hangmanParts.length : wrongGuesses;
+    for (let i = 0; i < total && i < hangmanParts.length; i++) {
         const el = document.getElementById(hangmanParts[i]);
         if (el) el.classList.add('visible');
     }
-    // Mostrar cara (ojos + boca) cuando hay cabeza
     if (wrongGuesses >= 1) {
         document.querySelectorAll('.face').forEach(f => f.classList.add('visible'));
     }
