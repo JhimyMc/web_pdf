@@ -77,7 +77,7 @@
             </div>
         </aside>
 
-        <section class="col-span-1 md:col-span-2 flex flex-col md:h-[80vh]">
+        <section class="col-span-1 md:col-span-2 flex flex-col md:h-[80vh] md:relative">
 
             <!-- Selector de PDFs (solo mobile) -->
             <div class="md:hidden mb-2">
@@ -139,14 +139,14 @@
 
             <!-- Chat (solo se ve cuando HAY chat activo, reemplaza la drop zone) -->
             <div id="contenedor-chat"
-                class="chat-contenedor-ia rounded-2xl p-4 hidden flex-col h-[50vh] md:h-auto md:absolute md:inset-0 md:z-20">
+                class="chat-contenedor-ia rounded-2xl p-4 hidden flex-col h-[50vh] md:h-auto md:flex-1 md:min-h-0">
                 <div id="historial-chat" class="w-full flex-1 min-h-0 overflow-y-auto space-y-3 pr-1 pb-2">
                 </div>
             </div>
 
             <!-- Barra de búsqueda -->
             <div id="wrapper-busqueda"
-                class="barra-busqueda w-full relative flex items-center rounded-2xl px-4 py-3 transition-all z-10">
+                class="barra-busqueda w-full relative flex items-center rounded-2xl px-4 py-3 transition-all">
                 <i class="fa-solid fa-wand-magic-sparkles mr-3 icono-magia"></i>
                 <input type="text" id="input-pregunta"
                     class="w-full bg-transparent focus:outline-none text-sm cursor-not-allowed"

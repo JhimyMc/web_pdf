@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v6';
+const CACHE_VERSION = 'v7';
 const STATIC_CACHE = 'playdf-static-' + CACHE_VERSION;
 const PAGES_CACHE = 'playdf-pages-' + CACHE_VERSION;
 
@@ -8,31 +8,9 @@ const STATIC_ASSETS = [
   '/favicon.ico'
 ];
 
-const PRE_CACHED_PAGES = [
-  '/',
-  '/ahorcado',
-  '/tarjetas-estudio',
-  '/mapa-mental',
-  '/repeticion-espaciada',
-  '/modo-examen',
-  '/offline.html'
-];
-
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then(cache => cache.addAll(STATIC_ASSETS))
-      .then(() => caches.open(PAGES_CACHE))
-      .then(cache => {
-        return Promise.all(
-          PRE_CACHED_PAGES.map(url =>
-            fetch(url, { credentials: 'include' })
-              .then(resp => {
-                if (resp.ok) return cache.put(url, resp);
-              })
-              .catch(() => {})
-          )
-        );
-      })
   );
   self.skipWaiting();
 });
@@ -72,15 +50,9 @@ self.addEventListener('fetch', (event) => {
 
   if (request.mode === 'navigate') {
     event.respondWith(
-      caches.open(PAGES_CACHE).then(cache =>
-        cache.match(request).then(cached => {
-          const fetchPromise = fetch(request).then(response => {
-            if (response.ok) cache.put(request, response.clone());
-            return response;
-          }).catch(() => cached || caches.match('/offline.html'));
-          return cached || fetchPromise;
-        })
-      )
+      fetch(request).then(response => {
+        return response;
+      }).catch(() => caches.match('/offline.html'))
     );
     return;
   }
